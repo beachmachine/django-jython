@@ -1,12 +1,17 @@
-from django.db.backends.postgresql.creation import DATA_TYPES as PG_DATA_TYPES
 import copy
+from django.db.backends import BaseDatabaseCreation
+from django.db.backends.postgresql.creation import DatabaseCreation as PostgresqlDatabaseCreation
 
-DATA_TYPES = copy.copy(PG_DATA_TYPES)
 
-# Avoid using the inet data type, because using it from JDBC is a pain.
-#
-# By reading http://archives.postgresql.org/pgsql-jdbc/2007-08/msg00089.php
-# seems like we would have to patch the JDBC driver with this extension:
-# http://oak.cats.ohiou.edu/~rf358197/jdbc/2/.
-DATA_TYPES['IPAddressField'] = 'char(15)'
+
+class DatabaseCreation(BaseDatabaseCreation):
+    def __init__(self):
+        # Avoid using the inet data type, because using it from JDBC is a pain.
+        #
+        # By reading http://archives.postgresql.org/pgsql-jdbc/2007-08/msg00089.php
+        # seems like we would have to patch the JDBC driver with this extension:
+        # http://oak.cats.ohiou.edu/~rf358197/jdbc/2/.
+        self.data_types = copy.copy(PostgresqlDatabaseCreation.data_types)
+        self.data_types['IPAddressField'] = 'char(15)'
+
 

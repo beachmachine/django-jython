@@ -7,9 +7,12 @@ except ImportError, e:
     from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured("Error loading zxJDBC module: %s" % e)
 
-
 from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures
 from django.db.backends.postgresql.operations import DatabaseOperations as PostgresqlDatabaseOperations
+from django.db.backends.postgresql.client import DatabaseClient
+from django.db.backends.postgresql.introspection import DatabaseIntrospection
+from doj.backends.zxjdbc.postgresql.creation import DatabaseCreation
+
 from doj.backends.zxjdbc.common import zxJDBCOperationsMixin, zxJDBCFeaturesMixin
 from doj.backends.zxjdbc.common import zxJDBCCursorWrapper, set_default_isolation_level
 from com.ziclix.python.sql.handler import PostgresqlDataHandler
@@ -28,6 +31,9 @@ class DatabaseOperations(zxJDBCOperationsMixin, PostgresqlDatabaseOperations):
 class DatabaseWrapper(BaseDatabaseWrapper):
     features = DatabaseFeatures()
     ops = DatabaseOperations()
+    client = DatabaseClient()
+    creation = DatabaseCreation()
+    introspection = DatabaseIntrospection(ops)
     operators = {
         'exact': '= %s',
         'iexact': 'ILIKE %s',
