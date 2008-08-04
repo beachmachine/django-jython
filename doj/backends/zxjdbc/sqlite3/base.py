@@ -2,11 +2,11 @@
 SQLite3 backend for Django/Jython.
 """
 
-from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseOperations, util
+from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures
+from django.db.backends import BaseDatabaseOperations, BaseDatabaseValidation, util
 from django.db.backends.sqlite3.client import DatabaseClient
 from django.db.backends.sqlite3.creation import DatabaseCreation
 from django.db.backends.sqlite3.introspection import DatabaseIntrospection
-
 
 try:
     from com.ziclix.python.sql import zxJDBC as Database
@@ -76,8 +76,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     features = DatabaseFeatures()
     ops = DatabaseOperations()
     client = DatabaseClient()
-    creation = DatabaseCreation()
+    creation = DatabaseCreation(ops, features)
     introspection = DatabaseIntrospection(ops)
+    validation = BaseDatabaseValidation()
 
     # SQLite requires LIKE statements to include an ESCAPE clause if the value
     # being escaped has a percent or underscore in it.

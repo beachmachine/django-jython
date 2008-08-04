@@ -7,7 +7,7 @@ except ImportError, e:
     from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured("Error loading zxJDBC module: %s" % e)
 
-from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures
+from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseValidation
 from django.db.backends.postgresql.operations import DatabaseOperations as PostgresqlDatabaseOperations
 from django.db.backends.postgresql.client import DatabaseClient
 from django.db.backends.postgresql.introspection import DatabaseIntrospection
@@ -32,8 +32,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     features = DatabaseFeatures()
     ops = DatabaseOperations()
     client = DatabaseClient()
-    creation = DatabaseCreation()
+    creation = DatabaseCreation(ops, features)
     introspection = DatabaseIntrospection(ops)
+    validation = BaseDatabaseValidation()
     operators = {
         'exact': '= %s',
         'iexact': 'ILIKE %s',
