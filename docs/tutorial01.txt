@@ -1,6 +1,6 @@
-=====================================
-Writing your first Django app, part 1
-=====================================
+============================================
+Writing your first Django/Jython app, part 1
+============================================
 
 Let's learn by example.
 
@@ -16,6 +16,8 @@ We'll assume you have `Django installed`_ already. You can tell Django is
 installed by running the Python interactive interpreter and typing
 ``import django``. If that command runs successfully, with no errors, Django is
 installed.
+
+TODO: Document django installation under jython
 
 .. _`Django installed`: ../install/
 
@@ -42,7 +44,7 @@ code, then run the command ``django-admin.py startproject mysite``. This
 will create a ``mysite`` directory in your current directory.
 
 .. admonition:: Mac OS X permissions
-   
+
    If you're using Mac OS X, you may see the message "permission
    denied" when you try to run ``django-admin.py startproject``. This
    is because, on Unix-based systems like OS X, a file must be marked
@@ -58,8 +60,10 @@ will create a ``mysite`` directory in your current directory.
     ``django`` (which will conflict with Django itself) or ``site`` (which
     conflicts with a built-in Python package).
 
+TODO: Check if the following applies for Jython
+
 (``django-admin.py`` should be on your system path if you installed Django via
-``python setup.py``. If it's not on your path, you can find it in
+``jython setup.py``. If it's not on your path, you can find it in
 ``site-packages/django/bin``, where ``site-packages`` is a directory within
 your Python installation. Consider symlinking to ``django-admin.py`` from some
 place on your path, such as ``/usr/local/bin``.)
@@ -101,7 +105,7 @@ The development server
 ----------------------
 
 Let's verify this worked. Change into the ``mysite`` directory, if you
-haven't already, and run the command ``python manage.py runserver``. You'll see
+haven't already, and run the command ``jython manage.py runserver``. You'll see
 the following output on the command line::
 
     Validating models...
@@ -134,7 +138,7 @@ It worked!
 
     Full docs for the development server are at `django-admin documentation`_.
 
-.. _django-admin documentation: ../django-admin/
+.. _django-admin documentation: http://code.djangoproject.com/documentation/django-admin/
 
 Database setup
 --------------
@@ -143,17 +147,16 @@ Now, edit ``settings.py``. It's a normal Python module with module-level
 variables representing Django settings. Change these settings to match your
 database's connection parameters:
 
-    * ``DATABASE_ENGINE`` -- Either 'postgresql_psycopg2', 'mysql' or 'sqlite3'.
-      Other backends are `also available`_.
+    * ``DATABASE_ENGINE`` -- Either 'doj.backends.zxjdbc.postgresql' or
+      'doj.backends.zxjdbc.sqlite3'. There should be more Jython specific
+      backends available soon.
     * ``DATABASE_NAME`` -- The name of your database, or the full (absolute)
-      path to the database file if you're using SQLite. 
+      path to the database file if you're using SQLite.
     * ``DATABASE_USER`` -- Your database username (not used for SQLite).
     * ``DATABASE_PASSWORD`` -- Your database password (not used for SQLite).
     * ``DATABASE_HOST`` -- The host your database is on. Leave this as an
       empty string if your database server is on the same physical machine
       (not used for SQLite).
-
-.. _also available: ../settings/
 
 .. admonition:: Note
 
@@ -186,7 +189,7 @@ Each of these applications makes use of at least one database table, though,
 so we need to create the tables in the database before we can use them. To do
 that, run the following command::
 
-    python manage.py syncdb
+    jython manage.py syncdb
 
 The ``syncdb`` command looks at the ``INSTALLED_APPS`` setting and creates any
 necessary database tables according to the database settings in your
@@ -233,7 +236,7 @@ Later in this tutorial, we'll discuss decoupling your apps for distribution.
 To create your app, make sure you're in the ``mysite`` directory and type
 this command::
 
-    python manage.py startapp polls
+    jython manage.py startapp polls
 
 That'll create a directory ``polls``, which is laid out like this::
 
@@ -281,12 +284,13 @@ These concepts are represented by simple Python classes. Edit the
    of Django's development version (see `the installation docs`_ for
    more information), you shouldn't have any problems.
 
-   If you want to stick with an older version of Django, you'll want to
-   switch to `the Django 0.96 tutorial`_, because this tutorial covers
-   several features that only exist in the Django development version.
+   If you want to stick with an older version of Django, you'll want to switch
+   to `the Django 0.96 tutorial`_, because this tutorial covers several features
+   that only exist in the Django development version. Note that Django versions
+   previous to 1.0 didn't work on Jython out of the box.
 
 .. _the installation docs: ../install/
-.. _the Django 0.96 tutorial: ../0.96/tutorial01/
+.. _the Django 0.96 tutorial: http://www.djangoproject.com/documentation/0.96/tutorial01/
 
 The code is straightforward. Each model is represented by a class that
 subclasses ``django.db.models.Model``. Each model has a number of class
@@ -314,6 +318,8 @@ schema, but in validation, as we'll soon see.
 Finally, note a relationship is defined, using ``models.ForeignKey``. That tells
 Django each Choice is related to a single Poll. Django supports all the common
 database relationships: many-to-ones, many-to-manys and one-to-ones.
+
+TODO: Check if the "python path" link applies for Jython.
 
 .. _`Python path`: http://docs.python.org/tut/node8.html#SECTION008110000000000000000
 .. _DRY Principle: http://c2.com/cgi/wiki?DontRepeatYourself
@@ -348,7 +354,7 @@ to include the string ``'mysite.polls'``. So it'll look like this::
 
 Now Django knows ``mysite`` includes the ``polls`` app. Let's run another command::
 
-    python manage.py sql polls
+    jython manage.py sql polls
 
 You should see something similar to the following (the CREATE TABLE SQL statements
 for the polls app)::
@@ -396,21 +402,21 @@ Note the following:
       the SQL to the database.
 
 If you're interested, also run the following commands:
-    * ``python manage.py validate`` -- Checks for any errors in the
+    * ``jython manage.py validate`` -- Checks for any errors in the
       construction of your models.
 
-    * ``python manage.py sqlcustom polls`` -- Outputs any custom SQL statements
+    * ``jython manage.py sqlcustom polls`` -- Outputs any custom SQL statements
       (such as table modifications or constraints) that are defined for the
       application.
 
-    * ``python manage.py sqlclear polls`` -- Outputs the necessary ``DROP
+    * ``jython manage.py sqlclear polls`` -- Outputs the necessary ``DROP
       TABLE`` statements for this app, according to which tables already exist
       in your database (if any).
 
-    * ``python manage.py sqlindexes polls`` -- Outputs the ``CREATE INDEX``
+    * ``jython manage.py sqlindexes polls`` -- Outputs the ``CREATE INDEX``
       statements for this app.
 
-    * ``python manage.py sqlall polls`` -- A combination of all the SQL from
+    * ``jython manage.py sqlall polls`` -- A combination of all the SQL from
       the 'sql', 'sqlcustom', and 'sqlindexes' commands.
 
 Looking at the output of those commands can help you understand what's actually
@@ -429,7 +435,7 @@ as you like, and it will only ever create the tables that don't exist.
 Read the `django-admin.py documentation`_ for full information on what the
 ``manage.py`` utility can do.
 
-.. _django-admin.py documentation: ../django-admin/
+.. _django-admin.py documentation: http://www.djangoproject.com/documentation/django-admin/
 
 Playing with the API
 ====================
@@ -437,7 +443,7 @@ Playing with the API
 Now, let's hop into the interactive Python shell and play around with the free
 API Django gives you. To invoke the Python shell, use this command::
 
-    python manage.py shell
+    jython manage.py shell
 
 We're using this instead of simply typing "python", because ``manage.py`` sets
 up the project's environment for you. "Setting up the environment" involves two
@@ -526,12 +532,13 @@ the ``polls/models.py`` file) and adding a ``__unicode__()`` method to both
    installation docs`_ for more information), you shouldn't have any
    problems.
 
-   If you want to stick with an older version of Django, you'll want to
-   switch to `the Django 0.96 tutorial`_, because this tutorial covers
-   several features that only exist in the Django development version.
+   If you want to stick with an older version of Django, you'll want to switch
+   to `the Django 0.96 tutorial`_, because this tutorial covers several features
+   that only exist in the Django development version. Note that Django versions
+   previous to 1.0 didn't work on Jython out of the box.
 
 .. _the installation docs: ../install/
-.. _the Django 0.96 tutorial: ../0.96/tutorial01/
+.. _the Django 0.96 tutorial: http://www.djangoproject.com/documentation/0.96/tutorial01/
 
 It's important to add ``__unicode__()`` methods to your models, not only for
 your own sanity when dealing with the interactive prompt, but also because
@@ -568,7 +575,7 @@ Note the addition of ``import datetime`` to reference Python's standard
 ``datetime`` module.
 
 Let's jump back into the Python interactive shell by running
-``python manage.py shell`` again::
+``jython manage.py shell`` again::
 
     >>> from mysite.polls.models import Poll, Choice
 
@@ -640,5 +647,5 @@ For full details on the database API, see our `Database API reference`_.
 When you're comfortable with the API, read `part 2 of this tutorial`_ to get
 Django's automatic admin working.
 
-.. _Database API reference: ../db-api/
+.. _Database API reference: http://www.djangoproject.com/documentation/db-api/
 .. _part 2 of this tutorial: ../tutorial02/
