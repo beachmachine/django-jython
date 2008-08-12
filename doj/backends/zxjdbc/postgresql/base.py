@@ -29,12 +29,6 @@ class DatabaseOperations(zxJDBCOperationsMixin, PostgresqlDatabaseOperations):
 
 
 class DatabaseWrapper(BaseDatabaseWrapper):
-    features = DatabaseFeatures()
-    ops = DatabaseOperations()
-    client = DatabaseClient()
-    creation = DatabaseCreation(ops, features)
-    introspection = DatabaseIntrospection(ops)
-    validation = BaseDatabaseValidation()
     operators = {
         'exact': '= %s',
         'iexact': 'ILIKE %s',
@@ -51,6 +45,16 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         'istartswith': 'ILIKE %s',
         'iendswith': 'ILIKE %s',
     }
+
+    def __init__(self, *args, **kwargs):
+        super(DatabaseWrapper, self).__init__(*args, **kwargs)
+
+        self.features = DatabaseFeatures()
+        self.ops = DatabaseOperations()
+        self.client = DatabaseClient()
+        self.creation = DatabaseCreation(self)
+        self.introspection = DatabaseIntrospection(self)
+        self.validation = BaseDatabaseValidation()
 
     def _cursor(self, settings):
         if self.connection is None:
