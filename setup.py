@@ -1,8 +1,8 @@
-from setuptools import setup, find_packages
+from distutils.core import setup
 setup(
     name = "django-jython",
     version = "0.9",
-    packages = find_packages(),
+    packages = ['doj'],
     # metadata for upload to PyPI
     author = "Leonardo Soto M.",
     author_email = "leo.soto@gmail.com",
