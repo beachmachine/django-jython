@@ -2,7 +2,12 @@ from distutils.core import setup
 setup(
     name = "django-jython",
     version = "0.9",
-    packages = ['doj'],
+    packages = ['doj',
+                'doj.backends',
+                'doj.backends..zxjdbc',
+                'doj.backends..zxjdbc.postgresql',
+                'doj.management',
+                'doj.management.commands'],
     # metadata for upload to PyPI
     author = "Leonardo Soto M.",
     author_email = "leo.soto@gmail.com",
