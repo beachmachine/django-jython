@@ -12,7 +12,6 @@ from django.conf import settings
 #       if modjy can support a path relative to the war root to specify the
 #       location of application.py.
 
-
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--include-java-libs', dest='include_java_libs', default='',
@@ -109,8 +108,8 @@ class Command(BaseCommand):
         print "Copying %s..." % dest_name
         if dest_name != 'Lib':
             # Each python library goes into its own sys.path entry (Except Lib,
-            # with it in itself a sys.path entry. Maybe I should add some flag
-            # to this method instead of special-casing Lib)
+            # which is itself a sys.path entry. Maybe I should add some flag to
+            # this method instead of special-casing Lib)
             os.mkdir(os.path.join(exploded_war_dir,
                                   'WEB-INF', 'lib-python', dest_name))
             dest_name = os.path.join(dest_name, dest_name)
