@@ -17,11 +17,14 @@ from django.template import Context, Template
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--include-java-libs', dest='include_java_libs', default='',
-                    help='Comma separated list of java libraries (JAR files) to '
-                         'include. Typically used for JDBC drivers '),
+                    help='List of java libraries (in the form of JAR files), '
+                         'which must be included, separated by the "%s" '
+                         'character. Typically used for JDBC drivers ' %
+                         os.path.pathsep),
         make_option('--include-py-libs', dest='include_py_libs', default='',
-                    help='Comma separated list of python libraries (directories '
-                         'or JAR/ZIP files) to include'),
+                    help='List of python libraries (directories or JAR/ZIP '
+                         'files) to include, separated by the "%s" character' %
+                          os.path.pathsep),
         make_option('--context-root', dest='context_root', default='',
                     help='Name of the context root for the application. If '
                          'unspecified, the project name is used. The context '
@@ -53,10 +56,10 @@ class Command(BaseCommand):
         self.copy_project_media(exploded_war_dir)
         self.copy_apps(exploded_war_dir)
         if options['include_java_libs']:
-            for java_lib in options['include_java_libs'].split(','):
+            for java_lib in options['include_java_libs'].split(os.path.pathsep):
                 self.copy_java_lib(exploded_war_dir, java_lib)
         if options['include_py_libs']:
-            for py_lib in options['inclide_py_libs'].split(','):
+            for py_lib in options['inclide_py_libs'].split(os.path.pathsep):
                 self.copy_py_lib(exploded_war_dir, py_lib)
 
         # I'm still unsure of wheter (by default) the WAR should be generated on
