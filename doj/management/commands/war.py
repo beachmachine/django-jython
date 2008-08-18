@@ -57,7 +57,7 @@ class Command(BaseCommand):
         self.copy_apps(exploded_war_dir)
         if options['include_java_libs']:
             for java_lib in options['include_java_libs'].split(os.path.pathsep):
-                self.copy_java_lib(exploded_war_dir, java_lib)
+                self.copy_java_jar(exploded_war_dir, java_lib)
         if options['include_py_libs']:
             for py_lib in options['inclide_py_libs'].split(os.path.pathsep):
                 self.copy_py_lib(exploded_war_dir, py_lib)
@@ -100,15 +100,15 @@ Now you can copy %s to whatever location you application server wants it.
         jython_home = os.path.dirname(jython_lib_path)
         if jython_home.endswith('.jar'):
             # We are on a Jython stand-alone installation.
-            self.copy_java_lib(exploded_war_dir, jython_home)
+            self.copy_java_jar(exploded_war_dir, jython_home)
         else:
             # Standard installation: jython.jar inside jython_home
-            self.copy_java_lib(exploded_war_dir,
+            self.copy_java_jar(exploded_war_dir,
                                os.path.join(jython_home, 'jython.jar'))
             # XXX: Right now (August 2008), on the asm branch in subversion,
             # jython.jar depends on a javalib/jarjar.jar file, containing the
             # runtime dependencies. In the future this step may not be needed
-            self.copy_java_lib(exploded_war_dir,
+            self.copy_java_jar(exploded_war_dir,
                                os.path.join(jython_home, 'javalib', 'jarjar.jar'))
             self.copy_py_lib(exploded_war_dir, jython_lib_path)
 
@@ -188,7 +188,7 @@ deployed settings file. You can append the following block at the end of the fil
             app_first_dir = os.path.dirname(os.path.abspath(__import__(app).__file__))
             self.copy_py_lib(exploded_war_dir, app_first_dir)
 
-    def copy_java_lib(self, exploded_war_dir, java_lib):
+    def copy_java_jar(self, exploded_war_dir, java_lib):
         # java_lib is a path to a JAR file
         dest_name = os.path.basename(java_lib)
         print "Copying %s..." % dest_name
@@ -196,18 +196,26 @@ deployed settings file. You can append the following block at the end of the fil
                     os.path.join(exploded_war_dir,
                                  'WEB-INF', 'lib', dest_name))
 
-    def copy_py_lib(self, exploded_war_dir, py_lib_dir):
-        dest_name = os.path.basename(py_lib_dir)
+    def copy_py_lib(self, exploded_war_dir, py_lib_dir_or_file):
+        dest_name = os.path.basename(py_lib_dir_or_file)
         print "Copying %s..." % dest_name
-        if dest_name != 'Lib':
-            # Each python library goes into its own sys.path entry (Except Lib,
-            # which is itself a sys.path entry. Maybe I should add some flag to
-            # this method instead of special-casing Lib)
-            os.mkdir(os.path.join(exploded_war_dir,
-                                  'WEB-INF', 'lib-python', dest_name))
-            dest_name = os.path.join(dest_name, dest_name)
+        if os.path.isdir(py_lib_dir_or_file):
+            py_lib_dir = py_lib_dir_or_file
+            if dest_name != 'Lib':
+                # Each python library goes into its own sys.path entry (Except Lib,
+                # which is itself a sys.path entry. Maybe I should add some flag to
+                # this method instead of special-casing Lib)
+                os.mkdir(os.path.join(exploded_war_dir,
+                                      'WEB-INF', 'lib-python', dest_name))
+                dest_name = os.path.join(dest_name, dest_name)
 
-        shutil.copytree(py_lib_dir,
+            shutil.copytree(py_lib_dir,
+                            os.path.join(exploded_war_dir,
+                                         'WEB-INF', 'lib-python', dest_name))
+        else:
+            # Zip or egg file, should go directly into lib-python
+            py_lib_file = py_lib_dir_or_file
+            shutil.copy(py_lib_file,
                         os.path.join(exploded_war_dir,
                                      'WEB-INF', 'lib-python', dest_name))
 
