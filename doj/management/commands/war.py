@@ -4,9 +4,10 @@ import tempfile
 from optparse import make_option
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.template import Context, Template
 
-# TODO: The (ab)use of __file__ makes me nervous. Check compatibility with
-#       zipimport.
+# TODO: The (ab)use of __file__ makes me nervous. Should improve compatibility
+#       with zipimport.
 #
 #       Also, I'd like to move application.py out of the WAR root. Need to check
 #       if modjy can support a path relative to the war root to specify the
@@ -15,27 +16,38 @@ from django.conf import settings
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--include-java-libs', dest='include_java_libs', default='',
-            help='Comma separated list of java libraries (JAR files) to '
-                 'include. Typically used for JDBC drivers '),
+                    help='Comma separated list of java libraries (JAR files) to '
+                         'include. Typically used for JDBC drivers '),
         make_option('--include-py-libs', dest='include_py_libs', default='',
-            help='Comma separated list of python libraries (directories '
-                  'or JAR/ZIP files) to include')
+                    help='Comma separated list of python libraries (directories '
+                         'or JAR/ZIP files) to include'),
+        make_option('--context-root', dest='context_root', default='',
+                    help='Name of the context root for the application. If '
+                         'unspecified, the project name is used. The context '
+                          'root name is used as the name of the WAR file, and '
+                          'as a prefix for some url-related settings, such as '
+                          'MEDIA_URL')
     )
     help = ("Builds a WAR file for stand-alone deployment on a Java "
             "Servlet container")
     def handle(self, *args, **options):
         project_name = self.project_name()
+        context_root = options['context_root'] or project_name
         exploded_war_dir = os.path.join(tempfile.mkdtemp(), project_name)
         print
         print "Assembling WAR on %s" % exploded_war_dir
+        print
         self.copy_skel(exploded_war_dir)
         self.fill_templates(exploded_war_dir,
                             ['WEB-INF/web.xml', 'application.py'],
                             {'project_name': project_name,
-                             'settings_module': settings.SETTINGS_MODULE})
+                             'settings': settings})
         self.copy_jython(exploded_war_dir)
         self.copy_django(exploded_war_dir)
+        self.copy_admin_media(exploded_war_dir)
         self.copy_project(exploded_war_dir)
+        self.fix_project_settings(exploded_war_dir, context_root)
+        self.copy_project_media(exploded_war_dir)
         self.copy_apps(exploded_war_dir)
         if options['include_java_libs']:
             for java_lib in options['include_java_libs'].split(','):
@@ -56,11 +68,10 @@ class Command(BaseCommand):
         for relative_file_name in relative_file_names:
             file_name = os.path.join(*[exploded_war_dir] +
                                      relative_file_name.split('/'))
-            content = file(file_name).read()
-            file(file_name, 'w').write(content % vars)
+            template = Template(file(file_name).read())
+            file(file_name, 'w').write(template.render(Context(vars)))
 
     def copy_jython(self, exploded_war_dir):
-        print "Copying Jython core..."
         jython_lib_path = os.path.dirname(os.path.abspath(os.__file__))
         jython_home = os.path.dirname(jython_lib_path)
         if jython_home.endswith('.jar'):
@@ -77,15 +88,73 @@ class Command(BaseCommand):
                                os.path.join(jython_home, 'javalib', 'jarjar.jar'))
             self.copy_py_lib(exploded_war_dir, jython_lib_path)
 
-
     def copy_django(self, exploded_war_dir):
         import django
         django_dir = os.path.dirname(os.path.abspath(django.__file__))
         self.copy_py_lib(exploded_war_dir, django_dir)
 
+    def copy_admin_media(self, exploded_war_dir):
+        from django.contrib import admin
+        self.copy_media(exploded_war_dir,
+                        os.path.join(os.path.dirname(admin.__file__), 'media'),
+                        os.path.join(*settings.ADMIN_MEDIA_PREFIX.split('/')))
 
     def copy_project(self, exploded_war_dir):
         self.copy_py_lib(exploded_war_dir, self.project_directory())
+
+    def fix_project_settings(self, exploded_war_dir, context_root):
+        fix_media = (settings.MEDIA_URL and
+                     not settings.MEDIA_URL.startswith('http'))
+        fix_admin_media =  (settings.ADMIN_MEDIA_PREFIX and
+                            not settings.ADMIN_MEDIA_PREFIX.startswith('http'))
+        if not fix_media and not fix_admin_media:
+            return
+
+        fix = """
+# Added by django-jython. Fixes URL prefixes to include the context root:
+"""
+        if fix_media:
+            fix += "MEDIA_URL='/%s%s'\n" % (context_root, settings.MEDIA_URL)
+        if fix_admin_media:
+            fix += "ADMIN_MEDIA_PREFIX='/%s%s'\n" % (context_root,
+                                                     settings.ADMIN_MEDIA_PREFIX)
+
+        settings_name = settings.SETTINGS_MODULE.split('.')[-1]
+        deployed_settings = os.path.join(exploded_war_dir,'WEB-INF', 'lib-python',
+                                         self.project_name(), self.project_name(),
+                                         settings_name + '.py')
+        if os.path.exists(deployed_settings):
+            settings_file_modified = file(deployed_settings, 'a')
+            settings_file_modified.write(fix)
+            settings_file_modified.close()
+        else:
+            print """WARNING: settings module file not found inside the project
+directory (maybe you have split settings into a package?)
+
+You SHOULD manually prefix the ADMIN_MEDIA_PREFIX and/or MEDIA_URL settings on the
+deployed settings file. You can append the following block at the end of the file:
+
+# ---------------------------- Begin Snip ---------------------------------
+%s
+# ----------------------------- End Snip -----------------------------------
+""" % fix
+
+
+    def copy_project_media(self, exploded_war_dir):
+        if not settings.MEDIA_ROOT:
+            print ("WARNING: Not copying project media, since MEDIA_ROOT "
+                   "is not defined")
+            return
+        if not settings.MEDIA_URL:
+            print ("WARNING: Not copying project media, since MEDIA_URL "
+                   "is not defined")
+            return
+        if settings.MEDIA_URL.startswith('http'):
+            print ("WARNING: Not copying project media, since MEDIA_URL "
+                   "is absolute (starts with 'http')")
+        self.copy_media(exploded_war_dir,
+                        settings.MEDIA_ROOT,
+                        os.path.join(*settings.MEDIA_URL.split('/')))
 
     def copy_apps(self, exploded_war_dir):
         for app in settings.INSTALLED_APPS:
@@ -117,6 +186,21 @@ class Command(BaseCommand):
         shutil.copytree(py_lib_dir,
                         os.path.join(exploded_war_dir,
                                      'WEB-INF', 'lib-python', dest_name))
+
+    def copy_media(self, exploded_war_dir, src_dir, dest_relative_path):
+        if dest_relative_path[-1] == '/':
+            dest_relative_path = dest_relative_path[:-1]
+        if os.path.sep in dest_relative_path:
+            # We have to construct the directory hierarchy (without the last
+            # level)
+            d = exploded_war_dir
+            for sub_dir in os.path.split(dest_relative_path)[:-1]:
+                d = os.path.join(d, sub_dir)
+                os.mkdir(d)
+        print "Copying %s..." % dest_relative_path
+        shutil.copytree(src_dir,
+                        os.path.join(exploded_war_dir, dest_relative_path))
+
 
     def settings_module(self):
         return __import__(settings.SETTINGS_MODULE, {}, {},

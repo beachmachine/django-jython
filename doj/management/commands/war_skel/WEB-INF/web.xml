@@ -3,10 +3,14 @@
 PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
 "http://java.sun.com/dtd/web-app_2_3.dtd">
 <web-app>
+   <context-param>
+    <param-name>files.prefix</param-name> <!-- Needed by fileservlet -->
+    <param-value></param-value>
+   </context-param>
 
-  <display-name>%(project_name)s</display-name>
+  <display-name>{{ project_name }}</display-name>
   <description>
-   %(project_name)s through WSGI with modjy
+   {{ project_name }} through WSGI with modjy
   </description>
 
   <servlet>
@@ -18,6 +22,25 @@ PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
+
+  <servlet>
+    <servlet-name>fileservlet</servlet-name>
+    <servlet-class>org.jruby.webapp.FileServlet</servlet-class>
+  </servlet>
+
+  {% if settings.ADMIN_MEDIA_PREFIX %}
+  <servlet-mapping>
+    <servlet-name>fileservlet</servlet-name>
+    <url-pattern>{{ settings.ADMIN_MEDIA_PREFIX }}*</url-pattern>
+  </servlet-mapping>
+  {% endif %}
+
+  {% if settings.MEDIA_URL %}
+  <servlet-mapping>
+    <servlet-name>fileservlet</servlet-name>
+    <url-pattern>{{ settings.MEDIA_URL }}*</url-pattern>
+  </servlet-mapping>
+  {% endif %}
 
   <servlet-mapping>
     <servlet-name>modjy</servlet-name>
