@@ -1,6 +1,7 @@
 import os
 import shutil
 import tempfile
+import zipfile
 from optparse import make_option
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -30,10 +31,12 @@ class Command(BaseCommand):
     )
     help = ("Builds a WAR file for stand-alone deployment on a Java "
             "Servlet container")
+
     def handle(self, *args, **options):
         project_name = self.project_name()
         context_root = options['context_root'] or project_name
-        exploded_war_dir = os.path.join(tempfile.mkdtemp(), project_name)
+        temp_dir = tempfile.mkdtemp()
+        exploded_war_dir = os.path.join(temp_dir, project_name)
         print
         print "Assembling WAR on %s" % exploded_war_dir
         print
@@ -55,7 +58,25 @@ class Command(BaseCommand):
         if options['include_py_libs']:
             for py_lib in options['inclide_py_libs'].split(','):
                 self.copy_py_lib(exploded_war_dir, py_lib)
-        print "Finished."
+
+        # I'm still unsure of wheter (by default) the WAR should be generated on
+        # the parent directory of the project root or inside the generated
+        # temporary directory.
+        #
+        # At least I'm sure I don't want to put it inside the project directory,
+        # to avoid cluttering it, and to keep it simple the logic of copying the
+        # project into the WAR (otherwise, it should special case the war file
+        # itself)
+        war_file_name = os.path.join(self.project_directory(),
+                                     '..', context_root + '.war')
+        self.war(exploded_war_dir, war_file_name)
+        print "Cleaning %s..." % temp_dir
+        shutil.rmtree(temp_dir)
+        print """
+Finished.
+
+Now you can copy %s to whatever location you application server wants it.
+""" % os.path.abspath(war_file_name)
 
     def copy_skel(self, exploded_war_dir):
         print "Copying WAR skeleton..."
@@ -201,6 +222,28 @@ deployed settings file. You can append the following block at the end of the fil
         shutil.copytree(src_dir,
                         os.path.join(exploded_war_dir, dest_relative_path))
 
+    def war(self, exploded_war_dir, war_file_name):
+        # Make sure we are working with absolute paths
+        exploded_war_dir = os.path.abspath(exploded_war_dir)
+        war_file_name = os.path.abspath(war_file_name)
+
+        print "Building WAR on %s..." % war_file_name
+        war = zipfile.ZipFile(war_file_name, 'w',
+                              compression=zipfile.ZIP_DEFLATED)
+        def walker(arg, directory, files):
+            # The following + 1 accounts for the path separator after the
+            # directory name
+            relative_dir = directory[len(exploded_war_dir) + 1:]
+            for f in files:
+                file_name = os.path.join(directory, f)
+                zip_file_name = os.path.join(relative_dir, f)
+                if not os.path.isfile(file_name):
+                    continue
+                war.write(file_name,
+                          os.path.join(relative_dir, f),
+                          zipfile.ZIP_DEFLATED)
+        os.path.walk(exploded_war_dir, walker, None)
+        war.close()
 
     def settings_module(self):
         return __import__(settings.SETTINGS_MODULE, {}, {},
