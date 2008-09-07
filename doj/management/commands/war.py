@@ -59,7 +59,7 @@ class Command(BaseCommand):
             for java_lib in options['include_java_libs'].split(os.path.pathsep):
                 self.copy_java_jar(exploded_war_dir, java_lib)
         if options['include_py_libs']:
-            for py_lib in options['inclide_py_libs'].split(os.path.pathsep):
+            for py_lib in options['include_py_libs'].split(os.path.pathsep):
                 self.copy_py_lib(exploded_war_dir, py_lib)
 
         # I'm still unsure of wheter (by default) the WAR should be generated on
