@@ -3,16 +3,14 @@
 PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
 "http://java.sun.com/dtd/web-app_2_3.dtd">
 <web-app>
-   <context-param>
-    <param-name>files.prefix</param-name> <!-- Needed by fileservlet -->
-    <param-value></param-value>
-   </context-param>
-
   <display-name>{{ project_name }}</display-name>
   <description>
    {{ project_name }} through WSGI with modjy
   </description>
-
+  <context-param>
+    <param-name>files.prefix</param-name> <!-- Needed by fileservlet -->
+    <param-value></param-value>
+   </context-param>
   <servlet>
     <servlet-name>modjy</servlet-name>
     <servlet-class>com.xhaus.modjy.ModjyJServlet</servlet-class>
