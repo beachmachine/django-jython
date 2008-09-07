@@ -78,7 +78,7 @@ class Command(BaseCommand):
         print """
 Finished.
 
-Now you can copy %s to whatever location you application server wants it.
+Now you can copy %s to whatever location your application server wants it.
 """ % os.path.abspath(war_file_name)
 
     def copy_skel(self, exploded_war_dir):
@@ -102,14 +102,19 @@ Now you can copy %s to whatever location you application server wants it.
             # We are on a Jython stand-alone installation.
             self.copy_java_jar(exploded_war_dir, jython_home)
         else:
-            # Standard installation: jython.jar inside jython_home
-            self.copy_java_jar(exploded_war_dir,
-                               os.path.join(jython_home, 'jython.jar'))
-            # XXX: Right now (August 2008), on the asm branch in subversion,
-            # jython.jar depends on a javalib/jarjar.jar file, containing the
-            # runtime dependencies. In the future this step may not be needed
-            self.copy_java_jar(exploded_war_dir,
-                               os.path.join(jython_home, 'javalib', 'jarjar.jar'))
+            if os.path.exists(os.path.join(jython_home, 'jython-complete.jar')):
+                # Release installation: jython-complete.jar contains everything
+                self.copy_java_jar(exploded_war_dir,
+                                   os.path.join(jython_home,
+                                                'jython-complete.jar'))
+            else:
+                # SVN installation: jython.jar inside jython_home. Also need
+                # the jarjar.jar support file:
+                self.copy_java_jar(exploded_war_dir,
+                                   os.path.join(jython_home, 'jython.jar'))
+                self.copy_java_jar(exploded_war_dir,
+                                   os.path.join(jython_home, 'javalib',
+                                                'jarjar.jar'))
             self.copy_py_lib(exploded_war_dir, jython_lib_path)
 
     def copy_django(self, exploded_war_dir):
