@@ -113,8 +113,9 @@ class TestInfo(object):
 
     """The JUnit XML <testcase/> model."""
 
-    def __init__(self, name, took, type=None, exc_info=None):
+    def __init__(self, class_name, name, took, type=None, exc_info=None):
         # The name of the test
+        self.class_name = class_name
         self.name = name
 
         # How long it took
@@ -134,12 +135,12 @@ class TestInfo(object):
 
     @classmethod
     def from_testcase(cls, testcase, took, type=None, exc_info=None):
-        name = testcase.id().split('.')[-1]
-        return cls(name, took, type, exc_info)
+        class_name, name = testcase.id().rsplit('.', 1)
+        return cls(class_name, name, took, type, exc_info)
 
     def write_xml(self, stream):
-        stream.write('  <testcase name="%s" time="%.3f"' % (self.name,
-                                                            self.took))
+        stream.write('  <testcase classname="%s" name="%s" time="%.3f"' %
+                     (self.class_name, self.name, self.took))
 
         if not self.type:
             # test was successful
@@ -217,7 +218,7 @@ def write_manual_test(junit_xml_dir, module_name, test_name, took, type=None,
     write_testsuite_xml(stream, 1, errors, failures, skipped, module_name,
                         took)
 
-    info = TestInfo(test_name, took, type, exc_info)
+    info = TestInfo(module_name, test_name, took, type, exc_info)
     info.write_xml(stream)
 
     write_stdouterr_xml(stream, stdout, stderr)
