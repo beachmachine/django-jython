@@ -1,9 +1,9 @@
 """
-Django test runner to to spit out JUnit-compatible XML reports. Uses Jython's
-JUnitXMLTestRunner
+Django test runner to to spit out JUnit-compatible XML reports. Uses a slightly
+adapted copy of Jython's JUnitXMLTestRunner
 """
 import unittest
-from test.junit_xml import JUnitXMLTestRunner
+from doj.test.xmlrunner.junitxmlrunner import JUnitXMLTestRunner
 from django.conf import settings
 from django.test.utils import setup_test_environment, teardown_test_environment
 from django.test.simple import build_test, build_suite
