@@ -50,7 +50,7 @@ def run_tests(test_labels, verbosity=1, interactive=True, extra_tests=[]):
     old_name = settings.DATABASE_NAME
     from django.db import connection
     connection.creation.create_test_db(verbosity, autoclobber=not interactive)
-    result = JUnitXMLTestRunner().run(suite)
+    result = JUnitXMLTestRunner('.').run(suite)
     connection.creation.destroy_test_db(old_name, verbosity)
 
     teardown_test_environment()
