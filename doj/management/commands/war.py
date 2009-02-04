@@ -2,17 +2,14 @@ import os
 import shutil
 import tempfile
 import zipfile
+import glob
 from optparse import make_option
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.template import Context, Template
 
-# TODO: The (ab)use of __file__ makes me nervous. Should improve compatibility
+# TODO: The (ab)use of __file__ makes me nervous. We should improve compatibility
 #       with zipimport.
-#
-#       Also, I'd like to move application.py out of the WAR root. Need to check
-#       if modjy can support a path relative to the war root to specify the
-#       location of application.py.
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
@@ -21,8 +18,14 @@ class Command(BaseCommand):
                          'which must be included, separated by the "%s" '
                          'character. Typically used for JDBC drivers ' %
                          os.path.pathsep),
-        make_option('--include-py-libs', dest='include_py_libs', default='',
-                    help='List of python libraries (directories or JAR/ZIP '
+        make_option('--include-py-packages', dest='include_py_packages',
+                    default='',
+                    help='List of python top-level packages (directories) to '
+                         'include separated by the "%s" character' %
+                          os.path.pathsep),
+        make_option('--include-py-path-entries', dest='include_py_path_entries',
+                    default='',
+                    help='List of python path entries (directories or JAR/ZIP '
                          'files) to include, separated by the "%s" character' %
                           os.path.pathsep),
         make_option('--context-root', dest='context_root', default='',
@@ -58,9 +61,16 @@ class Command(BaseCommand):
         if options['include_java_libs']:
             for java_lib in options['include_java_libs'].split(os.path.pathsep):
                 self.copy_java_jar(exploded_war_dir, java_lib)
-        if options['include_py_libs']:
-            for py_lib in options['include_py_libs'].split(os.path.pathsep):
-                self.copy_py_lib(exploded_war_dir, py_lib)
+        if options['include_py_packages']:
+            py_package_dirs = options['include_py_packages'].split(
+                os.path.pathsep)
+            for py_package_dir in py_package_dirs:
+                self.copy_py_package_dir(exploded_war_dir, py_package_dir)
+        if options['include_py_path_entries']:
+            py_path_entries = options['include_py_path_entries'].split(
+                os.path.pathsep)
+            for py_path_entry in py_path_entries:
+                self.copy_py_path_entry(exploded_war_dir, py_path_entry)
 
         # I'm still unsure of wheter (by default) the WAR should be generated on
         # the parent directory of the project root or inside the generated
@@ -102,25 +112,49 @@ Now you can copy %s to whatever location your application server wants it.
             # We are on a Jython stand-alone installation.
             self.copy_java_jar(exploded_war_dir, jython_home)
         else:
-            if os.path.exists(os.path.join(jython_home, 'jython-complete.jar')):
-                # Release installation: jython-complete.jar contains everything
+            # Is this Jython installation an official release version?
+            if os.path.exists(os.path.join(jython_home, 'jython.jar')):
                 self.copy_java_jar(exploded_war_dir,
                                    os.path.join(jython_home,
-                                                'jython-complete.jar'))
+                                                'jython.jar'))
+                # TODO: When jython2.5b2 goes out, find out if there is any
+                #       extra step to include modjy.
+                #
+                #       Note that on the meantime, we aren't really supporting
+                #       official releases of jython, as modjy wasn't being
+                #       previously included.
             else:
-                # SVN installation: jython.jar inside jython_home. Also need
-                # the jarjar.jar support file:
+                # SVN installation: jython-dev.jar inside jython_home. Also need
+                # to include the extra java libraries
                 self.copy_java_jar(exploded_war_dir,
-                                   os.path.join(jython_home, 'jython.jar'))
-                self.copy_java_jar(exploded_war_dir,
-                                   os.path.join(jython_home, 'javalib',
-                                                'jarjar.jar'))
-            self.copy_py_lib(exploded_war_dir, jython_lib_path)
+                                   os.path.join(jython_home, 'jython-dev.jar'))
+                for jar in glob.glob(os.path.join(jython_home,
+                                                  'javalib', '*.jar')):
+                    self.copy_java_jar(exploded_war_dir, jar)
+                modjy_zip = glob.glob(os.path.join(jython_home,
+                                                  'javalib', 'modjy*.zip'))[0]
+                self.copy_modjy(exploded_war_dir, modjy_zip)
+            self.copy_py_path_entry(exploded_war_dir, jython_lib_path)
+
+    def copy_modjy(self, exploded_war_dir, modjy_zip_path):
+        dest_name = os.path.basename(modjy_zip_path)
+        print "Extracting modjy JAR from %s..." % dest_name
+        modjy_release_name = dest_name[:-4]
+        zip_file = zipfile.ZipFile(modjy_zip_path)
+        jar_content = zip_file.read("%s/modjy_webapp/WEB-INF/lib/modjy.jar" %
+                                    modjy_release_name)
+        zip_file.close()
+        dest_jar_path = os.path.join(exploded_war_dir, 'WEB-INF', 'lib',
+                                     modjy_release_name + '.jar')
+        dest_jar = file(dest_jar_path, 'wb')
+        dest_jar.write(jar_content)
+        dest_jar.close()
+
 
     def copy_django(self, exploded_war_dir):
         import django
         django_dir = os.path.dirname(os.path.abspath(django.__file__))
-        self.copy_py_lib(exploded_war_dir, django_dir)
+        self.copy_py_package_dir(exploded_war_dir, django_dir)
 
     def copy_admin_media(self, exploded_war_dir):
         from django.contrib import admin
@@ -129,7 +163,7 @@ Now you can copy %s to whatever location your application server wants it.
                         os.path.join(*settings.ADMIN_MEDIA_PREFIX.split('/')))
 
     def copy_project(self, exploded_war_dir):
-        self.copy_py_lib(exploded_war_dir, self.project_directory())
+        self.copy_py_package_dir(exploded_war_dir, self.project_directory())
 
     def fix_project_settings(self, exploded_war_dir, context_root):
         fix_media = (settings.MEDIA_URL and
@@ -149,8 +183,10 @@ Now you can copy %s to whatever location your application server wants it.
                                                      settings.ADMIN_MEDIA_PREFIX)
 
         settings_name = settings.SETTINGS_MODULE.split('.')[-1]
-        deployed_settings = os.path.join(exploded_war_dir,'WEB-INF', 'lib-python',
-                                         self.project_name(), self.project_name(),
+        deployed_settings = os.path.join(exploded_war_dir,
+                                         'WEB-INF',
+                                         'lib-python',
+                                         self.project_name(),
                                          settings_name + '.py')
         if os.path.exists(deployed_settings):
             settings_file_modified = file(deployed_settings, 'a')
@@ -190,8 +226,9 @@ deployed settings file. You can append the following block at the end of the fil
             if app.startswith('django.') or \
                    app.startswith(self.project_name() + '.'):
                 continue # Already included
-            app_first_dir = os.path.dirname(os.path.abspath(__import__(app).__file__))
-            self.copy_py_lib(exploded_war_dir, app_first_dir)
+            app_root_file = __import__(app).__file__
+            app_root_dir = os.path.dirname(os.path.abspath(app_root_file))
+            self.copy_py_package_dir(exploded_war_dir, app_root_dir)
 
     def copy_java_jar(self, exploded_war_dir, java_lib):
         # java_lib is a path to a JAR file
@@ -201,28 +238,29 @@ deployed settings file. You can append the following block at the end of the fil
                     os.path.join(exploded_war_dir,
                                  'WEB-INF', 'lib', dest_name))
 
-    def copy_py_lib(self, exploded_war_dir, py_lib_dir_or_file):
-        dest_name = os.path.basename(py_lib_dir_or_file)
+    def copy_py_package_dir(self, exploded_war_dir, py_package_dir):
+        """
+        Copies a directory containing a python package to lib-python/
+        """
+        dest_name = os.path.basename(py_package_dir)
         print "Copying %s..." % dest_name
-        if os.path.isdir(py_lib_dir_or_file):
-            py_lib_dir = py_lib_dir_or_file
-            if dest_name != 'Lib':
-                # Each python library goes into its own sys.path entry (Except Lib,
-                # which is itself a sys.path entry. Maybe I should add some flag to
-                # this method instead of special-casing Lib)
-                os.mkdir(os.path.join(exploded_war_dir,
-                                      'WEB-INF', 'lib-python', dest_name))
-                dest_name = os.path.join(dest_name, dest_name)
-
-            shutil.copytree(py_lib_dir,
-                            os.path.join(exploded_war_dir,
-                                         'WEB-INF', 'lib-python', dest_name))
-        else:
-            # Zip or egg file, should go directly into lib-python
-            py_lib_file = py_lib_dir_or_file
-            shutil.copy(py_lib_file,
+        shutil.copytree(py_package_dir,
                         os.path.join(exploded_war_dir,
                                      'WEB-INF', 'lib-python', dest_name))
+
+    def copy_py_path_entry(self, exploded_war_dir, dir_or_file):
+        """
+        Copies a directory or zip/egg file to lib-python and generates a .pth
+        file to make it part of sys.path
+        """
+        dest_name = os.path.basename(dir_or_file)
+        print "Copying %s..." % dest_name
+        dest_path = os.path.join(exploded_war_dir,
+                                 'WEB-INF', 'lib-python', dest_name)
+        shutil.copytree(dir_or_file, dest_path)
+        pth_file = file(dest_path + '.pth', 'w')
+        pth_file.write("%s\n" % dest_name)
+        pth_file.close()
 
     def copy_media(self, exploded_war_dir, src_dir, dest_relative_path):
         if dest_relative_path[-1] == '/':
@@ -247,7 +285,7 @@ deployed settings file. You can append the following block at the end of the fil
         war = zipfile.ZipFile(war_file_name, 'w',
                               compression=zipfile.ZIP_DEFLATED)
         def walker(arg, directory, files):
-            # The following + 1 accounts for the path separator after the
+            # The following "+ 1" accounts for the path separator after the
             # directory name
             relative_dir = directory[len(exploded_war_dir) + 1:]
             for f in files:
