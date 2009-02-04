@@ -103,7 +103,9 @@ Now you can copy %s to whatever location your application server wants it.
             file_name = os.path.join(*[exploded_war_dir] +
                                      relative_file_name.split('/'))
             template = Template(file(file_name).read())
-            file(file_name, 'w').write(template.render(Context(vars)))
+            f = file(file_name, 'w')
+            f.write(template.render(Context(vars)))
+            f.close()
 
     def copy_jython(self, exploded_war_dir):
         jython_lib_path = os.path.dirname(os.path.abspath(os.__file__))
