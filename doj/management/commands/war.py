@@ -263,7 +263,7 @@ deployed settings file. You can append the following block at the end of the fil
         pth_file.close()
 
     def copy_media(self, exploded_war_dir, src_dir, dest_relative_path):
-        if dest_relative_path[-1] == '/':
+        if dest_relative_path[-1] == os.path.sep:
             dest_relative_path = dest_relative_path[:-1]
         if os.path.sep in dest_relative_path:
             # We have to construct the directory hierarchy (without the last
