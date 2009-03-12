@@ -119,12 +119,6 @@ Now you can copy %s to whatever location your application server wants it.
                 self.copy_java_jar(exploded_war_dir,
                                    os.path.join(jython_home,
                                                 'jython.jar'))
-                # TODO: When jython2.5b2 goes out, find out if there is any
-                #       extra step to include modjy.
-                #
-                #       Note that on the meantime, we aren't really supporting
-                #       official releases of jython, as modjy wasn't being
-                #       previously included.
             else:
                 # SVN installation: jython-dev.jar inside jython_home. Also need
                 # to include the extra java libraries
@@ -133,25 +127,7 @@ Now you can copy %s to whatever location your application server wants it.
                 for jar in glob.glob(os.path.join(jython_home,
                                                   'javalib', '*.jar')):
                     self.copy_java_jar(exploded_war_dir, jar)
-                modjy_zip = glob.glob(os.path.join(jython_home,
-                                                  'javalib', 'modjy*.zip'))[0]
-                self.copy_modjy(exploded_war_dir, modjy_zip)
             self.copy_py_path_entry(exploded_war_dir, jython_lib_path)
-
-    def copy_modjy(self, exploded_war_dir, modjy_zip_path):
-        dest_name = os.path.basename(modjy_zip_path)
-        print "Extracting modjy JAR from %s..." % dest_name
-        modjy_release_name = dest_name[:-4]
-        zip_file = zipfile.ZipFile(modjy_zip_path)
-        jar_content = zip_file.read("%s/modjy_webapp/WEB-INF/lib/modjy.jar" %
-                                    modjy_release_name)
-        zip_file.close()
-        dest_jar_path = os.path.join(exploded_war_dir, 'WEB-INF', 'lib',
-                                     modjy_release_name + '.jar')
-        dest_jar = file(dest_jar_path, 'wb')
-        dest_jar.write(jar_content)
-        dest_jar.close()
-
 
     def copy_django(self, exploded_war_dir):
         import django
