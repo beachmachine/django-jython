@@ -21,5 +21,13 @@ setup(
     description = "Database backends and management commands, for development under Django/Jython",
     license = "BSD",
     keywords = "django jython database java",
-    url = "http://code.google.com/p/django-jython/"
+    url = "http://code.google.com/p/django-jython/",
+    classifiers = [
+        "Development Status :: 4 - Beta",
+        "Framework :: Django",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: BSD License",
+        "Programming Language :: Python",
+        "Programming Language :: Java"
+    ]
 )
