@@ -1,4 +1,1 @@
-This directory is recognized by modjy.
-
-Each entry inside lib-python (JAR/ZIP files or directories) is added to the
-sys.path.
+This directory is recognized by modjy and automatically added to sys.path.
