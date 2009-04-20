@@ -1,17 +1,20 @@
 from distutils.core import setup
 setup(
     name = "django-jython",
-    version = "0.9",
+    version = "1.0b1",
     packages = ['doj',
                 'doj.backends',
-                'doj.backends..zxjdbc',
-                'doj.backends..zxjdbc.postgresql',
+                'doj.backends.zxjdbc',
+                'doj.backends.zxjdbc.postgresql',
                 'doj.management',
-                'doj.management.commands'],
-    package_data = {'doj.management.commands':  ['war_skel/application.py',
-                                                 'war_skel/WEB-INF/web.xml',
-                                                 'war_skel/WEB-INF/lib/*',
-                                                 'war_skel/WEB-INF/lib-python/README']},
+                'doj.management.commands',
+                'doj.test',
+                'doj.test.xmlrunner'],
+    package_data = {
+        'doj.management.commands':  ['war_skel/application.py',
+                                     'war_skel/WEB-INF/web.xml',
+                                     'war_skel/WEB-INF/lib/*',
+                                     'war_skel/WEB-INF/lib-python/README']},
     # metadata for upload to PyPI
     author = "Leonardo Soto M.",
     author_email = "leo.soto@gmail.com",
