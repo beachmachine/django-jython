@@ -1,0 +1,2 @@
+recursive-include doj/management/commands/war_skel *
+include LICENSE.txt
