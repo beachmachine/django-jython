@@ -5,13 +5,8 @@ Modifications Made By: Josh Juneau
                an effort to incorporate zxJDBC logic
 """
 from django.db.backends import BaseDatabaseIntrospection
+from com.ziclix.python.sql import zxJDBC
 import re
-
-try:
-    from com.ziclix.python.sql import zxJDBC
-except ImportError, e:
-    from django.core.exceptions import ImproperlyConfigured
-    raise ImproperlyConfigured("Error loading zxJDBC module: %s" % e)
 
 foreign_key_re = re.compile(r"\sCONSTRAINT `[^`]*` FOREIGN KEY \(`([^`]*)`\) REFERENCES `([^`]*)` \(`([^`]*)`\)")
 
