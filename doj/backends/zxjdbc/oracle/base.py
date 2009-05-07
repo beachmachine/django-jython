@@ -18,7 +18,7 @@ import os
 from django.db.backends import *
 from doj.backends.zxjdbc.oracle import query
 from django.db.backends.oracle.client import DatabaseClient
-from doj.backends.zxjdbc.oracle.creation import DatabaseCreation
+from django.db.backends.oracle.creation import DatabaseCreation
 from doj.backends.zxjdbc.oracle.introspection import DatabaseIntrospection
 from django.utils.encoding import smart_str
 
