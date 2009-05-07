@@ -1,9 +1,9 @@
-"""
-Modifications Made By: Josh Juneau
- Modified Date:  04/2009
- Description:  Modified the Oracle implementation from the Django backend in
-               an effort to incorporate zxJDBC logic
-"""
+# Highly based on Django's builtin Oracle backend.
+#
+# In fact, we only change the data_types_reverse dictionary. Unfortunately we
+# can't just subclass their DatabaseIntrospection class because their module
+# imports cx_Oracle. (We could do nasty monkey-patching trickery, but...)
+
 from django.db.backends import BaseDatabaseIntrospection
 from com.ziclix.python.sql import zxJDBC
 import re
