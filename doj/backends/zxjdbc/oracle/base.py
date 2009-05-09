@@ -56,12 +56,12 @@ class DatabaseOperations(zxJDBCOperationsMixin, BaseDatabaseOperations):
                 SELECT COUNT(*) INTO i FROM USER_CATALOG
                    WHERE TABLE_NAME = '%(sq_name)s' AND TABLE_TYPE = 'SEQUENCE';
                 IF i = 0 THEN
-                    EXECUTE IMMEDIATE 'CREATE SEQUENCE %(sq_name)s';
+                    EXECUTE IMMEDIATE 'CREATE SEQUENCE "%(sq_name)s"';
                 END IF;
             END;
             /""" % locals()
         trigger_sql = """
-            CREATE OR REPLACE TRIGGER %(tr_name)s
+            CREATE OR REPLACE TRIGGER "%(tr_name)s"
             BEFORE INSERT ON %(tbl_name)s
             FOR EACH ROW
             WHEN (new.%(col_name)s IS NULL)
