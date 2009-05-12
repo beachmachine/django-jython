@@ -2,14 +2,11 @@
 Custom Query class for Oracle.
 Derived from: django.db.models.sql.query.Query
 
-Modifications Made By:  Josh Juneau
-Modified Date:  04/2009
 """
 
 import datetime
 
 from django.db.backends import util
-from django.db.backends.oracle import query as DjangoQuery
 
 # Cache. Maps default query class to new Oracle query class.
 _classes = {}
