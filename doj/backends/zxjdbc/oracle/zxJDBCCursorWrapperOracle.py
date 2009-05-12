@@ -1,7 +1,8 @@
 """
     Author:  Josh Juneau
     Author Date:  11/2008
-    Modification Date: 04/30/2009
+    Modification Date: 05/11/2009
+        - Cleaned up unneccesary code bits
     
     Wrapper for Django-Jython Oracle implementation for zxJDBC calls
 """
@@ -21,21 +22,22 @@ class zxJDBCCursorWrapperOracle(object):
     """
     def __init__(self, cursor):
         self.cursor = cursor
-
+ 
     def execute(self, sql, params=()):
-        paramlist = []
-        paramcount = 0
+        if params is None:
+            params = []
+        else:
+            params = params
         if len(params) > 0:
             sql = sql % (('?',) * len(params))
-            for param in params:
-                if param == "":
-                    paramlist.append("name")
-                else:
-                    paramlist.append(param)
-        sql = sql.rstrip("/")
-        if sql.find("DESC LIMIT 10") != -1:
-            sql = sql.rstrip("DESC LIMIT 10")
-        self.cursor.execute(sql.rstrip(";"), paramlist)
+        if sql.endswith(';') or sql.endswith('/'):
+            sql = sql[:-1]
+        self.cursor.execute(sql, params)
+        
+    def executemany(self, sql, param_list):
+        if len(param_list) > 0:
+            sql = sql % (('?',) * len(param_list[0]))
+        self.cursor.executemany(sql, param_list)
         
     def fetchone(self):
         row = self.cursor.fetchone()
@@ -87,18 +89,11 @@ class zxJDBCCursorWrapperOracle(object):
                 else:
                     value = int(value)
             else:
-                if desc[1] == 2005:
-                    if '.' in value and value[0:1].isdigit():
-                        value = int(float(value))
-                else:
-                    value = to_unicode(value)
+                value = to_unicode(value)
             casted.append(value)
         return tuple(casted)
        
-    def executemany(self, sql, param_list):
-        if len(param_list) > 0:
-            sql = sql % (('?',) * len(param_list[0]))
-        self.cursor.executemany(sql, param_list)
+
 
     def __getattr__(self, attr):
         return getattr(self.cursor, attr)
