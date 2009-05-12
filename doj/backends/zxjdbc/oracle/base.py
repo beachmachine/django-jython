@@ -6,6 +6,9 @@ Modified Date:  01/10/2009
 
 Modified On:  04/30/2009
     - Finalized for release with 1.0b2
+    
+Modified On:  05/11/2009
+    - Removed unnecessary code.
 """
 
 try:
@@ -260,11 +263,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                     "jdbc:oracle:thin:@%s:%s:%s" % (host, port, settings.DATABASE_NAME), settings.DATABASE_USER, settings.DATABASE_PASSWORD,
                     "oracle.jdbc.OracleDriver")
             # make transactions transparent to all cursors
-            # Commented out as set_default_isolation_level is not recognized via zxJDBC impl - JJ
-            #set_default_isolation_level(self.connection)
-            #cursor = self.connection
             cursor = CursorWrapper(self.connection.cursor())
-            cursor.numberAsStrings = True
             # Set oracle date to ansi date format.  This only needs to execute
             # once when we create a new connection.
             cursor.execute("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD' "
@@ -273,123 +272,15 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             try:
                 self.connection.stmtcachesize = 20
             except:
-                # Django docs specify cx_Oracle version 4.3.1 or higher, but
-                # stmtcachesize is available only in 4.3.2 and up.
                 pass
         if not cursor:
             cursor = CursorWrapper(self.connection.cursor())
-        # Default arraysize of 1 is highly sub-optimal.
- #       cursor.arraysize = 100
         return cursor
 
 
 
 CursorWrapper = zxJDBCCursorWrapperOracle
 
-
-class OracleParam(object):
-    """
-    Wrapper object for formatting parameters for Oracle. If the string
-    representation of the value is large enough (greater than 4000 characters)
-    the input size needs to be set as NCLOB. Alternatively, if the parameter has
-    an `input_size` attribute, then the value of the `input_size` attribute will
-    be used instead. Otherwise, no input size will be set for the parameter when
-    executing the query.
-    """
-    def __init__(self, param, charset, strings_only=False):
-        self.smart_str = smart_str(param, charset, strings_only)
-        if hasattr(param, 'input_size'):
-            # If parameter has `input_size` attribute, use that.
-            self.input_size = param.input_size
-        elif isinstance(param, basestring) and len(param) > 4000:
-            # Mark any string parameter greater than 4000 characters as an NCLOB.
-            self.input_size = Database.NCLOB
-        else:
-            self.input_size = None
-
-#  THE FOLLOWING IMPLEMENTATION IS NOT USED BY THE ORACLE BACKEND, IT ONLY
-#  REMAINS INTACT FOR DOCUMENTATION PURPOSES, SEE zxJDBCCursorWrapperOracle.py
-#  FOR CURRENT IMPLEMENTATION - JJ
-class FormatStylePlaceholderCursor(CursorWrapper):
-    """
-    #Django uses "format" (e.g. '%s') style placeholders, but Oracle uses ":var"
-    #style. This fixes it -- but note that if you want to use a literal "%s" in
-    #a query, you'll need to use "%%s".
-
-    We also do automatic conversion between Unicode on the Python side and
-    UTF-8 -- for talking to Oracle -- in here.
-    """
-    charset = 'utf-8'
-
-
-    def _format_params(self, params):
-        if isinstance(params, dict):
-            result = {}
-            for key, value in params.items():
-                result[smart_str(key, self.charset)] = OracleParam(param, self.charset)
-            return result
-        else:
-            return tuple([OracleParam(p, self.charset, True) for p in params])
-
-    def _guess_input_sizes(self, params_list):
-        if isinstance(params_list[0], dict):
-            sizes = {}
-            iterators = [params.iteritems() for params in params_list]
-        else:
-            sizes = [None] * len(params_list[0])
-            iterators = [enumerate(params) for params in params_list]
-        for iterator in iterators:
-            for key, value in iterator:
-                if value.input_size: sizes[key] = value.input_size
-
-    def _param_generator(self, params):
-        if isinstance(params, dict):
-            return dict([(k, p.smart_str) for k, p in params.iteritems()])
-        else:
-            return [p.smart_str for p in params]
-            
-    def execute(self, sql, params=()):
-        paramlist = []
-        paramcount = 0
-        if len(params) > 0:
-            sql = sql % (('?',) * len(params))
-            if (sql.find("INSERT INTO \"AUTH_USER\"") != -1) or (sql.find("UPDATE \"AUTH_USER\"") != -1):
-                for param in params:
-                    if param == "":
-                     
-                        paramlist.append("name")
-                    else:
-                        paramlist.append(params[paramcount])
-                    paramcount = paramcount + 1
-            else:
-                paramlist = params
-        sql = sql.rstrip("/")
-        if sql.find("DESC LIMIT %d") != -1:
-            sql = sql.rstrip("DESC LIMIT %d")
-        self.cursor.execute(sql.rstrip(";"), paramlist)
-        
-    def fetchone(self):
-        row = self.execute(self)
-        if row is None:
-            return row
-        return tuple([e for e in row])
-
-    def fetchmany(self, size=None):
-        if size is None:
-            size = self.arraysize
-        return tuple([tuple([e for e in r]) for r in self.execute(self, "")])
-
-    def fetchall(self):
-        return tuple([tuple([e for e in r]) for r in self.execute(self, "")])
-        
-def to_unicode(s):
-    """
-    Convert strings to Unicode objects (and return all other data types
-    unchanged).
-    """
-    if isinstance(s, basestring):
-       return force_unicode(s)
-    return s
 
 def _get_sequence_reset_sql():
     # TODO: colorize this SQL code with style.SQL_KEYWORD(), etc.
