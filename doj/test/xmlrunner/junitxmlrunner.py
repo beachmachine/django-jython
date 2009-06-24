@@ -95,6 +95,8 @@ class JUnitXMLTestResult(unittest.TestResult):
 
         ensure_dir(self.xml_dir)
         filename = os.path.join(self.xml_dir, 'TEST-%s.xml' % self.module_name)
+        print "JUnitXMLRunner: Writing test results to %s " % \
+              os.path.abspath(filename)
         stream = open(filename, 'w')
 
         write_testsuite_xml(stream, len(self.tests), len(self.errors),
