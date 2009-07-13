@@ -1,0 +1,37 @@
+This is a Jython package to provide a jTDS backend to Django that is
+specific to Microsoft SQL Server 2000.
+
+This driver was developed usnig the jTDS 1.2.2 driver.  You can grab
+it from sourceforge.net
+
+I've only tested this driver marginally with SQL Server 2005 and not
+at all with 2008.  
+
+Known issues:
+
+SQL2k doesn't support rownumber like 2k5 or 2k8 - so there are hacks
+to emulate select statements with LIMIT, OFFSET clauses.
+
+SQL2k's transaction support is half baked.  There doesn't seem to be a
+completely effective way to produce behaviour equilvalent to
+postgresql's deferred constraint behaviour where constraints are 
+enforced at COMMIT time but 'dirty' references are allowed inside of
+the transaction.
+
+SQL2k's NULL handling is non-standard.  There's a hack to work around
+this by creating a schema bound view to enforce ANSI behaviour.
+Comments and code can be found in mssql2k.base
+
+zxJDBC or jTDS doesn't like long integer types.  They're forced to
+plain integers.  This obviously has real problems. Haven't
+investigated a fix yet.
+
+Date vs DateTime fields are handled with a bit of type trickery using
+smalldatetime vs datetime.
+
+There are probably tons of other bugs.  This driver may cause damage
+to your data. 
+
+Use at your peril.
+
+
