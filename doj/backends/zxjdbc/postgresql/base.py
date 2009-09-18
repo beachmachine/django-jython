@@ -16,6 +16,8 @@ from doj.backends.zxjdbc.postgresql.creation import DatabaseCreation
 from doj.backends.zxjdbc.common import zxJDBCOperationsMixin, zxJDBCFeaturesMixin
 from doj.backends.zxjdbc.common import zxJDBCCursorWrapper, set_default_isolation_level
 from com.ziclix.python.sql.handler import PostgresqlDataHandler
+from UserDict import DictMixin
+import django
 
 DatabaseError = Database.DatabaseError
 IntegrityError = Database.IntegrityError
@@ -27,6 +29,17 @@ class DatabaseFeatures(zxJDBCFeaturesMixin, BaseDatabaseFeatures):
 class DatabaseOperations(zxJDBCOperationsMixin, PostgresqlDatabaseOperations):
     pass # The mixin contains all what is needed
 
+class SettingsModuleAsDict(DictMixin):
+    def __init__(self, module):
+        self.module = module
+    def __getitem__(self, name):
+        return getattr(self.module, name)
+    def __setitem__(self, name, value):
+        setattr(self.module, name, value)
+    def __delitem__(self, name):
+        self.module.__delattr__(name)
+    def keys(self):
+        return dir(self.module)
 
 class DatabaseWrapper(BaseDatabaseWrapper):
     operators = {
@@ -51,25 +64,42 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
         self.features = DatabaseFeatures()
         self.ops = DatabaseOperations()
-        self.client = DatabaseClient()
+        if django.VERSION < (1, 1):
+            # Compatibility with 1.0 ORM API
+            self.client = DatabaseClient()
+        else:
+            self.client = DatabaseClient(self)
         self.creation = DatabaseCreation(self)
         self.introspection = DatabaseIntrospection(self)
         self.validation = BaseDatabaseValidation()
 
-    def _cursor(self, settings):
+    def _cursor(self, *args):
+        if django.VERSION < (1, 1):
+            # Compatibility with 1.0 ORM API
+            settings, = args
+            settings_dict = SettingsModuleAsDict(settings)
+            settings_dict['DATABASE_OPTIONS'] = self.options
+        else:
+            settings_dict = self.settings_dict
+        return self._cursor_from_settings_dict(settings_dict)
+
+    def _cursor_from_settings_dict(self, settings_dict):
         if self.connection is None:
-            if settings.DATABASE_NAME == '':
+            if settings_dict['DATABASE_NAME'] == '':
                 from django.core.exceptions import ImproperlyConfigured
                 raise ImproperlyConfigured("You need to specify DATABASE_NAME in your Django settings file.")
-            host = settings.DATABASE_HOST or 'localhost'
-            port = settings.DATABASE_PORT and (':%s' % settings.DATABASE_PORT) or ''
-            conn_string = "jdbc:postgresql://%s%s/%s" % (host, port,
-                                                         settings.DATABASE_NAME)
-            self.connection = Database.connect(conn_string,
-                                               settings.DATABASE_USER,
-                                               settings.DATABASE_PASSWORD,
-                                               'org.postgresql.Driver',
-                                               **self.options)
+            host = settings_dict['DATABASE_HOST'] or 'localhost'
+            port = (settings_dict['DATABASE_PORT'] 
+                    and (':%s' % settings_dict['DATABASE_PORT'])
+                    or '')
+            conn_string = "jdbc:postgresql://%s%s/%s" % (
+                    host, port, settings_dict['DATABASE_NAME'])
+            self.connection = Database.connect(
+                    conn_string,
+                    settings_dict['DATABASE_USER'],
+                    settings_dict['DATABASE_PASSWORD'],
+                    'org.postgresql.Driver',
+                    **settings_dict['DATABASE_OPTIONS'])
             # make transactions transparent to all cursors
             set_default_isolation_level(self.connection)
         real_cursor = self.connection.cursor()
