@@ -5,7 +5,6 @@ Derived from: django.db.models.sql.query.Query
 """
 
 import datetime
-
 from django.db.backends import util
 
 # Cache. Maps default query class to new Oracle query class.
@@ -41,8 +40,9 @@ def query_class(QueryClass, Database):
             # order to adhere to the Django convention of using the empty
             # string instead of null, but only if the field accepts the
             # empty string.
-
-            if value is None and field.empty_strings_allowed:
+            if not value:
+                pass
+            elif value is None and field.empty_strings_allowed:
                 value = u''
             # Convert 1 or 0 to True or False
             elif value is not None and isinstance(value, float):
