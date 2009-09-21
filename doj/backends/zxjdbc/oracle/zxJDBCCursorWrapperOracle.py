@@ -1,8 +1,6 @@
 """
     Author:  Josh Juneau
     Author Date:  11/2008
-    Modification Date: 05/11/2009
-        - Cleaned up unneccesary code bits
     
     Wrapper for Django-Jython Oracle implementation for zxJDBC calls
 """
@@ -71,10 +69,14 @@ class zxJDBCCursorWrapperOracle(object):
                         # NUMBER column: decimal-precision floating point
                         # This will normally be an integer from a sequence,
                         # but it could be a decimal value.
-                        if '.' in value:
-                            value = Decimal(value)
+                        
+                        if isinstance(value, float):
+                            value = float(value)
                         else:
-                            value = int(value)
+                            if '.' in value:
+                                value = Decimal(value)
+                            else:
+                                value = int(value)
                     else:
                         # FLOAT column: binary-precision floating point.
                         # This comes from FloatField columns.
