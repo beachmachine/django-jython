@@ -1,7 +1,6 @@
 """
     Author:  Josh Juneau
-    Author Date:  11/2008
-    
+
     Wrapper for Django-Jython Oracle implementation for zxJDBC calls
 """
 
@@ -71,7 +70,7 @@ class zxJDBCCursorWrapperOracle(object):
                         # but it could be a decimal value.
                         
                         if isinstance(value, float):
-                            value = float(value)
+                            pass
                         else:
                             if '.' in value:
                                 value = Decimal(value)
