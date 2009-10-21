@@ -40,30 +40,28 @@ def query_class(QueryClass, Database):
             # order to adhere to the Django convention of using the empty
             # string instead of null, but only if the field accepts the
             # empty string.
-            if not value:
+            if value is None:
                 pass
-            elif value is None and field.empty_strings_allowed:
+            elif value is None and isinstance(field, Field) and field.empty_strings_allowed:
                 value = u''
             # Convert 1 or 0 to True or False
-            elif value is not None and isinstance(value, float):
+            elif isinstance(value, float):
                 value = float(value)
             # Added 04-26-2009 to repair "Invalid literal for int() base 10" error
-            elif value is not None and isinstance(value,int):
+            elif isinstance(value,int):
                 value = int(value)
-            elif value is not None and field is not None and field.get_internal_type() == 'AutoField':
+            elif field is not None and field.get_internal_type() == 'AutoField':
                 value = int(float(value))
             elif value in (1, 0) and field is not None and field.get_internal_type() in ('BooleanField', 'NullBooleanField'):
                 value = bool(value)
             # Force floats to the correct type
-            elif value is not None and field is not None and field.get_internal_type() == 'FloatField':
+            elif field is not None and field.get_internal_type() == 'FloatField':
                 value = float(value)
             # Convert floats to decimals
-            elif value is not None and field is not None and field.get_internal_type() == 'DecimalField':
+            elif field is not None and field.get_internal_type() == 'DecimalField':
                 value = util.typecast_decimal(field.format_number(value))
-            elif value is not None and field is not None and field.get_internal_type() == 'SmallIntegerField':
+            elif field is not None and field.get_internal_type() == 'SmallIntegerField':
                 value = util.typecast_decimal(field.format_number(value))
-            elif value is not None:
-                pass
             return value
 
         def as_sql(self, with_limits=True, with_col_aliases=False):
