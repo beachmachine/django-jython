@@ -1,14 +1,5 @@
 """
 Oracle database backend for Django-Jython
-
-Modified by: J. Juneau - juneau001@gmail.com
-Modified Date:  01/10/2009
-
-Modified On:  04/30/2009
-    - Finalized for release with 1.0b2
-    
-Modified On:  05/11/2009
-    - Removed unnecessary code.
 """
 
 try:
