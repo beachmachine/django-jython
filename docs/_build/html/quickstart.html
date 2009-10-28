@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>QuickStart &mdash; Django-Jython v1.0 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Django-Jython v1.0 documentation" href="index.html" />
+    <link rel="next" title="Installation instructions" href="install.html" />
+    <link rel="prev" title="Welcome to Django-Jython’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="install.html" title="Installation instructions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Django-Jython’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Django-Jython v1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="quickstart">
+<h1>QuickStart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="install">
+<h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
+<p>To get started with using Django-Jython, first install it following these steps:</p>
+<blockquote>
+<ul class="simple">
+<li>Grab the latest django-jython distribution</li>
+<li>Uncompress it</li>
+<li>Move into the resulting directory</li>
+<li>Run <tt class="docutils literal"><span class="pre">jython</span> <span class="pre">setup.py</span></tt></li>
+</ul>
+</blockquote>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>If you already have <a class="reference external" href="http://pypi.python.org/pypi/pip">pip</a> installed on
+Jython, you can use it instead of the manual process detailed above. The
+output looks like this:</p>
+<div class="last highlight-python"><pre>$ /path/to/jyton/bin/pip install django-jython
+
+Downloading/unpacking django-jython
+  Downloading django-jython-1.0b1.tar.gz
+  Running setup.py egg_info for package django-jython
+Installing collected packages: django-jython
+  Running setup.py install for django-jython
+Successfully installed django-jython</pre>
+</div>
+</div>
+</div>
+<div class="section" id="database-backends">
+<h2>Database Backends<a class="headerlink" href="#database-backends" title="Permalink to this headline">¶</a></h2>
+<p>Then, if you want to use the JDBC backends change the <tt class="docutils literal"><span class="pre">settings.py</span></tt> file of
+your project and set:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">DATABASE_ENGINE</span><span class="o">=</span><span class="s">&#39;doj.backends.zxjdbc.postgresql&#39;</span>
+</pre></div>
+</div>
+<p>Or:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">DATABASE_ENGINE</span><span class="o">=</span><span class="s">&#39;doj.backends.zxjdbc.mysql&#39;</span>
+</pre></div>
+</div>
+<p>Or:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">DATABASE_ENGINE</span><span class="o">=</span><span class="s">&#39;doj.backends.zxjdbc.oracle&#39;</span>
+</pre></div>
+</div>
+<p>Depending on which database you want to use. Remember to have the JAR file
+containing the JDBC driver for each database somewhere in your
+<tt class="docutils literal"><span class="pre">CLASSPATH</span></tt>. For example, you can do that on Unix-based system by running:</p>
+<div class="highlight-python"><pre>export CLASSPATH="$CLASSPATH:/path/to/postgreql-8.3-603-jdbc4.jar"</pre>
+</div>
+</div>
+<div class="section" id="building-a-war-file">
+<h2>Building a war file<a class="headerlink" href="#building-a-war-file" title="Permalink to this headline">¶</a></h2>
+<p>To build a war archive for deployment into Java application servers, change
+<tt class="docutils literal"><span class="pre">settings.py</span></tt> on your project to include <tt class="docutils literal"><span class="pre">'doj'</span></tt>. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s">&#39;django.contrib.auth&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.contenttypes&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.sessions&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.sites&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.admin&#39;</span><span class="p">,</span>
+    <span class="s">&#39;mysite.polls&#39;</span><span class="p">,</span>
+    <span class="s">&#39;mysite.another_app&#39;</span><span class="p">,</span>
+    <span class="c"># More apps...</span>
+    <span class="s">&#39;doj&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Then you can build a war file running <tt class="docutils literal"><span class="pre">jython</span> <span class="pre">manage.py</span> <span class="pre">war</span></tt> on your project
+directory.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h3><a href="index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="">QuickStart</a><ul>
+<li><a class="reference external" href="#install">Install</a></li>
+<li><a class="reference external" href="#database-backends">Database Backends</a></li>
+<li><a class="reference external" href="#building-a-war-file">Building a war file</a></li>
+</ul>
+</li>
+</ul>
+
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="index.html"
+                                  title="previous chapter">Welcome to Django-Jython&#8217;s documentation!</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="install.html"
+                                  title="next chapter">Installation instructions</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/quickstart.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="install.html" title="Installation instructions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Django-Jython’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">Django-Jython v1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2009, Leo Soto M..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.3.
+    </div>
+  </body>
+</html>

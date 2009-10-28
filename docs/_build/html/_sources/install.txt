@@ -1,0 +1,25 @@
+Installation instructions
+=========================
+
+Django-Jython installation follows the typical distutils-based procedure. Go
+into the root directory of the unpacked the source distribution and run::
+
+  $ jython setup.py install
+
+That's all.
+
+Installing using Pip
+--------------------
+
+Alternatively, if you already have `pip <http://pypi.python.org/pypi/pip>`_
+installed on Jython, you can use it instead::
+
+  $ /path/to/jyton/bin/pip install django-jython
+
+  Downloading/unpacking django-jython
+    Downloading django-jython-1.0b1.tar.gz
+    Running setup.py egg_info for package django-jython
+  Installing collected packages: django-jython
+    Running setup.py install for django-jython
+  Successfully installed django-jython
+
