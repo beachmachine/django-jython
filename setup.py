@@ -8,7 +8,7 @@ setup(
                 'doj.backends.zxjdbc.postgresql',
                 'doj.backends.zxjdbc.oracle',
                 'doj.backends.zxjdbc.mysql',
-                'doj.backends.zxjdbc.sqlite',
+                'doj.backends.zxjdbc.sqlite3',
                 'doj.backends.zxjdbc.mssql2k',
                 'doj.management',
                 'doj.management.commands',
