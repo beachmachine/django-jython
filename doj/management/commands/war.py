@@ -200,13 +200,15 @@ deployed settings file. You can append the following block at the end of the fil
                         os.path.join(*settings.MEDIA_URL.split('/')))
 
     def copy_apps(self, exploded_war_dir):
+        already_included_pkgs = ['django', self.project_name()]
         for app in settings.INSTALLED_APPS:
-            if app.startswith('django.') or \
-                   app.startswith(self.project_name() + '.'):
-                continue # Already included
-            app_root_file = __import__(app).__file__
-            app_root_dir = os.path.dirname(os.path.abspath(app_root_file))
-            self.copy_py_package_dir(exploded_war_dir, app_root_dir)
+            # We copy the whole package in which the app resides
+            app_pkg = __import__(app)
+            if app_pkg.__name__ in already_included_pkgs:
+                continue
+            app_pkg_dir = os.path.dirname(os.path.abspath(app_pkg.__file__))
+            self.copy_py_package_dir(exploded_war_dir, app_pkg_dir)
+            already_included_pkgs.append(app_pkg.__name__)
 
     def copy_java_jar(self, exploded_war_dir, java_lib):
         # java_lib is a path to a JAR file
