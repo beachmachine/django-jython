@@ -1,5 +1,3 @@
-.. _database-backends:
-
 Database Backends
 =================
 
@@ -40,3 +38,18 @@ SQLite3
 
 Experimental. By now, use it only if you are working on improving it. Or if you
 are really adventurous.
+
+Oracle
+------
+
+The Oracle database backend is fairly stable and has been tested extensively.
+The Oracle backend has been tested with Oracle version 10.2.0.3, 10.2.0.4, and
+11.1.0.6.  To use it set the following in your Django project settings::
+
+  DATABASE_ENGINE = 'doj.backends.zxjdbc.oracle'
+
+Oracle has several different JDBC drivers, however only ojdbc14.jar has been
+extensively tested.  The next target for testing is ojdbc6.jar for use with
+11.1.0.7 database.  You can obtain a copy of the Oracle JDBC drivers from the
+Oracle site at http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/index.html.
+Remember to put the JAR file on the ``CLASSPATH``.
