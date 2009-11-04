@@ -3,3 +3,4 @@ syntax:glob
 *.class
 *~
 *.war
+build
