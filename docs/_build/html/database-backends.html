@@ -94,6 +94,20 @@ extensively tested.  The next target for testing is ojdbc6.jar for use with
 Oracle site at <a class="reference external" href="http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/index.html">http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/index.html</a>.
 Remember to put the JAR file on the <tt class="docutils literal"><span class="pre">CLASSPATH</span></tt>.</p>
 </div>
+<div class="section" id="mysql">
+<h2>MySQL<a class="headerlink" href="#mysql" title="Permalink to this headline">¶</a></h2>
+<p>The MySQL database backend has been exposed to limited practical testing, but
+appears mostly stable.  It has been tested with MySQL version 5.1.34-community
+on Windows XP SP3. To use it set the following in your Django project settings:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">DATABASE_ENGINE</span> <span class="o">=</span> <span class="s">&#39;doj.backends.zxjdbc.mysql&#39;</span>
+</pre></div>
+</div>
+<p>MySQL has several different JDBC drivers, however only mysql-connector-java-5.1.10-bin.jar has been extensively tested.</p>
+<p>Remember to put the JAR file on the <tt class="docutils literal"><span class="pre">CLASSPATH</span></tt>.</p>
+<p>Known issues are that FilePathField does not require you to set the path
+attribute, and URLField is not able to verify that a server returned a 404
+error.</p>
+</div>
 </div>
 
 
@@ -111,6 +125,7 @@ Remember to put the JAR file on the <tt class="docutils literal"><span class="pr
 </li>
 <li><a class="reference external" href="#sqlite3">SQLite3</a></li>
 <li><a class="reference external" href="#oracle">Oracle</a></li>
+<li><a class="reference external" href="#mysql">MySQL</a></li>
 </ul>
 </li>
 </ul>
