@@ -125,3 +125,24 @@ class CursorWrapper(zxJDBCCursorWrapper):
             # occurs, unless the current transaction is rollback'ed.
             self.connection.rollback()
             raise
+
+
+import platform
+if tuple(platform.python_version_tuple()) < ('2', '5', '2'):
+    # Workaround Jython bug http://bugs.jython.org/issue1499: PostgreSQL
+    # datahandler should return Decimals instead of floats for NUMERIC/DECIMAL
+    # columns
+    OriginalPostgresqlDataHandler = PostgresqlDataHandler
+    from java.sql import Types
+    from decimal import Decimal
+    class PostgresqlDataHandler(OriginalPostgresqlDataHandler):
+        def getPyObject(self, set, col, type):
+            if type in (Types.NUMERIC, Types.DECIMAL):
+                value = set.getBigDecimal(col)
+                if value is None:
+                    return None
+                else:
+                    return Decimal(str(value))
+            else:
+                return OriginalPostgresqlDataHandler.getPyObject(
+                    self, set, col, type)
