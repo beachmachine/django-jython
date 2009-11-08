@@ -4,12 +4,12 @@ Release Notes
 1.0.0
 -----
 
-Released on ???
+Released on November 8, 2009.
 
 Changes
 ~~~~~~~~
 
-With respect to the 1.0.0b1 release:
+Changes from the 1.0.0b1 release:
 
  - Added Oracle backend
  - Added MySQL backend 

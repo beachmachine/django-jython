@@ -1,7 +1,7 @@
 from distutils.core import setup
 setup(
     name = "django-jython",
-    version = "1.0",
+    version = "1.0.0",
     packages = ['doj',
                 'doj.backends',
                 'doj.backends.zxjdbc',
@@ -28,7 +28,7 @@ setup(
     keywords = "django jython database java",
     url = "http://code.google.com/p/django-jython/",
     classifiers = [
-        "Development Status :: 5 - Production/Stable"
+        "Development Status :: 5 - Production/Stable",
         "Framework :: Django",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
