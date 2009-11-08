@@ -44,37 +44,41 @@
   <div class="section" id="release-notes">
 <h1>Release Notes<a class="headerlink" href="#release-notes" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2>1.0<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>1.0.0<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <p>Released on ???</p>
 <div class="section" id="changes">
 <h3>Changes<a class="headerlink" href="#changes" title="Permalink to this headline">¶</a></h3>
-<p>With respect to the 1.0b1 release:</p>
+<p>With respect to the 1.0.0b1 release:</p>
 <blockquote>
 <ul class="simple">
 <li>Added Oracle backend</li>
 <li>Added MySQL backend</li>
-<li>PostgreSQL backend works on Django 1.1.x</li>
-<li>Stand-alone documentation</li>
+<li>PostgreSQL backend: Works on Django 1.1.x</li>
+<li>War command: Fixed problems when using multiple apps from a package not
+belonging to the project.</li>
+<li>PostgreSQL backend: DecimalField works as expected</li>
+<li>Added <tt class="docutils literal"><span class="pre">doj.VERSION</span></tt> following the same convention as <tt class="docutils literal"><span class="pre">django.VERSION</span></tt></li>
+<li>Stand-alone documentation included on the distribution</li>
 </ul>
 </blockquote>
 </div>
 <div class="section" id="django-compatibility">
 <h3>Django Compatibility<a class="headerlink" href="#django-compatibility" title="Permalink to this headline">¶</a></h3>
 <p>This version has been tested against Django 1.0.4. It may or may not work with
-Django 1.1.1 (most database backends don&#8217;t).</p>
+Django 1.1.1 (in particular, MySQL and Oracle database backends don&#8217;t).</p>
 <p>Users who get issues with currupted class files must apply the patch for <a class="reference external" href="http://code.djangoproject.com/ticket/11621">Django
 bug #11621</a>.</p>
-<p>Django 1.0.3 or earlier should not be used as such releases have known security
-vulnerabilities.</p>
+<p>Django 1.0.3 or earlier should not be used, since such releases have known
+security vulnerabilities.</p>
 </div>
 <div class="section" id="jython-compatibility">
 <h3>Jython Compatibility<a class="headerlink" href="#jython-compatibility" title="Permalink to this headline">¶</a></h3>
-<p>The release have been tested on Jython 2.5.1. However, it should work on any
+<p>The release has been tested on Jython 2.5.1. However, it should work on any
 Jython 2.5.x release (including 2.5.0)</p>
 </div>
 </div>
 <div class="section" id="b1">
-<h2>1.0b1<a class="headerlink" href="#b1" title="Permalink to this headline">¶</a></h2>
+<h2>1.0.0b1<a class="headerlink" href="#b1" title="Permalink to this headline">¶</a></h2>
 <p>Released on April 20, 2009.</p>
 <div class="section" id="id2">
 <h3>Changes<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
@@ -117,13 +121,13 @@ will <em>not</em> work with Django 1.1.X.</p>
             <h3><a href="index.html">Table Of Contents</a></h3>
             <ul>
 <li><a class="reference external" href="">Release Notes</a><ul>
-<li><a class="reference external" href="#id1">1.0</a><ul>
+<li><a class="reference external" href="#id1">1.0.0</a><ul>
 <li><a class="reference external" href="#changes">Changes</a></li>
 <li><a class="reference external" href="#django-compatibility">Django Compatibility</a></li>
 <li><a class="reference external" href="#jython-compatibility">Jython Compatibility</a></li>
 </ul>
 </li>
-<li><a class="reference external" href="#b1">1.0b1</a><ul>
+<li><a class="reference external" href="#b1">1.0.0b1</a><ul>
 <li><a class="reference external" href="#id2">Changes</a></li>
 <li><a class="reference external" href="#id3">Django Compatibility</a></li>
 <li><a class="reference external" href="#id4">Jython Compatibility</a></li>

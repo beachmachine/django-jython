@@ -1,42 +1,47 @@
 Release Notes
 =============
 
-1.0
----
+1.0.0
+-----
 
 Released on ???
 
 Changes
 ~~~~~~~~
 
-With respect to the 1.0b1 release:
+With respect to the 1.0.0b1 release:
 
  - Added Oracle backend
  - Added MySQL backend 
- - PostgreSQL backend works on Django 1.1.x
- - Stand-alone documentation
+ - PostgreSQL backend: Works on Django 1.1.x
+ - War command: Fixed problems when using multiple apps from a package not
+   belonging to the project.
+ - PostgreSQL backend: DecimalField works as expected
+ - Added ``doj.VERSION`` following the same convention as ``django.VERSION``
+ - Stand-alone documentation included on the distribution
+
 
 Django Compatibility
 ~~~~~~~~~~~~~~~~~~~~
 
 This version has been tested against Django 1.0.4. It may or may not work with
-Django 1.1.1 (most database backends don't).
+Django 1.1.1 (in particular, MySQL and Oracle database backends don't).
 
 Users who get issues with currupted class files must apply the patch for `Django
 bug #11621 <http://code.djangoproject.com/ticket/11621>`_.
 
-Django 1.0.3 or earlier should not be used as such releases have known security
-vulnerabilities.
+Django 1.0.3 or earlier should not be used, since such releases have known
+security vulnerabilities.
 
 Jython Compatibility
 ~~~~~~~~~~~~~~~~~~~~
 
-The release have been tested on Jython 2.5.1. However, it should work on any
+The release has been tested on Jython 2.5.1. However, it should work on any
 Jython 2.5.x release (including 2.5.0)
 
 
-1.0b1
------
+1.0.0b1
+-------
 
 Released on April 20, 2009.
 
