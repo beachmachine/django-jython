@@ -4,3 +4,4 @@ syntax:glob
 *~
 *.war
 build
+MANIFEST
