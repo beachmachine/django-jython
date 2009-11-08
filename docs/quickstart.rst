@@ -6,7 +6,8 @@ Install
 
 To get started with using Django-Jython, first install it following these steps:
 
- - Grab the latest django-jython distribution
+ - Grab the `latest django-jython distribution
+   <http://pypi.python.org/pypi/django-jython>`_
  - Uncompress it
  - Move into the resulting directory
  - Run ``jython setup.py``
