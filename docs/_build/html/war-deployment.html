@@ -49,7 +49,7 @@
 <h1>Creating a WAR Archive for Deployment<a class="headerlink" href="#creating-a-war-archive-for-deployment" title="Permalink to this headline">¶</a></h1>
 <p>django-jython includes a &#8220;war&#8221; management command so you can go to your project
 directory and type something like this:</p>
-<div class="highlight-python"><pre>lsoto@spirit:~/src/mysite$ jython25 manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar</pre>
+<div class="highlight-python"><pre>lsoto@spirit:~/src/mysite$ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar</pre>
 </div>
 <p>And get a single <tt class="docutils literal"><span class="pre">mysite.war</span></tt> file which you can deploy in your preferred application server. <em>This file doesn&#8217;t require anything special installed on the target server</em>. No Django, no Jython, no nothing.</p>
 <div class="section" id="usage">
@@ -70,19 +70,19 @@ directory and type something like this:</p>
 </pre></div>
 </div>
 <p>Then, the most typical usage is the one already exemplified:</p>
-<div class="highlight-python"><pre>$ jython25 manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar</pre>
+<div class="highlight-python"><pre>$ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar</pre>
 </div>
 <p>Here, you tell the war command that it should include an extra java library to
 the generated WAR file, because it can&#8217;t know which java libraries are you using
 inside your project. In the typical cases, you must <strong>at least</strong> specify the
 JDBC driver you are using to connect to the database, which will depend on the
-configured <em class="xref">database-backends</em></p>
+configured <a class="reference external" href="database-backends.html#database-backends"><em>Database Backends</em></a></p>
 <p>You may also specify more files to include, separating the paths by the special
 <strong>path separator</strong> character, which is <tt class="docutils literal"><span class="pre">&quot;:&quot;</span></tt> in Unix based platforms and
 <tt class="docutils literal"><span class="pre">&quot;;&quot;</span></tt> on Windows platforms.</p>
 <p>For example, if you are the iText library inside your Django project you should
 specify something like the following when constructing the war file:</p>
-<div class="highlight-python"><pre>$ jython25 manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar:/usr/share/java/iText-2.1.3.jar</pre>
+<div class="highlight-python"><pre>$ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar:/usr/share/java/iText-2.1.3.jar</pre>
 </div>
 <p>By the way, <em>the generated WAR file is created on the parent directory of your
 project directory</em>, in order to avoid cluttering your project space.</p>
@@ -96,12 +96,12 @@ any other python dependency of your project</em>, like for example PyAMF.</p>
 <p>So, in case you have a dependency on a Python library (not included on the
 standard library of course), you have to specify it with the
 <tt class="docutils literal"><span class="pre">--include-py-packages</span></tt> option, as the following example:</p>
-<div class="highlight-python"><pre>$ jython25 manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar --include-py-packages=$HOME/jython25/Lib/site-packages/pyamf</pre>
+<div class="highlight-python"><pre>$ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar --include-py-packages=$HOME/jython/Lib/site-packages/pyamf</pre>
 </div>
 <p>Egg or zip files are also supported, as well as directories meant: to be &#8220;path
 entries&#8221; (i.e, a directory _containing_ packages). For these cases, use the
 <tt class="docutils literal"><span class="pre">--include-py-path-entries</span></tt> option:</p>
-<div class="highlight-python"><pre>$ jython25 manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar --include-py-path-entries=$HOME/eggs/PyAMF-0.3.1-py2.5.egg</pre>
+<div class="highlight-python"><pre>$ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar --include-py-path-entries=$HOME/eggs/PyAMF-0.3.1-py2.5.egg</pre>
 </div>
 <p>As with <tt class="docutils literal"><span class="pre">--include-java-libs</span></tt>, multiple entries and/or packages can be
 specified, by separating them with the <strong>path separator</strong> character of your

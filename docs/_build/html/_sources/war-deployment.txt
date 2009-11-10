@@ -4,7 +4,7 @@ Creating a WAR Archive for Deployment
 django-jython includes a "war" management command so you can go to your project
 directory and type something like this::
 
-    lsoto@spirit:~/src/mysite$ jython25 manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar
+    lsoto@spirit:~/src/mysite$ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar
 
 And get a single ``mysite.war`` file which you can deploy in your preferred application server. *This file doesn't require anything special installed on the target server*. No Django, no Jython, no nothing.
 
@@ -28,7 +28,7 @@ The first step is to add ``'doj'`` to the list of ``INSTALLED_APPS`` on your
 
 Then, the most typical usage is the one already exemplified::
 
-  $ jython25 manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar
+  $ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar
 
 Here, you tell the war command that it should include an extra java library to
 the generated WAR file, because it can't know which java libraries are you using
@@ -43,7 +43,7 @@ You may also specify more files to include, separating the paths by the special
 For example, if you are the iText library inside your Django project you should
 specify something like the following when constructing the war file::
 
-  $ jython25 manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar:/usr/share/java/iText-2.1.3.jar 
+  $ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar:/usr/share/java/iText-2.1.3.jar 
 
 By the way, *the generated WAR file is created on the parent directory of your
 project directory*, in order to avoid cluttering your project space.
@@ -60,14 +60,14 @@ So, in case you have a dependency on a Python library (not included on the
 standard library of course), you have to specify it with the
 ``--include-py-packages`` option, as the following example::
 
-  $ jython25 manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar --include-py-packages=$HOME/jython25/Lib/site-packages/pyamf
+  $ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar --include-py-packages=$HOME/jython/Lib/site-packages/pyamf
 
 
 Egg or zip files are also supported, as well as directories meant: to be "path
 entries" (i.e, a directory _containing_ packages). For these cases, use the
 ``--include-py-path-entries`` option::
 
-  $ jython25 manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar --include-py-path-entries=$HOME/eggs/PyAMF-0.3.1-py2.5.egg
+  $ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar --include-py-path-entries=$HOME/eggs/PyAMF-0.3.1-py2.5.egg
 
 As with ``--include-java-libs``, multiple entries and/or packages can be
 specified, by separating them with the **path separator** character of your
