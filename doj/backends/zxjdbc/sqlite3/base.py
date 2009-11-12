@@ -103,18 +103,18 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
         self.features = DatabaseFeatures()
         self.ops = DatabaseOperations()
-        self.client = DatabaseClient()
+        self.client = DatabaseClient(self)
         self.creation = DatabaseCreation(self)
         self.introspection = DatabaseIntrospection(self)
         self.validation = BaseDatabaseValidation()
 
-    def _cursor(self, settings):
+    def _cursor(self,):
         if self.connection is None:
             from java.sql import DriverManager
             # For some reason, Class.forName('org.sqlite.JDBC') doesn't work, but
             # this does:
             from org.sqlite import JDBC
-            conn_string = "jdbc:sqlite:%s" % settings.DATABASE_NAME
+            conn_string = "jdbc:sqlite:%s" % self.settings_dict['DATABASE_NAME']
             self.connection = Database.connect(
                 DriverManager.getConnection(conn_string))
             # set_default_isolation_level(self.connection)
@@ -132,7 +132,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         # If database is in memory, closing the connection destroys the
         # database. To prevent accidental data loss, ignore close requests on
         # an in-memory db.
-        if settings.DATABASE_NAME != ":memory:":
+        if self.settings_dict['DATABASE_NAME'] != ":memory:":
             BaseDatabaseWrapper.close(self)
 
 CursorWrapper = zxJDBCCursorWrapper
