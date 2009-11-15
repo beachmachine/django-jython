@@ -17,7 +17,6 @@ from doj.backends.zxjdbc.common import zxJDBCOperationsMixin, zxJDBCFeaturesMixi
 from doj.backends.zxjdbc.common import zxJDBCCursorWrapper, set_default_isolation_level
 from com.ziclix.python.sql.handler import PostgresqlDataHandler
 from UserDict import DictMixin
-import django
 
 DatabaseError = Database.DatabaseError
 IntegrityError = Database.IntegrityError
@@ -64,26 +63,13 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
         self.features = DatabaseFeatures()
         self.ops = DatabaseOperations()
-        if django.VERSION < (1, 1):
-            # Compatibility with 1.0 ORM API
-            self.client = DatabaseClient()
-        else:
-            self.client = DatabaseClient(self)
+        self.client = DatabaseClient(self)
         self.creation = DatabaseCreation(self)
         self.introspection = DatabaseIntrospection(self)
         self.validation = BaseDatabaseValidation()
 
-    def _cursor(self, *args):
-        if django.VERSION < (1, 1):
-            # Compatibility with 1.0 ORM API
-            settings, = args
-            settings_dict = SettingsModuleAsDict(settings)
-            settings_dict['DATABASE_OPTIONS'] = self.options
-        else:
-            settings_dict = self.settings_dict
-        return self._cursor_from_settings_dict(settings_dict)
-
-    def _cursor_from_settings_dict(self, settings_dict):
+    def _cursor(self):
+        settings_dict = self.settings_dict
         if self.connection is None:
             if settings_dict['DATABASE_NAME'] == '':
                 from django.core.exceptions import ImproperlyConfigured
