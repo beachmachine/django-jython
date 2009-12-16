@@ -11,7 +11,7 @@ Changes
 
 Changes from the 1.0.0 release:
 
- - MySQL and Oracle backends work with Django 1.1.x
+ - All database backends now work with Django 1.1.x
  - Django 1.0.x support removed
 
 Django compatibility
