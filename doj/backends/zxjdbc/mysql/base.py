@@ -150,25 +150,26 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
         self.features = DatabaseFeatures()
         self.ops = DatabaseOperations()
-        self.client = DatabaseClient()
+        self.client = DatabaseClient(self)
         self.creation = DatabaseCreation(self)
         self.introspection = DatabaseIntrospection(self)
         self.validation = BaseDatabaseValidation()
 
-    def _cursor(self, settings):
+    def _cursor(self):
+        settings_dict = self.settings_dict
         if self.connection is None:
-            if settings.DATABASE_NAME == '':
+            if settings_dict['DATABASE_NAME'] == '':
                 from django.core.exceptions import ImproperlyConfigured
                 raise ImproperlyConfigured("You need to specify DATABASE_NAME in your Django settings file.")
-            host = settings.DATABASE_HOST or 'localhost'
-            port = settings.DATABASE_PORT and (':%s' % settings.DATABASE_PORT) or ''
+            host = settings_dict['DATABASE_HOST'] or 'localhost'
+            port = settings_dict['DATABASE_PORT'] and (':%s' % settings_dict['DATABASE_PORT']) or ''
             conn_string = "jdbc:mysql://%s%s/%s" % (host, port,
-                                                         settings.DATABASE_NAME)
+                                                         settings_dict['DATABASE_NAME'])
             self.connection = Database.connect(conn_string,
-                                               settings.DATABASE_USER,
-                                               settings.DATABASE_PASSWORD,
+                                               settings_dict['DATABASE_USER'],
+                                               settings_dict['DATABASE_PASSWORD'],
                                                'com.mysql.jdbc.Driver',
-                                               **self.options)
+                                               **settings_dict['DATABASE_OPTIONS'])
             # make transactions transparent to all cursors
             set_default_isolation_level(self.connection)
         real_cursor = self.connection.cursor()
