@@ -4,7 +4,7 @@ Release Notes
 1.1.0
 -----
 
-Released on ???
+Released on 2009-12-15
 
 Changes
 ~~~~~~~
