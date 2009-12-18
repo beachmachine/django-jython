@@ -23,7 +23,8 @@ DatabaseError = Database.DatabaseError
 IntegrityError = Database.IntegrityError
 
 class DatabaseFeatures(zxJDBCFeaturesMixin, BaseDatabaseFeatures):
-    pass
+    update_can_self_select = False
+    related_fields_match_type = True
 
 class MysqlDatabaseOperations(BaseDatabaseOperations):
     def date_extract_sql(self, lookup_type, field_name):
