@@ -1,6 +1,33 @@
 Release Notes
 =============
 
+1.1.1
+-----
+
+Released on ???
+
+Changes
+~~~~~~~
+
+Changes from the 1.1.0 release:
+
+ - MySQL backend: Fixed problem with model inheritance with a concrete base. 
+
+Django Compatbility
+~~~~~~~~~~~~~~~~~~~
+
+This version has been tested against Django 1.1.1 and will work with any future
+micro release of the 1.1.x branch.
+
+Note that Django 1.0.x is *NOT* supported by this release. If you need support
+for Django 1.0.x, use django-jython 1.0.
+
+Jython compatibility
+~~~~~~~~~~~~~~~~~~~~
+
+The release has been tested on Jython 2.5.1. However, it should work on any
+Jython 2.5.x release (including 2.5.0)
+
 1.1.0
 -----
 
