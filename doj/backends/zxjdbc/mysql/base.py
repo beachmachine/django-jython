@@ -7,16 +7,15 @@ except ImportError, e:
     from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured("Error loading zxJDBC module: %s" % e)
 
-from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseValidation
+from django.db.backends import BaseDatabaseFeatures, BaseDatabaseValidation
 from django.db.backends import BaseDatabaseOperations
-#from django.db.backends.mysql.base import DatabaseOperations as MysqlDatabaseOperations
 from django.db.backends.mysql.client import DatabaseClient
-#from django.db.backends.mysql.introspection import DatabaseIntrospection
 from doj.backends.zxjdbc.mysql.creation import DatabaseCreation
 
 from doj.backends.zxjdbc.mysql.introspection import DatabaseIntrospection
-from doj.backends.zxjdbc.common import zxJDBCOperationsMixin, zxJDBCFeaturesMixin
-from doj.backends.zxjdbc.common import zxJDBCCursorWrapper, set_default_isolation_level
+from doj.backends.zxjdbc.common import (
+    zxJDBCDatabaseWrapper, zxJDBCOperationsMixin, zxJDBCFeaturesMixin, 
+    zxJDBCCursorWrapper, set_default_isolation_level)
 from com.ziclix.python.sql.handler import MySQLDataHandler
 
 DatabaseError = Database.DatabaseError
@@ -126,8 +125,10 @@ class DatabaseOperations(zxJDBCOperationsMixin, MysqlDatabaseOperations):
     pass # The mixin contains all what is needed
 
 
-class DatabaseWrapper(BaseDatabaseWrapper):
-
+class DatabaseWrapper(zxJDBCDatabaseWrapper):
+    driver_class_name = "com.mysql.jdbc.Driver"
+    jdbc_url_pattern = \
+        "jdbc:mysql://%(DATABASE_HOST)s%(DATABASE_PORT)s/%(DATABASE_NAME)s"
     operators = {
         'exact': '= %s',
         'iexact': 'LIKE %s',
@@ -145,7 +146,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         'iendswith': 'LIKE %s',
     }
 
-
     def __init__(self, *args, **kwargs):
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
 
@@ -157,20 +157,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.validation = BaseDatabaseValidation()
 
     def _cursor(self):
-        settings_dict = self.settings_dict
         if self.connection is None:
-            if settings_dict['DATABASE_NAME'] == '':
-                from django.core.exceptions import ImproperlyConfigured
-                raise ImproperlyConfigured("You need to specify DATABASE_NAME in your Django settings file.")
-            host = settings_dict['DATABASE_HOST'] or 'localhost'
-            port = settings_dict['DATABASE_PORT'] and (':%s' % settings_dict['DATABASE_PORT']) or ''
-            conn_string = "jdbc:mysql://%s%s/%s" % (host, port,
-                                                         settings_dict['DATABASE_NAME'])
-            self.connection = Database.connect(conn_string,
-                                               settings_dict['DATABASE_USER'],
-                                               settings_dict['DATABASE_PASSWORD'],
-                                               'com.mysql.jdbc.Driver',
-                                               **settings_dict['DATABASE_OPTIONS'])
+            self.connection = self.new_connection()
             # make transactions transparent to all cursors
             set_default_isolation_level(self.connection)
         real_cursor = self.connection.cursor()

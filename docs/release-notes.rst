@@ -11,6 +11,8 @@ Changes
 
 Changes from the 1.1.0 release:
 
+ - JNDI support added to all database backends, to leverage connection pools
+   offered by Java application servers and servlet containers.
  - MySQL backend: Fixed problem with model inheritance with a concrete base. 
 
 Django Compatbility

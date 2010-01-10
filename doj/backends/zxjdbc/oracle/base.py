@@ -16,7 +16,8 @@ from django.db.backends.oracle.creation import DatabaseCreation
 from doj.backends.zxjdbc.oracle.introspection import DatabaseIntrospection
 from django.utils.encoding import smart_str
 
-from doj.backends.zxjdbc.common import zxJDBCOperationsMixin, zxJDBCFeaturesMixin
+from doj.backends.zxjdbc.common import (
+    zxJDBCDatabaseWrapper, zxJDBCOperationsMixin, zxJDBCFeaturesMixin)
 from doj.backends.zxjdbc.oracle.zxJDBCCursorWrapperOracle import zxJDBCCursorWrapperOracle
 from UserDict import DictMixin
 import django
@@ -210,20 +211,11 @@ class DatabaseOperations(zxJDBCOperationsMixin, BaseDatabaseOperations):
         second = '%s-12-31'
         return [first % value, second % value]
 
-class SettingsModuleAsDict(DictMixin):
-    def __init__(self, module):
-        self.module = module
-    def __getitem__(self, name):
-        return getattr(self.module, name)
-    def __setitem__(self, name, value):
-        setattr(self.module, name, value)
-    def __delitem__(self, name):
-        self.module.__delattr__(name)
-    def keys(self):
-        return dir(self.module)
-
-class DatabaseWrapper(BaseDatabaseWrapper):
-
+class DatabaseWrapper(zxJDBCDatabaseWrapper):
+    default_port = 1521
+    driver_class_name = "oracle.jdbc.OracleDriver"
+    jdbc_url_pattern = \
+        "jdbc:oracle:thin:@%(DATABASE_HOST)s%(DATABASE_PORT)s:%(DATABASE_NAME)s"
     operators = {
         'exact': '= %s',
         'iexact': '= UPPER(%s)',
@@ -253,48 +245,24 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     def _valid_connection(self):
         return self.connection is not None
 
-    def _cursor(self, *args):
-        settings_dict = self.settings_dict
-        return self._cursor_from_settings_dict(settings_dict)
-        
-    def _cursor_from_settings_dict(self, settings_dict):    
-        cursor = None
+    def _cursor(self):
         if self.connection is None:
-            #  Configure and connect to database using zxJDBC
-            if settings_dict['DATABASE_NAME'] == '':
-                from django.core.exceptions import ImproperlyConfigured
-                raise ImproperlyConfigured("You need to specify DATABASE_NAME in your Django settings file.")
-            host = settings_dict['DATABASE_HOST'] or 'localhost'
-            port = (settings_dict['DATABASE_PORT'] 
-                    and (':%s' % settings_dict['DATABASE_PORT'])
-                    or '')
-            conn_string = "jdbc:oracle:thin:@%s%s:%s" % (host, port,
-                                                         settings_dict['DATABASE_NAME'])
-            self.connection = Database.connect(
-                    conn_string,
-                    settings_dict['DATABASE_USER'],
-                    settings_dict['DATABASE_PASSWORD'],
-                    "oracle.jdbc.OracleDriver",
-                    **settings_dict['DATABASE_OPTIONS'])
+            self.connection = self.new_connection()
             # make transactions transparent to all cursors
             cursor = CursorWrapper(self.connection.cursor())
             # Set oracle date to ansi date format.  This only needs to execute
             # once when we create a new connection.
             cursor.execute("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD' "
                            "NLS_TIMESTAMP_FORMAT = 'YYYY-MM-DD HH24:MI:SS.FF'")
-
             try:
                 self.connection.stmtcachesize = 20
             except:
                 pass
-        if not cursor:
+        else:
             cursor = CursorWrapper(self.connection.cursor())
         return cursor
 
-
-
 CursorWrapper = zxJDBCCursorWrapperOracle
-
 
 def _get_sequence_reset_sql():
     # TODO: colorize this SQL code with style.SQL_KEYWORD(), etc.

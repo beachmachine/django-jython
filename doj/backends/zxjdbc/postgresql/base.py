@@ -7,14 +7,16 @@ except ImportError, e:
     from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured("Error loading zxJDBC module: %s" % e)
 
-from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseValidation
+from django.db.backends import BaseDatabaseFeatures, BaseDatabaseValidation
 from django.db.backends.postgresql.operations import DatabaseOperations as PostgresqlDatabaseOperations
 from django.db.backends.postgresql.client import DatabaseClient
 from django.db.backends.postgresql.introspection import DatabaseIntrospection
 from doj.backends.zxjdbc.postgresql.creation import DatabaseCreation
 
-from doj.backends.zxjdbc.common import zxJDBCOperationsMixin, zxJDBCFeaturesMixin
-from doj.backends.zxjdbc.common import zxJDBCCursorWrapper, set_default_isolation_level
+from doj.backends.zxjdbc.common import (
+    zxJDBCDatabaseWrapper, zxJDBCOperationsMixin, zxJDBCFeaturesMixin, 
+    zxJDBCCursorWrapper, set_default_isolation_level)
+
 from com.ziclix.python.sql.handler import PostgresqlDataHandler
 from UserDict import DictMixin
 
@@ -40,7 +42,10 @@ class SettingsModuleAsDict(DictMixin):
     def keys(self):
         return dir(self.module)
 
-class DatabaseWrapper(BaseDatabaseWrapper):
+class DatabaseWrapper(zxJDBCDatabaseWrapper):
+    driver_class_name = "org.postgresql.Driver"
+    jdbc_url_pattern = \
+        "jdbc:postgresql://%(DATABASE_HOST)s%(DATABASE_PORT)s/%(DATABASE_NAME)s"
     operators = {
         'exact': '= %s',
         'iexact': 'ILIKE %s',
@@ -69,23 +74,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.validation = BaseDatabaseValidation()
 
     def _cursor(self):
-        settings_dict = self.settings_dict
         if self.connection is None:
-            if settings_dict['DATABASE_NAME'] == '':
-                from django.core.exceptions import ImproperlyConfigured
-                raise ImproperlyConfigured("You need to specify DATABASE_NAME in your Django settings file.")
-            host = settings_dict['DATABASE_HOST'] or 'localhost'
-            port = (settings_dict['DATABASE_PORT'] 
-                    and (':%s' % settings_dict['DATABASE_PORT'])
-                    or '')
-            conn_string = "jdbc:postgresql://%s%s/%s" % (
-                    host, port, settings_dict['DATABASE_NAME'])
-            self.connection = Database.connect(
-                    conn_string,
-                    settings_dict['DATABASE_USER'],
-                    settings_dict['DATABASE_PASSWORD'],
-                    'org.postgresql.Driver',
-                    **settings_dict['DATABASE_OPTIONS'])
+            self.connection = self.new_connection()
             # make transactions transparent to all cursors
             set_default_isolation_level(self.connection)
         real_cursor = self.connection.cursor()

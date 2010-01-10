@@ -1,5 +1,70 @@
+# -*- coding: utf-8 -*-
 import datetime
 from java.sql import Connection
+from com.ziclix.python.sql import zxJDBC
+from django.db.backends import BaseDatabaseWrapper
+
+class zxJDBCDatabaseWrapper(BaseDatabaseWrapper):
+    default_host = 'localhost'
+    default_port = ''
+    driver_class_name = None # Must be overriden
+    jdbc_url_pattern = None # Must be overriden
+
+    def __init__(self, *args, **kwargs):
+        super(zxJDBCDatabaseWrapper, self).__init__(*args, **kwargs)
+
+    def jdbc_url(self):
+        return self.jdbc_url_pattern % self.settings_dict_postprocesed()
+
+    def settings_dict_postprocesed(self):
+        settings_dict = self.settings_dict.copy() # Avoid messing with the
+                                                  # original settings
+        host, port = settings_dict['DATABASE_HOST'], settings_dict['DATABASE_PORT']
+        if not host:
+            settings_dict['DATABASE_HOST'] = self.default_host
+        if port:
+            settings_dict['DATABASE_PORT'] = ":%s" % port
+        elif self.default_port:
+            settings_dict['DATABASE_PORT'] = ":%s" % self.default_port
+        return settings_dict
+
+    def new_connection(self):
+        connection = self.new_jndi_connection()
+        if not connection:
+            settings_dict = self.settings_dict
+            if settings_dict['DATABASE_NAME'] == '':
+                from django.core.exceptions import ImproperlyConfigured
+                raise ImproperlyConfigured(
+                    "You need to specify DATABASE_NAME in your Django settings file.")
+            connection = zxJDBC.connect(self.jdbc_url(),
+                                        settings_dict['DATABASE_USER'],
+                                        settings_dict['DATABASE_PASSWORD'],
+                                        self.driver_class_name,
+                                        **settings_dict['DATABASE_OPTIONS'])
+        return connection
+    
+    def new_jndi_connection(self):
+        """
+        Returns a zxJDBC Connection object obtained from a JNDI data source if
+        the settings dictionary contains the JNDI_NAME entry on the
+        DATABASE_OPTIONS dictionary, or None if it doesn't.
+        """
+        settings_dict = self.settings_dict
+        if 'DATABASE_OPTIONS' not in settings_dict: 
+            return None
+        if 'JNDI_NAME' not in settings_dict['DATABASE_OPTIONS']: 
+            return None
+
+        name = settings_dict['DATABASE_OPTIONS']['JNDI_NAME']
+        props = settings_dict['DATABASE_OPTIONS'].get('JNDI_CONTEXT_OPTIONS', {})
+        # Default the JNDI endpoint to a Glassfish instance
+        # running on localhost
+        #     jndi_endpoint = settings_dict['DATABASE_OPTIONS'].get('JNDI_ENDPOINT', 'localhost:3700')
+        #     jndi_ctx_factory = settings_dict['DATABASE_OPTIONS'].get('JNDI_INITIAL_CONTEXT_FACTORY', 'localhost:3700')
+        #     props = {'com.sun.appserv.iiop.endpoints':jndi_endpoint,
+#              Context.INITIAL_CONTEXT_FACTORY:jndi_ctx_factory}
+        return zxJDBC.lookup(name, keywords=props)
+
 
 class zxJDBCOperationsMixin(object):
     # zxJDBC supports dates, times, datetimes and decimal directly
@@ -50,4 +115,5 @@ class zxJDBCCursorWrapper(object):
 def set_default_isolation_level(connection):
     jdbc_conn = connection.__connection__
     jdbc_conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED)
+
 

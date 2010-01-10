@@ -21,10 +21,10 @@ except ImportError, e:
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db.backends import *
-from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseValidation
+from django.db.backends import BaseDatabaseFeatures, BaseDatabaseValidation
 from django.conf import settings
 from pool import ManualPoolingDriver
-
+from doj.backends.zxjdbc.common import zxJDBCDatabaseWrapper
 from operations import DatabaseOperations
 from introspection import DatabaseIntrospection
 from creation import DatabaseCreation
@@ -42,7 +42,9 @@ class DatabaseClient(BaseDatabaseClient):
     runshell = complain
     
 
-class DatabaseWrapper(BaseDatabaseWrapper):    
+class DatabaseWrapper(zxJDBCDatabaseWrapper):    
+    jdbc_url_pattern = "jdbc:jtds:sqlserver://%(DATABASE_HOST)s%(DATABASE_PORT)s/%(DATABASE_NAME)s"
+    driver_class_name = "net.sourceforge.jtds.jdbc.Driver"
     operators = {
         # Since '=' is used not only for string comparision there is no way
         # to make it case (in)sensitive. It will simply fallback to the
@@ -90,16 +92,17 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         '''
         new_conn = False
         if self.connection is None:
+            # TODO: Refactor this DBCP pool setup to zxJDBCCursorWrapper
             new_conn = True
-
-            pool_name = self._register_driver()
-
-            if not settings.DATABASE_NAME:
-                from django.core.exceptions import ImproperlyConfigured
-                raise ImproperlyConfigured("You need to specify DATABASE_NAME in your Django settings file.")
-
-            url='jdbc:apache:commons:dbcp:%s' % pool_name
-            self.connection = Database.connect(url, None, None, 'org.apache.commons.dbcp.PoolingDriver')
+            self.connection = self.new_jndi_connection()
+            if self.connection is None:
+                pool_name = self._register_driver()
+                if not settings.DATABASE_NAME:
+                    from django.core.exceptions import ImproperlyConfigured
+                    raise ImproperlyConfigured("You need to specify DATABASE_NAME in your Django settings file.")
+    
+                url='jdbc:apache:commons:dbcp:%s' % pool_name
+                self.connection = Database.connect(url, None, None, 'org.apache.commons.dbcp.PoolingDriver')
 
         cursor = self.connection.cursor()
         if new_conn:

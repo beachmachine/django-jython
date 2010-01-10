@@ -2,7 +2,7 @@
 SQLite3 backend for Django/Jython.
 """
 
-from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures
+from django.db.backends import BaseDatabaseFeatures
 from django.db.backends import BaseDatabaseOperations, BaseDatabaseValidation, util
 from django.db.backends.sqlite3.client import DatabaseClient
 from django.db.backends.sqlite3.creation import DatabaseCreation
@@ -22,8 +22,9 @@ except ImportError, e:
     raise ImproperlyConfigured("Error loading SQLite3 JDBC driver: %s" % e)
 
 
-from doj.backends.zxjdbc.common import zxJDBCOperationsMixin, zxJDBCFeaturesMixin
-from doj.backends.zxjdbc.common import zxJDBCCursorWrapper
+from doj.backends.zxjdbc.common import (
+    zxJDBCDatabaseWrapper, zxJDBCOperationsMixin, zxJDBCFeaturesMixin, 
+    zxJDBCCursorWrapper)
 from org.sqlite import Function
 
 DatabaseError = Database.DatabaseError
@@ -76,8 +77,11 @@ class DatabaseOperations(zxJDBCOperationsMixin, BaseDatabaseOperations):
         # sql_flush() implementations). Just return SQL at this point
         return sql
 
-# With the exception of _cursor, also copied from the sqlite3 backend
-class DatabaseWrapper(BaseDatabaseWrapper):
+# With the exception of _cursor and zxJDBCDatabaseWrapper properties, also
+# copied from the sqlite3 backend:
+class DatabaseWrapper(zxJDBCDatabaseWrapper):
+    driver_class_name = 'org.sqlite.JDBC'
+    jdbc_url_pattern = "jdbc:sqlite:%(DATABASE_NAME)s"
     # SQLite requires LIKE statements to include an ESCAPE clause if the value
     # being escaped has a percent or underscore in it.
     # See http://www.sqlite.org/lang_expr.html for an explanation.
@@ -108,16 +112,10 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.introspection = DatabaseIntrospection(self)
         self.validation = BaseDatabaseValidation()
 
-    def _cursor(self,):
+    def _cursor(self):
         if self.connection is None:
-            from java.sql import DriverManager
-            # For some reason, Class.forName('org.sqlite.JDBC') doesn't work, but
-            # this does:
-            from org.sqlite import JDBC
-            conn_string = "jdbc:sqlite:%s" % self.settings_dict['DATABASE_NAME']
-            self.connection = Database.connect(
-                DriverManager.getConnection(conn_string))
-            # set_default_isolation_level(self.connection)
+            self.connection = self.new_connection()
+            # set_default_isolation_level(self.connection) not working :(
             # Register extract, date_trunc, and regexp functions.
             _create_function(self.connection.__connection__,
                              "django_extract", 2, _sqlite_extract)
