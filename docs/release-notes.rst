@@ -14,6 +14,15 @@ Changes from the 1.1.0 release:
  - JNDI support added to all database backends, to leverage connection pools
    offered by Java application servers and servlet containers.
  - MySQL backend: Fixed problem with model inheritance with a concrete base. 
+ - War deployment command: 
+   - New ``--shared-war`` option to not bundle Django, Jython and django-jython
+     in the WAR file, for enviroments in which those libraries are configured at
+     the application server level and shared among all the web applications
+     (thanks to John Sonnenschein for the contribution)
+   - Fixed problem when ADMIN_MEDIA_PREFIX conflicts with MEDIA_URL but the
+     admin app is not being used (issue 22)
+
+
 
 Django Compatbility
 ~~~~~~~~~~~~~~~~~~~

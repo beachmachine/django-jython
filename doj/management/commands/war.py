@@ -34,7 +34,15 @@ class Command(BaseCommand):
                          'unspecified, the project name is used. The context '
                           'root name is used as the name of the WAR file, and '
                           'as a prefix for some url-related settings, such as '
-                          'MEDIA_URL')
+                          'MEDIA_URL'),
+        make_option('--shared-war', action='store_true', dest='shared_war',
+                    help='Do not include Jython, it\'s libraries, django-jython,'
+                         'or Django. Useful for deployment of multiple django '
+                         'projects on a single app server. Note that your '
+                         'application server must be configured to correctly '
+                         'find jython.jar, django-jython, and the Jython and '
+                         'Django libs. ')
+
     )
     help = ("Builds a WAR file for stand-alone deployment on a Java "
             "Servlet container")
@@ -59,13 +67,18 @@ class Command(BaseCommand):
                             ['WEB-INF/web.xml', 'application.py'],
                             {'project_name': project_name,
                              'settings': settings})
-        self.copy_jython(exploded_war_dir)
-        self.copy_django(exploded_war_dir)
+        if not options['shared_war']:
+            self.copy_jython(exploded_war_dir)
+            self.copy_django(exploded_war_dir)
         self.copy_project(exploded_war_dir)
         self.fix_project_settings(exploded_war_dir, context_root)
         self.copy_project_media(exploded_war_dir)
         self.copy_admin_media(exploded_war_dir)
-        self.copy_apps(exploded_war_dir)
+        if not options['shared_war']:
+            self.copy_apps(exploded_war_dir, settings.INSTALLED_APPS)
+        else:
+            self.copy_apps(exploded_war_dir, 
+                           [app for app in settings.INSTALLED_APPS if app != "doj"])
         if options['include_java_libs']:
             for java_lib in options['include_java_libs'].split(os.path.pathsep):
                 self.copy_java_jar(exploded_war_dir, java_lib)
@@ -210,9 +223,9 @@ deployed settings file. You can append the following block at the end of the fil
                         settings.MEDIA_ROOT,
                         os.path.join(*settings.MEDIA_URL.split('/')))
 
-    def copy_apps(self, exploded_war_dir):
+    def copy_apps(self, exploded_war_dir, apps):
         already_included_pkgs = ['django', self.project_name()]
-        for app in settings.INSTALLED_APPS:
+        for app in apps:
             # We copy the whole package in which the app resides
             app_pkg = __import__(app)
             if app_pkg.__name__ in already_included_pkgs:
