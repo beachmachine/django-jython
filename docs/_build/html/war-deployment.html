@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Creating a WAR Archive for Deployment &mdash; Django-Jython v1.0 documentation</title>
+    <title>Creating a WAR Archive for Deployment &mdash; Django-Jython v1.1.1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '1.0',
+        VERSION:     '1.1.1',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Django-Jython v1.0 documentation" href="index.html" />
+    <link rel="top" title="Django-Jython v1.1.1 documentation" href="index.html" />
     <link rel="next" title="JUnit XML Test Runner" href="xml-test-runner.html" />
     <link rel="prev" title="Database Backends" href="database-backends.html" /> 
   </head>
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="database-backends.html" title="Database Backends"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Django-Jython v1.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Django-Jython v1.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -107,6 +107,23 @@ entries&#8221; (i.e, a directory _containing_ packages). For these cases, use th
 specified, by separating them with the <strong>path separator</strong> character of your
 platform (<tt class="docutils literal"><span class="pre">&quot;:&quot;</span></tt> in Unix-based systems and <tt class="docutils literal"><span class="pre">&quot;;&quot;</span></tt> in Windows).</p>
 <p>All <tt class="docutils literal"><span class="pre">--include-*</span></tt> options  can be mixed freely.</p>
+</div>
+<div class="section" id="excluding-jython-and-django">
+<h2>Excluding Jython and Django<a class="headerlink" href="#excluding-jython-and-django" title="Permalink to this headline">¶</a></h2>
+<p>In some cases you may wish to reduce the size of the resulting .war file in
+order to speed deployment and deploy multiple projects using a shared copy of
+Jython, django-jython, and the Django libraries. In this case, you would use the
+<tt class="docutils literal"><span class="pre">--shared-war</span></tt> option with the war command:</p>
+<div class="highlight-python"><pre>$ jython manage.py war --shared-war</pre>
+</div>
+<p>This presupposes your JavaEE container is configured such that it can find
+jython.jar, django-jython and the Django libraries. This may involve adding a
+python.path property to your JVM settings, pointing it to the location of
+django-jython and Django, and adding the Jython JAR file to the global CLASSPATH
+of your JavaEE container. If you are using Glassfish, you need to add the JAR
+file to the <tt class="docutils literal"><span class="pre">$DOMAINDIR/lib/ext</span></tt> directory or adding the location to the
+<tt class="docutils literal"><span class="pre">Libraries</span></tt> deployment option. If you are using Tomcat you would add the JAR
+to <tt class="docutils literal"><span class="pre">$CATALINA_HOME/shared/lib</span></tt>.</p>
 </div>
 <div class="section" id="media-files-and-the-context-root-name">
 <h2>Media Files and the Context Root Name<a class="headerlink" href="#media-files-and-the-context-root-name" title="Permalink to this headline">¶</a></h2>
@@ -181,6 +198,7 @@ Now you can copy /Users/lsoto/src/jython-book/src/chapter14/tour/pollsite.war to
 <li><a class="reference external" href="">Creating a WAR Archive for Deployment</a><ul>
 <li><a class="reference external" href="#usage">Usage</a></li>
 <li><a class="reference external" href="#including-extra-python-libraries">Including Extra Python libraries</a></li>
+<li><a class="reference external" href="#excluding-jython-and-django">Excluding Jython and Django</a></li>
 <li><a class="reference external" href="#media-files-and-the-context-root-name">Media Files and the Context Root Name</a></li>
 <li><a class="reference external" href="#sample-output">Sample Output</a></li>
 </ul>
@@ -227,7 +245,7 @@ Now you can copy /Users/lsoto/src/jython-book/src/chapter14/tour/pollsite.war to
         <li class="right" >
           <a href="database-backends.html" title="Database Backends"
              >previous</a> |</li>
-        <li><a href="index.html">Django-Jython v1.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Django-Jython v1.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

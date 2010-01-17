@@ -4,7 +4,7 @@ Release Notes
 1.1.1
 -----
 
-Released on ???
+Released on January 17, 2010.
 
 Changes
 ~~~~~~~
@@ -15,6 +15,7 @@ Changes from the 1.1.0 release:
    offered by Java application servers and servlet containers.
  - MySQL backend: Fixed problem with model inheritance with a concrete base. 
  - War deployment command: 
+
    - New ``--shared-war`` option to not bundle Django, Jython and django-jython
      in the WAR file, for enviroments in which those libraries are configured at
      the application server level and shared among all the web applications
@@ -42,7 +43,7 @@ Jython 2.5.x release (including 2.5.0)
 1.1.0
 -----
 
-Released on 2009-12-15
+Released on December 15, 2009.
 
 Changes
 ~~~~~~~

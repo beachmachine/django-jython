@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Database Backends &mdash; Django-Jython v1.0 documentation</title>
+    <title>Database Backends &mdash; Django-Jython v1.1.1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '1.0',
+        VERSION:     '1.1.1',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Django-Jython v1.0 documentation" href="index.html" />
+    <link rel="top" title="Django-Jython v1.1.1 documentation" href="index.html" />
     <link rel="next" title="Creating a WAR Archive for Deployment" href="war-deployment.html" />
     <link rel="prev" title="QuickStart" href="quickstart.html" /> 
   </head>
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="quickstart.html" title="QuickStart"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Django-Jython v1.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Django-Jython v1.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -108,6 +108,84 @@ on Windows XP SP3. To use it set the following in your Django project settings:<
 attribute, and URLField is not able to verify that a server returned a 404
 error.</p>
 </div>
+<div class="section" id="jndi-support">
+<h2>JNDI Support<a class="headerlink" href="#jndi-support" title="Permalink to this headline">¶</a></h2>
+<p>All the backends documented on the previous sections support JNDI lookups to
+leverage connection pools provided by Java application servers. To use JNDI,
+simply add the following line to the project&#8217;s <tt class="docutils literal"><span class="pre">settings.py</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">DATABASE_OPTIONS</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;JNDI_NAME&#39;</span><span class="p">:</span> <span class="s">&#39;java:comp/env/jdbc/myDataSource&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>And make sure that the datasource specified as the <tt class="docutils literal"><span class="pre">JNDI_NAME</span></tt> is defined on
+the application server in which you will deploy your application.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">When using JNDI and with the exception of <tt class="docutils literal"><span class="pre">DATABASE_BACKEND</span></tt>, all the other
+<tt class="docutils literal"><span class="pre">DATABASE_*</span></tt> options will be ignored by django-jython. For ease of
+development you may want to add the <tt class="docutils literal"><span class="pre">JNDI_NAME</span></tt> option <em>only</em> to the staging
+and production servers. After all, on most cases you won&#8217;t really need
+database connection pooling when testing on your development machine.</p>
+</div>
+<div class="section" id="specifying-additional-jndi-options">
+<h3>Specifying additional JNDI options<a class="headerlink" href="#specifying-additional-jndi-options" title="Permalink to this headline">¶</a></h3>
+<p>Additionally, you can use the <tt class="docutils literal"><span class="pre">'JNDI_CONTEXT_OPTIONS'</span></tt> entry of the
+<tt class="docutils literal"><span class="pre">DATABASE_OPTIONS</span></tt> dictionary to pass <tt class="docutils literal"><span class="pre">additional</span> <span class="pre">options</span>
+<span class="pre">&lt;http://java.sun.com/j2se/1.5.0/docs/api/javax/naming/Context.html#INITIAL_CONTEXT_FACTORY&gt;``_</span>
+<span class="pre">to</span> <span class="pre">set</span> <span class="pre">up</span> <span class="pre">the</span> <span class="pre">underlying</span> <span class="pre">JNDI</span> <span class="pre">``InitialContext</span></tt>. The options are themselves
+specified as another dictionary. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">DATABASE_OPTIONS</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s">&#39;JNDI_NAME&#39;</span><span class="p">:</span> <span class="s">&#39;java:comp/env/jdbc/your-datasource&#39;</span><span class="p">,</span>
+  <span class="s">&#39;JNDI_CONTEXT_OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s">&#39;java.naming.factory.initial&#39;</span><span class="p">:</span> <span class="s">&#39;com.sun.appserv.naming.S1ASCtxFactory&#39;</span><span class="p">,</span>
+    <span class="s">&#39;com.sun.appserv.iiop.endpoints&#39;</span><span class="p">:</span> <span class="s">&#39;localhost:3700&#39;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Note that usually you don&#8217;t need to pass additional options for JNDI to work if
+the application has been deployed on a JavaEE container (such as Tomcat,
+Glassfish, JBoss, Websphere, Weblogic, etc). We provide this setting for
+flexibility and completeness. But on most cases the configuration will looklike
+the one-liner shown on the first JNDI settings example.</p>
+</div>
+<div class="section" id="recipe-jndi-and-tomcat">
+<h3>Recipe: JNDI and Tomcat<a class="headerlink" href="#recipe-jndi-and-tomcat" title="Permalink to this headline">¶</a></h3>
+<p>To use django-jython JNDI support on top of Apache Tomcat, add the JNDI
+configuration line to your settings.py:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">DATABASE_OPTIONS</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;JNDI_NAME&#39;</span><span class="p">:</span> <span class="s">&#39;java:comp/env/jdbc/myDataSource&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Do <em>not</em> remove the other <tt class="docutils literal"><span class="pre">DATABASE_*</span></tt> settings, as they will be used by
+django-jython to help you create your JNDI configuration.</p>
+<p>Deploy your application as normal. It won&#8217;t work (raising a JNDI exception
+telling you that &#8220;the jdbc name is not bound in this Context&#8221;), but we will fix
+that now. Use the tomcat management command to get a sample context XML file to
+set up your data source:</p>
+<div class="highlight-python"><pre>$ jython manage.py tomcat jndiconfig</pre>
+</div>
+<p>You will see an output similar to this:</p>
+<div class="highlight-python"><pre>For a basic configuration of JNDI on your Tomcat server, create a file named
+pollsite.xml on /path/to/apache-tomcat-6.x.x/conf/Catalina/localhost/ with the
+following contents:
+
+&lt;Context&gt;
+  &lt;Resource name="jdbc/myDataSource"
+            auth="Container"
+            type="javax.sql.DataSource"
+            username="lsoto"
+            password="secret"
+            driverClassName="org.postgresql.Driver"
+            url="jdbc:postgresql://localhost/pollsite"
+            maxActive="8"
+            maxIdle="4"/&gt;
+&lt;/Context&gt;
+
+Do NOT forget to copy the JDBC Driver jar file to the lib/ directory of your
+Tomcat instalation</pre>
+</div>
+<p>Follow the instructions, restart Tomcat and it will be working as expected.</p>
+</div>
+</div>
 </div>
 
 
@@ -126,6 +204,11 @@ error.</p>
 <li><a class="reference external" href="#sqlite3">SQLite3</a></li>
 <li><a class="reference external" href="#oracle">Oracle</a></li>
 <li><a class="reference external" href="#mysql">MySQL</a></li>
+<li><a class="reference external" href="#jndi-support">JNDI Support</a><ul>
+<li><a class="reference external" href="#specifying-additional-jndi-options">Specifying additional JNDI options</a></li>
+<li><a class="reference external" href="#recipe-jndi-and-tomcat">Recipe: JNDI and Tomcat</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -170,7 +253,7 @@ error.</p>
         <li class="right" >
           <a href="quickstart.html" title="QuickStart"
              >previous</a> |</li>
-        <li><a href="index.html">Django-Jython v1.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Django-Jython v1.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

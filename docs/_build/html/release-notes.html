@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Release Notes &mdash; Django-Jython v1.0 documentation</title>
+    <title>Release Notes &mdash; Django-Jython v1.1.1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '1.0',
+        VERSION:     '1.1.1',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Django-Jython v1.0 documentation" href="index.html" />
+    <link rel="top" title="Django-Jython v1.1.1 documentation" href="index.html" />
     <link rel="prev" title="JUnit XML Test Runner" href="xml-test-runner.html" /> 
   </head>
   <body>
@@ -32,7 +32,7 @@
         <li class="right" >
           <a href="xml-test-runner.html" title="JUnit XML Test Runner"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Django-Jython v1.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Django-Jython v1.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -44,10 +44,46 @@
   <div class="section" id="release-notes">
 <h1>Release Notes<a class="headerlink" href="#release-notes" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2>1.1.0<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>Released on 2009-12-15</p>
+<h2>1.1.1<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>Released on January 17, 2010.</p>
 <div class="section" id="changes">
 <h3>Changes<a class="headerlink" href="#changes" title="Permalink to this headline">¶</a></h3>
+<p>Changes from the 1.1.0 release:</p>
+<blockquote>
+<ul class="simple">
+<li>JNDI support added to all database backends, to leverage connection pools
+offered by Java application servers and servlet containers.</li>
+<li>MySQL backend: Fixed problem with model inheritance with a concrete base.</li>
+<li>War deployment command:<ul>
+<li>New <tt class="docutils literal"><span class="pre">--shared-war</span></tt> option to not bundle Django, Jython and django-jython
+in the WAR file, for enviroments in which those libraries are configured at
+the application server level and shared among all the web applications
+(thanks to John Sonnenschein for the contribution)</li>
+<li>Fixed problem when ADMIN_MEDIA_PREFIX conflicts with MEDIA_URL but the
+admin app is not being used (issue 22)</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="django-compatbility">
+<h3>Django Compatbility<a class="headerlink" href="#django-compatbility" title="Permalink to this headline">¶</a></h3>
+<p>This version has been tested against Django 1.1.1 and will work with any future
+micro release of the 1.1.x branch.</p>
+<p>Note that Django 1.0.x is <em>NOT</em> supported by this release. If you need support
+for Django 1.0.x, use django-jython 1.0.</p>
+</div>
+<div class="section" id="jython-compatibility">
+<h3>Jython compatibility<a class="headerlink" href="#jython-compatibility" title="Permalink to this headline">¶</a></h3>
+<p>The release has been tested on Jython 2.5.1. However, it should work on any
+Jython 2.5.x release (including 2.5.0)</p>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>1.1.0<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>Released on December 15, 2009.</p>
+<div class="section" id="id3">
+<h3>Changes<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <p>Changes from the 1.0.0 release:</p>
 <blockquote>
 <ul class="simple">
@@ -63,17 +99,17 @@ micro release of the 1.1.x branch.</p>
 <p>Note that Django 1.0.x is <em>NOT</em> supported by this release. If you need support
 for Django 1.0.x, use django-jython 1.0.</p>
 </div>
-<div class="section" id="jython-compatibility">
-<h3>Jython compatibility<a class="headerlink" href="#jython-compatibility" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id4">
+<h3>Jython compatibility<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <p>The release has been tested on Jython 2.5.1. However, it should work on any
 Jython 2.5.x release (including 2.5.0)</p>
 </div>
 </div>
-<div class="section" id="id2">
-<h2>1.0.0<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id5">
+<h2>1.0.0<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <p>Released on November 8, 2009.</p>
-<div class="section" id="id3">
-<h3>Changes<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id6">
+<h3>Changes<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
 <p>Changes from the 1.0.0b1 release:</p>
 <blockquote>
 <ul class="simple">
@@ -88,8 +124,8 @@ belonging to the project.</li>
 </ul>
 </blockquote>
 </div>
-<div class="section" id="id4">
-<h3>Django Compatibility<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id7">
+<h3>Django Compatibility<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
 <p>This version has been tested against Django 1.0.4. It may or may not work with
 Django 1.1.1 (in particular, MySQL and Oracle database backends don&#8217;t).</p>
 <p>Users who get issues with currupted class files must apply the patch for <a class="reference external" href="http://code.djangoproject.com/ticket/11621">Django
@@ -97,8 +133,8 @@ bug #11621</a>.</p>
 <p>Django 1.0.3 or earlier should not be used, since such releases have known
 security vulnerabilities.</p>
 </div>
-<div class="section" id="id5">
-<h3>Jython Compatibility<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id8">
+<h3>Jython Compatibility<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
 <p>The release has been tested on Jython 2.5.1. However, it should work on any
 Jython 2.5.x release (including 2.5.0)</p>
 </div>
@@ -106,8 +142,8 @@ Jython 2.5.x release (including 2.5.0)</p>
 <div class="section" id="b1">
 <h2>1.0.0b1<a class="headerlink" href="#b1" title="Permalink to this headline">¶</a></h2>
 <p>Released on April 20, 2009.</p>
-<div class="section" id="id6">
-<h3>Changes<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id9">
+<h3>Changes<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
 <p>The following are the changes with respect to the original code (produced under
 the GSoC 2008):</p>
 <ul class="simple">
@@ -122,8 +158,8 @@ integration tools like hudson, cruise-control, etc).</li>
 <li>Bugfixes for all reported issues.</li>
 </ul>
 </div>
-<div class="section" id="id7">
-<h3>Django Compatibility<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id10">
+<h3>Django Compatibility<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
 <p>This release is meant to be used with the current 1.0.X branch of Django. If for
 some special reason you are stuck with 1.0.2, you should manually apply the
 patch attached to <a class="reference external" href="http://code.djangoproject.com/ticket/9789">this issue</a></p>
@@ -131,8 +167,8 @@ patch attached to <a class="reference external" href="http://code.djangoproject.
 <p>Please note that database backends included on this release of django-jython
 will <em>not</em> work with Django 1.1.X.</p>
 </div>
-<div class="section" id="id8">
-<h3>Jython Compatibility<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id11">
+<h3>Jython Compatibility<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
 <p>This release is compatible with Jython 2.5b2 and later releases.</p>
 </div>
 </div>
@@ -147,22 +183,28 @@ will <em>not</em> work with Django 1.1.X.</p>
             <h3><a href="index.html">Table Of Contents</a></h3>
             <ul>
 <li><a class="reference external" href="">Release Notes</a><ul>
-<li><a class="reference external" href="#id1">1.1.0</a><ul>
+<li><a class="reference external" href="#id1">1.1.1</a><ul>
 <li><a class="reference external" href="#changes">Changes</a></li>
-<li><a class="reference external" href="#django-compatibility">Django compatibility</a></li>
+<li><a class="reference external" href="#django-compatbility">Django Compatbility</a></li>
 <li><a class="reference external" href="#jython-compatibility">Jython compatibility</a></li>
 </ul>
 </li>
-<li><a class="reference external" href="#id2">1.0.0</a><ul>
+<li><a class="reference external" href="#id2">1.1.0</a><ul>
 <li><a class="reference external" href="#id3">Changes</a></li>
-<li><a class="reference external" href="#id4">Django Compatibility</a></li>
-<li><a class="reference external" href="#id5">Jython Compatibility</a></li>
+<li><a class="reference external" href="#django-compatibility">Django compatibility</a></li>
+<li><a class="reference external" href="#id4">Jython compatibility</a></li>
 </ul>
 </li>
-<li><a class="reference external" href="#b1">1.0.0b1</a><ul>
+<li><a class="reference external" href="#id5">1.0.0</a><ul>
 <li><a class="reference external" href="#id6">Changes</a></li>
 <li><a class="reference external" href="#id7">Django Compatibility</a></li>
 <li><a class="reference external" href="#id8">Jython Compatibility</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#b1">1.0.0b1</a><ul>
+<li><a class="reference external" href="#id9">Changes</a></li>
+<li><a class="reference external" href="#id10">Django Compatibility</a></li>
+<li><a class="reference external" href="#id11">Jython Compatibility</a></li>
 </ul>
 </li>
 </ul>
@@ -203,7 +245,7 @@ will <em>not</em> work with Django 1.1.X.</p>
         <li class="right" >
           <a href="xml-test-runner.html" title="JUnit XML Test Runner"
              >previous</a> |</li>
-        <li><a href="index.html">Django-Jython v1.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Django-Jython v1.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

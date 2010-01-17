@@ -75,6 +75,26 @@ platform (``":"`` in Unix-based systems and ``";"`` in Windows).
 
 All ``--include-*`` options  can be mixed freely.
 
+Excluding Jython and Django
+---------------------------
+
+In some cases you may wish to reduce the size of the resulting .war file in
+order to speed deployment and deploy multiple projects using a shared copy of
+Jython, django-jython, and the Django libraries. In this case, you would use the
+``--shared-war`` option with the war command::
+
+   $ jython manage.py war --shared-war
+
+This presupposes your JavaEE container is configured such that it can find
+jython.jar, django-jython and the Django libraries. This may involve adding a
+python.path property to your JVM settings, pointing it to the location of
+django-jython and Django, and adding the Jython JAR file to the global CLASSPATH
+of your JavaEE container. If you are using Glassfish, you need to add the JAR
+file to the ``$DOMAINDIR/lib/ext`` directory or adding the location to the
+``Libraries`` deployment option. If you are using Tomcat you would add the JAR
+to ``$CATALINA_HOME/shared/lib``.
+
+
 Media Files and the Context Root Name
 -------------------------------------
 
