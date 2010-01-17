@@ -1,7 +1,7 @@
 from distutils.core import setup
 setup(
     name = "django-jython",
-    version = "1.1.1",
+    version = "1.1.2-alpha",
     packages = ['doj',
                 'doj.backends',
                 'doj.backends.zxjdbc',
