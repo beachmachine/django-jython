@@ -1,3 +1,4 @@
+import sys
 import os
 import shutil
 import tempfile
@@ -43,7 +44,12 @@ class Command(BaseCommand):
         context_root = options['context_root'] or project_name
         temp_dir = tempfile.mkdtemp()
         exploded_war_dir = os.path.join(temp_dir, project_name)
-        print
+        if settings.ADMIN_MEDIA_PREFIX == settings.MEDIA_URL:
+            print "Both ADMIN_MEDIA_PREFIX and MEDIA_URL point to %s" % settings.MEDIA_URL
+            print "This may cause admin media files to be overriden by project media files"
+            print "Are you sure you want to continue? [Y/N]",
+            if raw_input().strip()[0] not in ('Y', 'y'):
+                sys.exit(1)
         print "Assembling WAR on %s" % exploded_war_dir
         print
         self.copy_skel(exploded_war_dir)
