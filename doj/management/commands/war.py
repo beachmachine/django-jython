@@ -44,12 +44,14 @@ class Command(BaseCommand):
         context_root = options['context_root'] or project_name
         temp_dir = tempfile.mkdtemp()
         exploded_war_dir = os.path.join(temp_dir, project_name)
-        if settings.ADMIN_MEDIA_PREFIX == settings.MEDIA_URL:
+        if ('django.contrib.admin' in settings.INSTALLED_APPS) and \
+                (settings.ADMIN_MEDIA_PREFIX == settings.MEDIA_URL):
+            print
             print "Both ADMIN_MEDIA_PREFIX and MEDIA_URL point to %s" % settings.MEDIA_URL
-            print "This may cause admin media files to be overriden by project media files"
-            print "Are you sure you want to continue? [Y/N]",
-            if raw_input().strip()[0] not in ('Y', 'y'):
-                sys.exit(1)
+            print "This will cause admin media files to override project media files"
+            print "Please change your settings and run the war command again"
+            print
+            sys.exit(1)
         print "Assembling WAR on %s" % exploded_war_dir
         print
         self.copy_skel(exploded_war_dir)
@@ -59,10 +61,10 @@ class Command(BaseCommand):
                              'settings': settings})
         self.copy_jython(exploded_war_dir)
         self.copy_django(exploded_war_dir)
-        self.copy_admin_media(exploded_war_dir)
         self.copy_project(exploded_war_dir)
         self.fix_project_settings(exploded_war_dir, context_root)
         self.copy_project_media(exploded_war_dir)
+        self.copy_admin_media(exploded_war_dir)
         self.copy_apps(exploded_war_dir)
         if options['include_java_libs']:
             for java_lib in options['include_java_libs'].split(os.path.pathsep):
@@ -141,6 +143,9 @@ Now you can copy %s to whatever location your application server wants it.
         self.copy_py_package_dir(exploded_war_dir, django_dir)
 
     def copy_admin_media(self, exploded_war_dir):
+        if 'django.contrib.admin' not in settings.INSTALLED_APPS:
+            print "Skipping admin media: django.contrib.admin not in INSTALLED_APPS"
+            return
         from django.contrib import admin
         self.copy_media(exploded_war_dir,
                         os.path.join(os.path.dirname(admin.__file__), 'media'),
@@ -257,7 +262,8 @@ deployed settings file. You can append the following block at the end of the fil
             d = exploded_war_dir
             for sub_dir in os.path.split(dest_relative_path)[:-1]:
                 d = os.path.join(d, sub_dir)
-                os.mkdir(d)
+                if not os.path.exists(d):
+                    os.mkdir(d)
         print "Copying %s..." % dest_relative_path
         shutil.copytree(src_dir,
                         os.path.join(exploded_war_dir, dest_relative_path))
