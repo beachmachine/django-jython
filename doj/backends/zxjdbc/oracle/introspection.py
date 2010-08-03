@@ -21,8 +21,8 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         zxJDBC.TIMESTAMP: 'DateTimeField',
         zxJDBC.NUMERIC: 'SmallIntegerField',
         zxJDBC.INTEGER: 'IntegerField',
-        zxJDBC.DECIMAL: 'DecimalField',
-        zxJDBC.NUMBER: 'DecimalField'
+        zxJDBC.DECIMAL: 'Decimal',
+        zxJDBC.NUMBER: 'Decimal'
     }
 
     def get_table_list(self, cursor):
