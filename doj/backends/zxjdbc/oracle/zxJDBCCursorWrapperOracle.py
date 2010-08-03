@@ -29,6 +29,30 @@ class zxJDBCCursorWrapperOracle(object):
             sql = sql % (('?',) * len(params))
         if sql.endswith(';') or sql.endswith('/'):
             sql = sql[:-1]
+        
+        # Patch LIMIT clause for Oracle to implement ROWNUM
+        if sql.count(' LIMIT'):
+            limit_idx = sql.find(' LIMIT')
+            limit_rows = sql[limit_idx:]
+            # Replace LIMIT clause with blank
+            sql = sql.replace(sql[limit_idx:],'')
+            # If WHERE clause then make ROWNUM evaluation first
+            if sql.count(' WHERE'):
+                sql.replace(' WHERE', ' WHERE ROWNUM <= %s AND' % limit_rows)
+            else:
+                if sql.count(' ORDER BY'):
+                    sql.replace(' ORDER BY', ' WHERE ROWNUM <= %s ORDER BY' % limit_rows)
+                else:
+                    if sql.count(' ASC'):
+                        sql.replace(' ASC', ' WHERE ROWNUM <= %s ASC' % limit_rows)
+                    elif sql.count(' DESC'):
+                        sql.replace(' DESC', ' WHERE ROWNUM <= %s DESC' % limit_rows)
+        # Strip any OFFSET references.  Not the best implementation, certainly
+        # needs some work.  However, this does the trick for now.
+        if sql.find('OFFSET') > 0:
+            offset_int = int(sql[sql.find('OFFSET') + 7:])
+            sql = sql.replace(' OFFSET %d' % offset_int,'')
+        
         self.cursor.execute(sql, params)
         
     def executemany(self, sql, param_list):
