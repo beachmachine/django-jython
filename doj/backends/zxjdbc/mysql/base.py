@@ -7,15 +7,16 @@ except ImportError, e:
     from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured("Error loading zxJDBC module: %s" % e)
 
-from django.db.backends import BaseDatabaseFeatures, BaseDatabaseValidation
+from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseValidation
 from django.db.backends import BaseDatabaseOperations
+#from django.db.backends.mysql.base import DatabaseOperations as MysqlDatabaseOperations
 from django.db.backends.mysql.client import DatabaseClient
+#from django.db.backends.mysql.introspection import DatabaseIntrospection
 from doj.backends.zxjdbc.mysql.creation import DatabaseCreation
 
 from doj.backends.zxjdbc.mysql.introspection import DatabaseIntrospection
-from doj.backends.zxjdbc.common import (
-    zxJDBCDatabaseWrapper, zxJDBCOperationsMixin, zxJDBCFeaturesMixin, 
-    zxJDBCCursorWrapper, set_default_isolation_level)
+from doj.backends.zxjdbc.common import zxJDBCOperationsMixin, zxJDBCFeaturesMixin
+from doj.backends.zxjdbc.common import zxJDBCCursorWrapper, set_default_isolation_level
 from com.ziclix.python.sql.handler import MySQLDataHandler
 
 DatabaseError = Database.DatabaseError
@@ -125,10 +126,8 @@ class DatabaseOperations(zxJDBCOperationsMixin, MysqlDatabaseOperations):
     pass # The mixin contains all what is needed
 
 
-class DatabaseWrapper(zxJDBCDatabaseWrapper):
-    driver_class_name = "com.mysql.jdbc.Driver"
-    jdbc_url_pattern = \
-        "jdbc:mysql://%(DATABASE_HOST)s%(DATABASE_PORT)s/%(DATABASE_NAME)s"
+class DatabaseWrapper(BaseDatabaseWrapper):
+
     operators = {
         'exact': '= %s',
         'iexact': 'LIKE %s',
@@ -146,6 +145,7 @@ class DatabaseWrapper(zxJDBCDatabaseWrapper):
         'iendswith': 'LIKE %s',
     }
 
+
     def __init__(self, *args, **kwargs):
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
 
@@ -154,11 +154,23 @@ class DatabaseWrapper(zxJDBCDatabaseWrapper):
         self.client = DatabaseClient(self)
         self.creation = DatabaseCreation(self)
         self.introspection = DatabaseIntrospection(self)
-        self.validation = BaseDatabaseValidation()
+        self.validation = BaseDatabaseValidation(self)
 
     def _cursor(self):
+        settings_dict = self.settings_dict
         if self.connection is None:
-            self.connection = self.new_connection()
+            if settings_dict['NAME'] == '':
+                from django.core.exceptions import ImproperlyConfigured
+                raise ImproperlyConfigured("You need to specify DATABASE_NAME in your Django settings file.")
+            host = settings_dict['HOST'] or 'localhost'
+            port = settings_dict['PORT'] and (':%s' % settings_dict['PORT']) or ''
+            conn_string = "jdbc:mysql://%s%s/%s" % (host, port,
+                                                         settings_dict['NAME'])
+            self.connection = Database.connect(conn_string,
+                                               settings_dict['USER'],
+                                               settings_dict['PASSWORD'],
+                                               'com.mysql.jdbc.Driver',
+                                               **settings_dict['OPTIONS'])
             # make transactions transparent to all cursors
             set_default_isolation_level(self.connection)
         real_cursor = self.connection.cursor()
