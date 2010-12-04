@@ -45,7 +45,7 @@ class SettingsModuleAsDict(DictMixin):
 class DatabaseWrapper(zxJDBCDatabaseWrapper):
     driver_class_name = "org.postgresql.Driver"
     jdbc_url_pattern = \
-        "jdbc:postgresql://%(DATABASE_HOST)s%(DATABASE_PORT)s/%(DATABASE_NAME)s"
+        "jdbc:postgresql://%(HOST)s%(PORT)s/%(NAME)s"
     operators = {
         'exact': '= %s',
         'iexact': 'ILIKE %s',
@@ -66,12 +66,12 @@ class DatabaseWrapper(zxJDBCDatabaseWrapper):
     def __init__(self, *args, **kwargs):
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
 
-        self.features = DatabaseFeatures()
-        self.ops = DatabaseOperations()
+        self.features = DatabaseFeatures(self)
+        self.ops = DatabaseOperations(self)
         self.client = DatabaseClient(self)
         self.creation = DatabaseCreation(self)
         self.introspection = DatabaseIntrospection(self)
-        self.validation = BaseDatabaseValidation()
+        self.validation = BaseDatabaseValidation(self)
 
     def _cursor(self):
         if self.connection is None:

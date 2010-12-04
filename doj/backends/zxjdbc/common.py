@@ -19,28 +19,28 @@ class zxJDBCDatabaseWrapper(BaseDatabaseWrapper):
     def settings_dict_postprocesed(self):
         settings_dict = self.settings_dict.copy() # Avoid messing with the
                                                   # original settings
-        host, port = settings_dict['DATABASE_HOST'], settings_dict['DATABASE_PORT']
+        host, port = settings_dict['HOST'], settings_dict['PORT']
         if not host:
-            settings_dict['DATABASE_HOST'] = self.default_host
+            settings_dict['HOST'] = self.default_host
         if port:
-            settings_dict['DATABASE_PORT'] = ":%s" % port
+            settings_dict['PORT'] = ":%s" % port
         elif self.default_port:
-            settings_dict['DATABASE_PORT'] = ":%s" % self.default_port
+            settings_dict['PORT'] = ":%s" % self.default_port
         return settings_dict
 
     def new_connection(self):
         connection = self.new_jndi_connection()
         if not connection:
             settings_dict = self.settings_dict
-            if settings_dict['DATABASE_NAME'] == '':
+            if settings_dict['NAME'] == '':
                 from django.core.exceptions import ImproperlyConfigured
                 raise ImproperlyConfigured(
-                    "You need to specify DATABASE_NAME in your Django settings file.")
+                    "You need to specify DATABASE NAME in your Django settings file.")
             connection = zxJDBC.connect(self.jdbc_url(),
-                                        settings_dict['DATABASE_USER'],
-                                        settings_dict['DATABASE_PASSWORD'],
+                                        settings_dict['USER'],
+                                        settings_dict['PASSWORD'],
                                         self.driver_class_name,
-                                        **settings_dict['DATABASE_OPTIONS'])
+                                        **settings_dict['OPTIONS'])
         return connection
     
     def new_jndi_connection(self):
@@ -55,8 +55,8 @@ class zxJDBCDatabaseWrapper(BaseDatabaseWrapper):
         if 'JNDI_NAME' not in settings_dict['DATABASE_OPTIONS']: 
             return None
 
-        name = settings_dict['DATABASE_OPTIONS']['JNDI_NAME']
-        props = settings_dict['DATABASE_OPTIONS'].get('JNDI_CONTEXT_OPTIONS', {})
+        name = settings_dict['OPTIONS']['JNDI_NAME']
+        props = settings_dict['OPTIONS'].get('JNDI_CONTEXT_OPTIONS', {})
         # Default the JNDI endpoint to a Glassfish instance
         # running on localhost
         #     jndi_endpoint = settings_dict['DATABASE_OPTIONS'].get('JNDI_ENDPOINT', 'localhost:3700')
