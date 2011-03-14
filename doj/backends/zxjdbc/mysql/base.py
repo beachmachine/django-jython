@@ -15,8 +15,9 @@ from django.db.backends.mysql.client import DatabaseClient
 from doj.backends.zxjdbc.mysql.creation import DatabaseCreation
 
 from doj.backends.zxjdbc.mysql.introspection import DatabaseIntrospection
-from doj.backends.zxjdbc.common import zxJDBCOperationsMixin, zxJDBCFeaturesMixin
-from doj.backends.zxjdbc.common import zxJDBCCursorWrapper, set_default_isolation_level
+from doj.backends.zxjdbc.common import (
+    zxJDBCDatabaseWrapper, zxJDBCOperationsMixin, zxJDBCFeaturesMixin,
+     zxJDBCCursorWrapper, set_default_isolation_level)
 from com.ziclix.python.sql.handler import MySQLDataHandler
 
 DatabaseError = Database.DatabaseError
@@ -196,3 +197,24 @@ class CursorWrapper(zxJDBCCursorWrapper):
             # occurs, unless the current transaction is rollback'ed.
             self.connection.rollback()
             raise
+
+
+import platform
+# Workaround Jython bug http://bugs.jython.org/issue1499: MySQL
+# datahandler should return Decimals instead of floats for NUMERIC/DECIMAL
+# columns
+OriginalMySQLDataHandler = MySQLDataHandler
+from java.sql import Types
+from decimal import Decimal
+class MySQLDataHandler(OriginalMySQLDataHandler):
+    def getPyObject(self, set, col, type):
+        if type in (Types.NUMERIC, Types.DECIMAL):
+            value = set.getBigDecimal(col)
+            if value is None:
+                return None
+            else:
+                return Decimal(str(value))
+        else:
+            return OriginalMySQLDataHandler.getPyObject(
+                self, set, col, type)
+
