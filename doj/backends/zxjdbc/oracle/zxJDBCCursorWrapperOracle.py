@@ -4,6 +4,8 @@
     Wrapper for Django-Jython Oracle implementation for zxJDBC calls
 """
 
+from decimal import Decimal # Added for issue 39
+
 try:
     from com.ziclix.python.sql import zxJDBC as Database
 except ImportError, e:
@@ -87,6 +89,7 @@ class zxJDBCCursorWrapperOracle(object):
             if value is not None and desc[1] == Database.NUMBER:
                 
                 precision, scale = desc[4:6]
+                
                 if scale == -127:
                     if precision == 0:
                         # NUMBER column: decimal-precision floating point
