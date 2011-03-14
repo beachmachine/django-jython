@@ -50,6 +50,8 @@ def query_class(QueryClass, Database):
             # Added 04-26-2009 to repair "Invalid literal for int() base 10" error
             elif isinstance(value,int):
                 value = int(value)
+            elif isinstance(value,unicode):
+                value = unicode(value)
             elif field is not None and field.get_internal_type() == 'AutoField':
                 value = int(float(value))
             elif value in (1, 0) and field is not None and field.get_internal_type() in ('BooleanField', 'NullBooleanField'):
