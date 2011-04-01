@@ -1,6 +1,73 @@
 Release Notes
 =============
 
+1.3.0b1
+-------
+
+Released on April 1, 2011
+
+Changes
+~~~~~~~
+
+No code changes.  Testing has been performed with Django 1.3 against the following
+databases:
+
+* PostgreSQL
+* Oracle
+
+1.2.0
+-----
+
+Released on April 1, 2011
+
+Changes
+~~~~~~~
+
+None
+
+1.2.0rc1
+--------
+
+Released on March 24, 2011.
+
+Changes
+~~~~~~~
+
+Changes from the 1.2.0b1 release:
+
+ - Repaired Issue #40: Query fails if unicode field in Oracle
+ - Repaired Issue #39: Decimal in Oracle
+ - Repaired Issue #38: Decimal support not working in MySQL backend
+
+1.2.0b1
+-------
+
+Released on March 10, 2011.
+
+Changes
+~~~~~~~
+
+Changes from the 1.1.1 release:
+
+ - Oracle backend now compatible with Django 1.2.x
+ - MySQL backend now compatible with Django 1.2.x
+ - PostgreSQL backend now compatible with Django 1.2.x
+ 
+Django Compatbility
+~~~~~~~~~~~~~~~~~~~
+
+This version has been tested against Django 1.2.3 and will work with any future
+micro release of the 1.2.x branch.
+
+Note that Django 1.0.x and 1.1.x are *NOT* supported by this release. If you need support
+for Django 1.0.x or Django 1.1.0, please use previous releases of Django-Jython.
+
+Jython compatibility
+~~~~~~~~~~~~~~~~~~~~
+
+The release has been tested on Jython 2.5.2 RC4. However, it should work on any
+Jython 2.5.x release (including 2.5.0)
+
 1.1.1
 -----
 
