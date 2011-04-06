@@ -71,4 +71,5 @@ To build a war archive for deployment into Java application servers, change
 Then you can build a war file running ``jython manage.py war`` on your project
 directory.
 
+For a complete documentation on building war files see :ref:`war-deployment`.
 

@@ -1,3 +1,5 @@
+.. _war-deployment:
+
 Creating a WAR Archive for Deployment
 =====================================
 
@@ -48,6 +50,17 @@ specify something like the following when constructing the war file::
 By the way, *the generated WAR file is created on the parent directory of your
 project directory*, in order to avoid cluttering your project space.
 
+Including Extra files in WEB-INF/classes
+----------------------------------------
+
+As ``--include-java-libs`` adds Jar files to WEB-INF/lib of the generated war
+file, you can use ``--include-in-classes`` to add other files to WEB_INF/classes. 
+These will typically be resource files that your Java libraries load via a class 
+loader. Entries will be directories separated using the **path separator** 
+character as described in the previous section::
+
+  $ jython manage.py war --include-in-classes=dir1:dir2 ...
+
 Including Extra Python libraries
 --------------------------------
 
@@ -78,6 +91,17 @@ All ``--include-*`` options  can be mixed freely.
 Excluding Jython and Django
 ---------------------------
 
+By default the ``war`` command will include a copy of Jython and Django
+in the resulting war file.
+
+.. note::
+
+    Be aware that if you include Jython from a full (no standalone) installation, 
+    the whole Jython directory tree will be copied to the war file, including
+    ``site-packages``. Django-jython's ``war`` command takes care not to 
+    duplicate in your war file packages that are installed in ``site-packages``,
+    therefore if Django is already in ``site-packages`` it won't be added twice.
+
 In some cases you may wish to reduce the size of the resulting .war file in
 order to speed deployment and deploy multiple projects using a shared copy of
 Jython, django-jython, and the Django libraries. In this case, you would use the
@@ -94,7 +118,6 @@ file to the ``$DOMAINDIR/lib/ext`` directory or adding the location to the
 ``Libraries`` deployment option. If you are using Tomcat you would add the JAR
 to ``$CATALINA_HOME/shared/lib``.
 
-
 Media Files and the Context Root Name
 -------------------------------------
 
@@ -108,8 +131,8 @@ actual url they get "attached" to on the web server.
 *But*, this isn't true for media files when the prefix is configured on
 ``settings.py``, such as ``MEDIA_URL`` and ``ADMIN_MEDIA_PREFIX``. (Now, if you
 never planned to serve media on the same server where your django applications
-live, skip this section. This is all about making easy to serve static files
-inside the **same** servlet context as your Django project will live)
+live, skip this section. This is all about making it easy to serve static files
+inside the **same** servlet context as your Django project will live.)
 
 So, the war command patches the ``settings.py`` copied on the generated WAR, by
 appending something like the following, at the end of the file::

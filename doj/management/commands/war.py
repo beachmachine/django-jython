@@ -24,6 +24,13 @@ class Command(BaseCommand):
                     help='List of python top-level packages (directories) to '
                          'include separated by the "%s" character' %
                           os.path.pathsep),
+        make_option('--include-in-classes', dest='include_in_classes',
+                    default='',
+                    help='List of directories with files that must be '
+                         'included in WEB-INF/classes, separated by the "%s" character. '
+                         'Use this option to include additional resources '
+                         'required by your aplication.' %
+                          os.path.pathsep),
         make_option('--include-py-path-entries', dest='include_py_path_entries',
                     default='',
                     help='List of python path entries (directories or JAR/ZIP '
@@ -41,8 +48,11 @@ class Command(BaseCommand):
                          'projects on a single app server. Note that your '
                          'application server must be configured to correctly '
                          'find jython.jar, django-jython, and the Jython and '
-                         'Django libs. ')
-
+                         'Django libs. '),
+        make_option('--keep-temp-files', action='store_true', dest='keep_temp_files',
+                    help='Do not delete the temporary files with the exploded '
+                         'war file. You can use this feature for debugging '
+                         'purposes.'),
     )
     help = ("Builds a WAR file for stand-alone deployment on a Java "
             "Servlet container")
@@ -82,6 +92,11 @@ class Command(BaseCommand):
         if options['include_java_libs']:
             for java_lib in options['include_java_libs'].split(os.path.pathsep):
                 self.copy_java_jar(exploded_war_dir, java_lib)
+        if options['include_in_classes']:
+            include_in_classes = options['include_in_classes'].split(
+                os.path.pathsep)
+            for data_dir in include_in_classes:
+                self.copy_to_classes(exploded_war_dir, data_dir)
         if options['include_py_packages']:
             py_package_dirs = options['include_py_packages'].split(
                 os.path.pathsep)
@@ -104,8 +119,9 @@ class Command(BaseCommand):
         war_file_name = os.path.join(self.project_directory(),
                                      '..', context_root + '.war')
         self.war(exploded_war_dir, war_file_name)
-        print "Cleaning %s..." % temp_dir
-        shutil.rmtree(temp_dir)
+        if not options['keep_temp_files']:
+            print "Cleaning %s..." % temp_dir
+            shutil.rmtree(temp_dir)
         print """
 Finished.
 
@@ -128,9 +144,12 @@ Now you can copy %s to whatever location your application server wants it.
             f.write(template.render(Context(vars)))
             f.close()
 
-    def copy_jython(self, exploded_war_dir):
+    def get_jython_home(self):
         jython_lib_path = os.path.dirname(os.path.abspath(os.__file__))
-        jython_home = os.path.dirname(jython_lib_path)
+        return os.path.dirname(jython_lib_path), jython_lib_path
+
+    def copy_jython(self, exploded_war_dir):
+        jython_home, jython_lib_path = self.get_jython_home()
         if jython_home.endswith('.jar'):
             # We are on a Jython stand-alone installation.
             self.copy_java_jar(exploded_war_dir, jython_home)
@@ -149,11 +168,23 @@ Now you can copy %s to whatever location your application server wants it.
                                                   'javalib', '*.jar')):
                     self.copy_java_jar(exploded_war_dir, jar)
             self.copy_py_path_entry(exploded_war_dir, jython_lib_path)
+            # create_site_packages_pth():
+            site_packages_pth = os.path.join(exploded_war_dir,
+                                    'WEB-INF', 'lib-python', 'site-packages.pth')
+            pth_file = file(site_packages_pth, 'w')
+            libdir_name = os.path.basename(jython_lib_path)
+            site_packages_rel_path = os.path.join(libdir_name, 'site-packages')
+            pth_file.write("%s\n" % site_packages_rel_path)
+            for egg in glob.glob(os.path.join(jython_lib_path, 'site-packages', '*.egg')):
+                pth_file.write("%s\n" % os.path.join(site_packages_rel_path, os.path.basename(egg)))
+            pth_file.close()
 
     def copy_django(self, exploded_war_dir):
         import django
         django_dir = os.path.dirname(os.path.abspath(django.__file__))
-        self.copy_py_package_dir(exploded_war_dir, django_dir)
+        jython_home, jython_lib_path = self.get_jython_home()
+        if not django_dir.startswith(jython_lib_path):
+            self.copy_py_package_dir(exploded_war_dir, django_dir)
 
     def copy_admin_media(self, exploded_war_dir):
         if 'django.contrib.admin' not in settings.INSTALLED_APPS:
@@ -231,7 +262,9 @@ deployed settings file. You can append the following block at the end of the fil
             if app_pkg.__name__ in already_included_pkgs:
                 continue
             app_pkg_dir = os.path.dirname(os.path.abspath(app_pkg.__file__))
-            self.copy_py_package_dir(exploded_war_dir, app_pkg_dir)
+            jython_home, jython_lib_path = self.get_jython_home()
+            if not app_pkg_dir.startswith(jython_lib_path):
+                self.copy_py_package_dir(exploded_war_dir, app_pkg_dir)
             already_included_pkgs.append(app_pkg.__name__)
 
     def copy_java_jar(self, exploded_war_dir, java_lib):
@@ -241,6 +274,15 @@ deployed settings file. You can append the following block at the end of the fil
         shutil.copy(java_lib,
                     os.path.join(exploded_war_dir,
                                  'WEB-INF', 'lib', dest_name))
+
+    def copy_to_classes(self, exploded_war_dir, data_dir):
+        """
+        Copies files from a directory to classes/
+        """
+        print "Copying files from %s to WEB-INF/classes..." % data_dir
+        shutil.copytree(data_dir,
+                        os.path.join(exploded_war_dir,
+                                     'WEB-INF', 'classes'))
 
     def copy_py_package_dir(self, exploded_war_dir, py_package_dir):
         """
@@ -280,6 +322,25 @@ deployed settings file. You can append the following block at the end of the fil
         print "Copying %s..." % dest_relative_path
         shutil.copytree(src_dir,
                         os.path.join(exploded_war_dir, dest_relative_path))
+        # check if media src_dir is within project folder, then remove
+        # duplicates from war
+        project_dir = self.project_directory()
+        jython_home, jython_lib_path = self.get_jython_home()
+        dupe_root = None
+        if src_dir.startswith(project_dir):
+            dupe_root = project_dir
+            dest_dir = self.project_name()
+        elif src_dir.startswith(jython_lib_path):
+            dupe_root = jython_lib_path             
+            dest_dir = os.path.basename(jython_lib_path)            
+        if dupe_root:
+            # get the relative path of original media in packed war and remove
+            src_rel_dir = src_dir[len(dupe_root) + 1:]
+            print(" - source: %s" % src_dir)
+            duplicate_media = os.path.join(exploded_war_dir, "WEB-INF", 
+                "lib-python", dest_dir, src_rel_dir)
+            print("Removing duplicate media: %s" % duplicate_media)
+            shutil.rmtree(os.path.join(duplicate_media))
 
     def war(self, exploded_war_dir, war_file_name):
         # Make sure we are working with absolute paths
