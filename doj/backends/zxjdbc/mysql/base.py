@@ -15,9 +15,9 @@ from django.db.backends.mysql.client import DatabaseClient
 from doj.backends.zxjdbc.mysql.creation import DatabaseCreation
 
 from doj.backends.zxjdbc.mysql.introspection import DatabaseIntrospection
-from doj.backends.zxjdbc.common import (
-    zxJDBCDatabaseWrapper, zxJDBCOperationsMixin, zxJDBCFeaturesMixin,
-     zxJDBCCursorWrapper, set_default_isolation_level)
+from doj.backends.zxjdbc.common import zxJDBCOperationsMixin, zxJDBCFeaturesMixin
+from doj.backends.zxjdbc.common import zxJDBCCursorWrapper, set_default_isolation_level
+from doj.backends.zxjdbc.common import zxJDBCDatabaseWrapper
 from com.ziclix.python.sql.handler import MySQLDataHandler
 
 DatabaseError = Database.DatabaseError
@@ -127,8 +127,10 @@ class DatabaseOperations(zxJDBCOperationsMixin, MysqlDatabaseOperations):
     pass # The mixin contains all what is needed
 
 
-class DatabaseWrapper(BaseDatabaseWrapper):
-
+class DatabaseWrapper(zxJDBCDatabaseWrapper):
+    driver_class_name = 'com.mysql.jdbc.Driver'
+    jdbc_url_pattern = \
+        "jdbc:mysql://%(HOST)s%(PORT)s/%(NAME)s"
     operators = {
         'exact': '= %s',
         'iexact': 'LIKE %s',
@@ -150,7 +152,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     def __init__(self, *args, **kwargs):
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
 
-        self.features = DatabaseFeatures()
+        self.features = DatabaseFeatures(self)
         self.ops = DatabaseOperations()
         self.client = DatabaseClient(self)
         self.creation = DatabaseCreation(self)
@@ -158,22 +160,10 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.validation = BaseDatabaseValidation(self)
 
     def _cursor(self):
-        settings_dict = self.settings_dict
         if self.connection is None:
-            if settings_dict['NAME'] == '':
-                from django.core.exceptions import ImproperlyConfigured
-                raise ImproperlyConfigured("You need to specify DATABASE_NAME in your Django settings file.")
-            host = settings_dict['HOST'] or 'localhost'
-            port = settings_dict['PORT'] and (':%s' % settings_dict['PORT']) or ''
-            conn_string = "jdbc:mysql://%s%s/%s" % (host, port,
-                                                         settings_dict['NAME'])
-            self.connection = Database.connect(conn_string,
-                                               settings_dict['USER'],
-                                               settings_dict['PASSWORD'],
-                                               'com.mysql.jdbc.Driver',
-                                               **settings_dict['OPTIONS'])
+            self.connection = self.new_connection()
             # make transactions transparent to all cursors
-            set_default_isolation_level(self.connection)
+            set_default_isolation_level(self.connection, innodb_binlog=True)
         real_cursor = self.connection.cursor()
         # Use the MySQL DataHandler for better compatibility:
         real_cursor.datahandler = MySQLDataHandler(real_cursor.datahandler)
@@ -197,24 +187,3 @@ class CursorWrapper(zxJDBCCursorWrapper):
             # occurs, unless the current transaction is rollback'ed.
             self.connection.rollback()
             raise
-
-
-import platform
-# Workaround Jython bug http://bugs.jython.org/issue1499: MySQL
-# datahandler should return Decimals instead of floats for NUMERIC/DECIMAL
-# columns
-OriginalMySQLDataHandler = MySQLDataHandler
-from java.sql import Types
-from decimal import Decimal
-class MySQLDataHandler(OriginalMySQLDataHandler):
-    def getPyObject(self, set, col, type):
-        if type in (Types.NUMERIC, Types.DECIMAL):
-            value = set.getBigDecimal(col)
-            if value is None:
-                return None
-            else:
-                return Decimal(str(value))
-        else:
-            return OriginalMySQLDataHandler.getPyObject(
-                self, set, col, type)
-
