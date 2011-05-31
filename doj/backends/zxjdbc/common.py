@@ -55,8 +55,8 @@ class zxJDBCDatabaseWrapper(BaseDatabaseWrapper):
         if 'JNDI_NAME' not in settings_dict['DATABASE_OPTIONS']: 
             return None
 
-        name = settings_dict['OPTIONS']['JNDI_NAME']
-        props = settings_dict['OPTIONS'].get('JNDI_CONTEXT_OPTIONS', {})
+        name = settings_dict['DATABASE_OPTIONS']['JNDI_NAME']
+        props = settings_dict['DATABASE_OPTIONS'].get('JNDI_CONTEXT_OPTIONS', {})
         # Default the JNDI endpoint to a Glassfish instance
         # running on localhost
         #     jndi_endpoint = settings_dict['DATABASE_OPTIONS'].get('JNDI_ENDPOINT', 'localhost:3700')
@@ -112,8 +112,11 @@ class zxJDBCCursorWrapper(object):
         return getattr(self.cursor, attr)
 
 # Must be called by zxJDBC backends after instantiating a connection
-def set_default_isolation_level(connection):
+def set_default_isolation_level(connection, innodb_binlog = False):
     jdbc_conn = connection.__connection__
-    jdbc_conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED)
+    if innodb_binlog:
+        jdbc_conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ)
+    else:
+        jdbc_conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED)
 
 
