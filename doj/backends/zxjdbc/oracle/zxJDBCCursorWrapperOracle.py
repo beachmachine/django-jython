@@ -54,7 +54,6 @@ class zxJDBCCursorWrapperOracle(object):
         if sql.find('OFFSET') > 0:
             offset_int = int(sql[sql.find('OFFSET') + 7:])
             sql = sql.replace(' OFFSET %d' % offset_int,'')
-        
         self.cursor.execute(sql, params)
         
     def executemany(self, sql, param_list):
