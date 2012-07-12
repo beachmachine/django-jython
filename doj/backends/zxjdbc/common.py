@@ -111,6 +111,10 @@ class zxJDBCCursorWrapper(object):
     def __getattr__(self, attr):
         return getattr(self.cursor, attr)
 
+    def __iter__(self):
+        return iter(self.next, None)
+
+
 # Must be called by zxJDBC backends after instantiating a connection
 def set_default_isolation_level(connection, innodb_binlog = False):
     jdbc_conn = connection.__connection__
