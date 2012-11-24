@@ -8,14 +8,14 @@ except ImportError, e:
     raise ImproperlyConfigured("Error loading zxJDBC module: %s" % e)
 
 from django.db.backends import BaseDatabaseFeatures, BaseDatabaseValidation
-from django.db.backends.postgresql.operations import DatabaseOperations as PostgresqlDatabaseOperations
-from django.db.backends.postgresql.client import DatabaseClient
-from django.db.backends.postgresql.introspection import DatabaseIntrospection
+from doj.backends.zxjdbc.postgresql.operations import DatabaseOperations
+from doj.backends.zxjdbc.postgresql.client import DatabaseClient
+from doj.backends.zxjdbc.postgresql.introspection import DatabaseIntrospection
 from doj.backends.zxjdbc.postgresql.creation import DatabaseCreation
 
 from doj.backends.zxjdbc.common import (
-    zxJDBCDatabaseWrapper, zxJDBCOperationsMixin, zxJDBCFeaturesMixin, 
-    zxJDBCCursorWrapper, set_default_isolation_level)
+    zxJDBCDatabaseWrapper, zxJDBCFeaturesMixin, zxJDBCCursorWrapper,
+    set_default_isolation_level)
 
 from com.ziclix.python.sql.handler import PostgresqlDataHandler
 from UserDict import DictMixin
@@ -25,10 +25,6 @@ IntegrityError = Database.IntegrityError
 
 class DatabaseFeatures(zxJDBCFeaturesMixin, BaseDatabaseFeatures):
     pass
-
-
-class DatabaseOperations(zxJDBCOperationsMixin, PostgresqlDatabaseOperations):
-    pass # The mixin contains all what is needed
 
 class SettingsModuleAsDict(DictMixin):
     def __init__(self, module):
