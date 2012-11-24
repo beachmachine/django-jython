@@ -1,6 +1,8 @@
 """
 jTDS/MSSQL2005 database backend for Django.
 """
+from datetime import date, datetime
+
 try:
     # Force the database driver to load
     from java.lang import Class
@@ -181,7 +183,7 @@ class CursorWrapper(zxJDBCCursorWrapper):
         for p in params:
             if isinstance(p, unicode) or isinstance(p, str):
                 fp.append(p)
-            elif isinstance(p, type(True)):
+            elif isinstance(p, bool):
                 if p:
                     fp.append(1)
                 else:

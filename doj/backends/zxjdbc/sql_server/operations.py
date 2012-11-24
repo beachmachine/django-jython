@@ -64,13 +64,11 @@ class DatabaseOperations(BaseDatabaseOperations):
         if db_type:
             if self.sql_server_ver < 2005 and db_type.lower() == 'ntext':
                 return 'CAST(%s as nvarchar)'
-            elif 'datetime' == db_type.lower():
+            elif 'datetime' == db_type.lower() or 'smalldatetime' == db_type.lower():
                 # We need to convert date and datetime columns into
                 # ODBC canonical format.
                 # See: http://msdn.microsoft.com/en-us/library/ms187928.aspx
-                return "CONVERT(varchar, %s, 120)"
-            elif 'smalldatetime' == db_type.lower():
-                return "SUBSTRING(CONVERT(varchar, %s, 120), 1, 10)"
+                return "CONVERT(datetime, %s, 120)"
         return '%s'
 
     def fulltext_search_sql(self, field_name):
