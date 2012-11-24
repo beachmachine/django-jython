@@ -43,6 +43,7 @@ class DatabaseCreation(BaseDatabaseCreation):
         #'PositiveSmallIntegerField': 'smallint CONSTRAINT [CK_smallint_pos_%(column)s] CHECK ([%(column)s] >= 0)',
         'SlugField':         'nvarchar(%(max_length)s)',
         'SmallIntegerField': 'smallint',
+        'BigIntegerField' :  'bigint',
         'TextField':         'nvarchar(max)',
         'TimeField':         'datetime',
     #}

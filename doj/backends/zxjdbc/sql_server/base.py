@@ -2,7 +2,7 @@
 jTDS/MSSQL2005 database backend for Django.
 """
 try:
-    # Force the database driver to load 
+    # Force the database driver to load
     from java.lang import Class
     cls = Class.forName("net.sourceforge.jtds.jdbc.Driver").newInstance()
     from pool import ManualPoolingDriver
@@ -14,7 +14,7 @@ except ImportError, e:
     raise ImproperlyConfigured("Error loading zxJDBC module: %s" % e)
 
 from django.db.backends import BaseDatabaseWrapper, BaseDatabaseFeatures, BaseDatabaseValidation
-from doj.backends.zxjdbc.common import zxJDBCDatabaseWrapper
+from doj.backends.zxjdbc.common import zxJDBCDatabaseWrapper, zxJDBCCursorWrapper
 from django.db.backends.signals import connection_created
 from django.conf import settings
 
@@ -28,10 +28,6 @@ import os
 import warnings
 
 warnings.filterwarnings('error', 'The DATABASE_ODBC.+ is deprecated',DeprecationWarning, __name__, 0)
-
-collation = 'Latin1_General_CI_AS'
-if 'collation' in settings.DATABASE_OPTIONS: 
-    collation = settings.DATABASE_OPTIONS['collation']
 
 DatabaseError = zxJDBC.DatabaseError
 IntegrityError = zxJDBC.IntegrityError
@@ -55,41 +51,44 @@ class DatabaseWrapper(zxJDBCDatabaseWrapper):
     #   CONTAINS:       http://msdn2.microsoft.com/en-us/library/ms187787.aspx
     #   FREETEXT:       http://msdn2.microsoft.com/en-us/library/ms176078.aspx
 
-    operators = {
-        # Since '=' is used not only for string comparision there is no way
-        # to make it case (in)sensitive. It will simply fallback to the
-        # database collation.
-        'exact': '= %s',
-        'iexact': "= UPPER(%s)",
-        'contains': "LIKE %s ESCAPE '\\' COLLATE " + collation,
-        'icontains': "LIKE UPPER(%s) ESCAPE '\\' COLLATE "+ collation,
-        'gt': '> %s',
-        'gte': '>= %s',
-        'lt': '< %s',
-        'lte': '<= %s',
-        'startswith': "LIKE %s ESCAPE '\\' COLLATE " + collation,
-        'endswith': "LIKE %s ESCAPE '\\' COLLATE " + collation,
-        'istartswith': "LIKE UPPER(%s) ESCAPE '\\' COLLATE " + collation,
-        'iendswith': "LIKE UPPER(%s) ESCAPE '\\' COLLATE " + collation,
-
-        # TODO: remove, keep native T-SQL LIKE wildcards support
-        # or use a "compatibility layer" and replace '*' with '%'
-        # and '.' with '_'
-        'regex': 'LIKE %s COLLATE ' + collation,
-        'iregex': 'LIKE %s COLLATE ' + collation,
-
-        # TODO: freetext, full-text contains...
-    }
+    # operators are set in the __init__ method
+    operators = {}
 
     def __init__(self, *args, **kwargs):
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
         self._LAST_DATABASE_NAME = None
         self._db_count = 0
         self.connection = None
-        
-        if 'OPTIONS' in self.settings_dict:
-            self.MARS_Connection = self.settings_dict['OPTIONS'].get('MARS_Connection', False)
-            self.unicode_results = self.settings_dict['OPTIONS'].get('unicode_results', False)
+
+        self.MARS_Connection = self.settings_dict['OPTIONS'].get('MARS_Connection', False)
+        self.unicode_results = self.settings_dict['OPTIONS'].get('unicode_results', False)
+        self.collation = self.settings_dict['OPTIONS'].get('collation', 'Latin1_General_CI_AS')
+
+        self.operators = {
+            # Since '=' is used not only for string comparision there is no way
+            # to make it case (in)sensitive. It will simply fallback to the
+            # database collation.
+            'exact': '= %s',
+            'iexact': "= UPPER(%s)",
+            'contains': "LIKE %s ESCAPE '\\' COLLATE " + self.collation,
+            'icontains': "LIKE UPPER(%s) ESCAPE '\\' COLLATE "+ self.collation,
+            'gt': '> %s',
+            'gte': '>= %s',
+            'lt': '< %s',
+            'lte': '<= %s',
+            'startswith': "LIKE %s ESCAPE '\\' COLLATE " + self.collation,
+            'endswith': "LIKE %s ESCAPE '\\' COLLATE " + self.collation,
+            'istartswith': "LIKE UPPER(%s) ESCAPE '\\' COLLATE " + self.collation,
+            'iendswith': "LIKE UPPER(%s) ESCAPE '\\' COLLATE " + self.collation,
+
+            # TODO: remove, keep native T-SQL LIKE wildcards support
+            # or use a "compatibility layer" and replace '*' with '%'
+            # and '.' with '_'
+            'regex': 'LIKE %s COLLATE ' + self.collation,
+            'iregex': 'LIKE %s COLLATE ' + self.collation,
+
+            # TODO: freetext, full-text contains...
+        }
 
         self.features = DatabaseFeatures(self)
         self.ops = DatabaseOperations(self)
@@ -109,7 +108,7 @@ class DatabaseWrapper(zxJDBCDatabaseWrapper):
                 if not settings_dict['NAME']:
                     from django.core.exceptions import ImproperlyConfigured
                     raise ImproperlyConfigured('You need to specify NAME in your Django settings file.')
-                
+
                 url='jdbc:apache:commons:dbcp:%s' % pool_name
                 self.connection = Database.connect(url, None, None, 'org.apache.commons.dbcp.PoolingDriver')
                 connection_created.send(sender=self.__class__)
@@ -117,7 +116,7 @@ class DatabaseWrapper(zxJDBCDatabaseWrapper):
         if new_conn:
             # Set date format for the connection.
             cursor.execute("SET DATEFORMAT ymd; SET DATEFIRST 7")
-            
+
             # SQL Server violates the SQL standard w.r.t handling NULL values in UNIQUE columns.
             # We work around this by creating schema bound views on tables with with nullable unique columns
             # but we need to modify the cursor to abort if the view has problems.
@@ -131,10 +130,10 @@ class DatabaseWrapper(zxJDBCDatabaseWrapper):
             cursor.execute("SET NUMERIC_ROUNDABORT OFF")
             cursor.execute("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE")
 
-			# jTDS can't execute some sql like CREATE DATABASE etc. in
+            # jTDS can't execute some sql like CREATE DATABASE etc. in
             # Multi-statement, so we need to commit the above SQL sentences to
             # avoid this
-            
+
         return CursorWrapper(cursor)
 
     def _register_driver(self):
@@ -150,8 +149,8 @@ class DatabaseWrapper(zxJDBCDatabaseWrapper):
                 'HOST': self.settings_dict['HOST'] or 'localhost',
                 'PORT': self.settings_dict['PORT'] or 1433,
                 }
-        self.driver = ManualPoolingDriver("jdbc:jtds:sqlserver://%(HOST)s:%(PORT)s/%(NAME)s" % db_dict, 
-                                    self.settings_dict['USER'], 
+        self.driver = ManualPoolingDriver("jdbc:jtds:sqlserver://%(HOST)s:%(PORT)s/%(NAME)s" % db_dict,
+                                    self.settings_dict['USER'],
                                     self.settings_dict['PASSWORD'],
                                     pool_name,
                                     )
@@ -159,7 +158,7 @@ class DatabaseWrapper(zxJDBCDatabaseWrapper):
 
         return pool_name
 
-class CursorWrapper(object):
+class CursorWrapper(zxJDBCCursorWrapper):
     """
     A wrapper around the pyodbc's cursor that takes in account a) some pyodbc
     DB-API 2.0 implementation and b) some common ODBC driver particularities.
@@ -172,7 +171,7 @@ class CursorWrapper(object):
     def format_sql(self, sql, n_params=None):
         # zxjdbc uses '?' instead of '%s' as parameter placeholder.
         if n_params is not None:
-        	sql = sql % tuple('?'*n_params)
+            sql = sql % tuple('?'*n_params)
         elif "%s" in sql:
             sql = sql.replace('%s', '?')
         return sql
@@ -230,11 +229,3 @@ class CursorWrapper(object):
 
     def fetchall(self):
         return [self.format_results(row) for row in self.cursor.fetchall()]
-
-    def __getattr__(self, attr):
-        if attr in self.__dict__:
-            return self.__dict__[attr]
-        return getattr(self.cursor, attr)
-    
-    def __iter__(self):
-        return iter(self.cursor)

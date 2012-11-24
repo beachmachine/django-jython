@@ -5,9 +5,11 @@ import time
 import decimal
 
 class DatabaseOperations(BaseDatabaseOperations):
+
     compiler_module = "doj.backends.zxjdbc.sql_server.compiler"
+
     def __init__(self, connection):
-        super(DatabaseOperations, self).__init__()
+        super(DatabaseOperations, self).__init__(connection)
         self.connection = connection
         self._ss_ver = None
 
@@ -28,7 +30,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             self._ss_ver = 2000
         return self._ss_ver
     sql_server_ver = property(_get_sql_server_ver)
-	
+
     def date_extract_sql(self, lookup_type, field_name):
         """
         Given a lookup_type of 'year', 'month', 'day' or 'week_day', returns
@@ -60,15 +62,15 @@ class DatabaseOperations(BaseDatabaseOperations):
         searched against.
         """
         if db_type:
-		    if self.sql_server_ver < 2005 and db_type.lower() == 'ntext':
-		        return 'CAST(%s as nvarchar)'
-		    elif 'datetime' == db_type.lower():
-		    	# We need to convert date and datetime columns into
-		        # ODBC canonical format.
-		        # See: http://msdn.microsoft.com/en-us/library/ms187928.aspx
-		        return "CONVERT(varchar, %s, 120)"
-		    elif 'smalldatetime' == db_type.lower():
-		        return "SUBSTRING(CONVERT(varchar, %s, 120), 1, 10)"
+            if self.sql_server_ver < 2005 and db_type.lower() == 'ntext':
+                return 'CAST(%s as nvarchar)'
+            elif 'datetime' == db_type.lower():
+                # We need to convert date and datetime columns into
+                # ODBC canonical format.
+                # See: http://msdn.microsoft.com/en-us/library/ms187928.aspx
+                return "CONVERT(varchar, %s, 120)"
+            elif 'smalldatetime' == db_type.lower():
+                return "SUBSTRING(CONVERT(varchar, %s, 120), 1, 10)"
         return '%s'
 
     def fulltext_search_sql(self, field_name):
@@ -134,7 +136,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         not quote the given name if it's already been quoted.
         """
         if 'CONVERT(' in name:
-            # SQL Server has a fragile parser.  If we've already applied CONVERT 
+            # SQL Server has a fragile parser.  If we've already applied CONVERT
             # on a column, treat this column as pre-quoted.
             # No - it doesn't make any sense.  Don't think too hard about this.
             return name
@@ -287,10 +289,10 @@ class DatabaseOperations(BaseDatabaseOperations):
         from django.utils.encoding import smart_unicode
         # http://msdn2.microsoft.com/en-us/library/ms179859.aspx
         return smart_unicode(x).\
-        	replace('\\', '\\\\').\
-        	replace('[', '[[]').\
-        	replace('%', '[%]').\
-        	replace('_', '[_]')
+            replace('\\', '\\\\').\
+            replace('[', '[[]').\
+            replace('%', '[%]').\
+            replace('_', '[_]')
 
     def prep_for_iexact_query(self, x):
         """
@@ -332,7 +334,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         # SQL Server doesn't support microseconds
         last = '%s-12-31 23:59:59'
         return [first % value, last % value]
-        
+
     def value_to_db_decimal(self, value, max_digits, decimal_places):
         """
         Transform a decimal.Decimal value to an object compatible with what is
@@ -378,4 +380,3 @@ class DatabaseOperations(BaseDatabaseOperations):
         elif value is not None and field and field.get_internal_type() == 'FloatField':
             value = float(value)
         return value
-        
