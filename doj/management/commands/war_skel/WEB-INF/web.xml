@@ -33,6 +33,15 @@ PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
   </servlet-mapping>
   {% endif %}
 
+  {% if settings.STATIC_URL %}
+  {% if settings.STATIC_URL != settings.MEDIA_URL %}
+  <servlet-mapping>
+    <servlet-name>fileservlet</servlet-name>
+    <url-pattern>{{ settings.STATIC_URL }}*</url-pattern>
+  </servlet-mapping>
+  {% endif %}
+  {% endif %}
+
   <servlet-mapping>
     <servlet-name>modjy</servlet-name>
     <url-pattern>/*</url-pattern>
