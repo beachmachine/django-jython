@@ -26,14 +26,14 @@ PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
     <servlet-class>org.jruby.webapp.FileServlet</servlet-class>
   </servlet>
 
-  {% if settings.MEDIA_URL %}
+  {% if settings.MEDIA_URL and settings.MEDIA_URL|slice:":4" != 'http' %}
   <servlet-mapping>
     <servlet-name>fileservlet</servlet-name>
     <url-pattern>{{ settings.MEDIA_URL }}*</url-pattern>
   </servlet-mapping>
   {% endif %}
 
-  {% if settings.STATIC_URL %}
+  {% if settings.STATIC_URL and settings.STATIC_URL|slice:":4" != 'http' %}
   {% if settings.STATIC_URL != settings.MEDIA_URL %}
   <servlet-mapping>
     <servlet-name>fileservlet</servlet-name>
