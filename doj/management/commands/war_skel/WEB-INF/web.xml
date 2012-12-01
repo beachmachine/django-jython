@@ -26,13 +26,6 @@ PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
     <servlet-class>org.jruby.webapp.FileServlet</servlet-class>
   </servlet>
 
-  {% if settings.ADMIN_MEDIA_PREFIX %}
-  <servlet-mapping>
-    <servlet-name>fileservlet</servlet-name>
-    <url-pattern>{{ settings.ADMIN_MEDIA_PREFIX }}*</url-pattern>
-  </servlet-mapping>
-  {% endif %}
-
   {% if settings.MEDIA_URL %}
   <servlet-mapping>
     <servlet-name>fileservlet</servlet-name>
