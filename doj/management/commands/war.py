@@ -145,10 +145,24 @@ Now you can copy %s to whatever location your application server wants it.
         self.copy_py_package_dir(exploded_war_dir, django_dir)
 
     def copy_admin_media(self, exploded_war_dir):
+        if not settings.STATIC_ROOT:
+            print ("WARNING: Not copying admin media, since STATIC_ROOT "
+                   "is not defined")
+            return
+        if not settings.STATIC_URL:
+            print ("WARNING: Not copying admin media, since STATIC_URL "
+                   "is not defined")
+            return
+        if settings.STATIC_URL.startswith('http'):
+            print ("WARNING: Not copying admin media, since STATIC_URL "
+                   "is absolute (starts with 'http')")
+            return
+
         from django.contrib import admin
+        admin_media_root = "%sadmin/" % settings.STATIC_URL
         self.copy_media(exploded_war_dir,
-                        os.path.join(os.path.dirname(admin.__file__), 'media'),
-                        os.path.join(*settings.ADMIN_MEDIA_PREFIX.split('/')))
+                        os.path.join(os.path.dirname(admin.__file__), 'static', 'admin'),
+                        os.path.join(*admin_media_root.split('/')))
 
     def copy_project(self, exploded_war_dir):
         self.copy_py_package_dir(exploded_war_dir, self.project_directory())
@@ -158,19 +172,18 @@ Now you can copy %s to whatever location your application server wants it.
                      not settings.MEDIA_URL.startswith('http'))
         fix_static = (settings.STATIC_URL and
                      not settings.STATIC_URL.startswith('http'))
-        fix_admin_media =  (settings.ADMIN_MEDIA_PREFIX and
-                            not settings.ADMIN_MEDIA_PREFIX.startswith('http'))
-        if not fix_media and not fix_admin_media and not fix_static:
+        if not fix_media and not fix_static:
             return
+
+        if hasattr(settings, 'ADMIN_MEDIA_PREFIX'):
+            print ("WARNING: Since ADMIN_MEDIA_PREFIX is deprecated it "
+                        "gets ignored by django-jython")
 
         fix = """
 # Added by django-jython. Fixes URL prefixes to include the context root:
 """
         if fix_media:
             fix += "MEDIA_URL='/%s%s'\n" % (context_root, settings.MEDIA_URL)
-        if fix_admin_media:
-            fix += "ADMIN_MEDIA_PREFIX='/%s%s'\n" % (context_root,
-                                                     settings.ADMIN_MEDIA_PREFIX)
         if fix_static:
             fix += "STATIC_URL='/%s%s'\n" % (context_root, settings.STATIC_URL)
 
@@ -209,6 +222,8 @@ deployed settings file. You can append the following block at the end of the fil
         if settings.MEDIA_URL.startswith('http'):
             print ("WARNING: Not copying project media, since MEDIA_URL "
                    "is absolute (starts with 'http')")
+            return
+
         self.copy_media(exploded_war_dir,
                         settings.MEDIA_ROOT,
                         os.path.join(*settings.MEDIA_URL.split('/')))
@@ -225,6 +240,8 @@ deployed settings file. You can append the following block at the end of the fil
         if settings.STATIC_URL.startswith('http'):
             print ("WARNING: Not copying project static, since STATIC_URL "
                    "is absolute (starts with 'http')")
+            return
+
         self.copy_media(exploded_war_dir,
                         settings.STATIC_ROOT,
                         os.path.join(*settings.STATIC_URL.split('/')))
@@ -257,7 +274,7 @@ deployed settings file. You can append the following block at the end of the fil
         shutil.copytree(py_package_dir,
                         os.path.join(exploded_war_dir,
                                      'WEB-INF', 'lib-python', dest_name))
-        
+
     def copy_add_dir(self, exploded_war_dir, add_dir):
         """
         Copies a directory containing a folder to WEB-INF/
@@ -327,4 +344,3 @@ deployed settings file. You can append the following block at the end of the fil
 
     def project_name(self):
         return os.path.basename(self.project_directory())
-
