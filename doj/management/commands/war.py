@@ -172,8 +172,14 @@ Now you can copy %s to whatever location your application server wants it.
                      not settings.MEDIA_URL.startswith('http'))
         fix_static = (settings.STATIC_URL and
                      not settings.STATIC_URL.startswith('http'))
-        if not fix_media and not fix_static:
-            return
+        fix_login_redirect_url = (settings.LOGIN_REDIRECT_URL and
+                     not settings.LOGIN_REDIRECT_URL.startswith('http'))
+        # since Django 1.5, LOGIN_URL also supports view function names, so we
+        # check for / in LOGIN_URL to make sure we only fix URLs
+        fix_login_url = (settings.LOGIN_URL and '/' in settings.LOGIN_URL and
+                     not settings.LOGIN_URL.startswith('http'))
+        fix_logout_url = (settings.LOGOUT_URL and '/' in settings.LOGOUT_URL and
+                     not settings.LOGOUT_URL.startswith('http'))
 
         if hasattr(settings, 'ADMIN_MEDIA_PREFIX'):
             print ("WARNING: Since ADMIN_MEDIA_PREFIX is deprecated it "
@@ -182,10 +188,18 @@ Now you can copy %s to whatever location your application server wants it.
         fix = """
 # Added by django-jython. Fixes URL prefixes to include the context root:
 """
+        fix += "CONTEXT_ROOT='%s'\n" % context_root
+
         if fix_media:
             fix += "MEDIA_URL='/%s%s'\n" % (context_root, settings.MEDIA_URL)
         if fix_static:
             fix += "STATIC_URL='/%s%s'\n" % (context_root, settings.STATIC_URL)
+        if fix_login_redirect_url:
+            fix += "LOGIN_REDIRECT_URL='/%s%s'\n" % (context_root, settings.LOGIN_REDIRECT_URL)
+        if fix_login_url:
+            fix += "LOGIN_URL='/%s%s'\n" % (context_root, settings.LOGIN_URL)
+        if fix_logout_url:
+            fix += "LOGOUT_URL='/%s%s'\n" % (context_root, settings.LOGOUT_URL)
 
         settings_name = settings.SETTINGS_MODULE.split('.')[-1]
         deployed_settings = os.path.join(exploded_war_dir,
