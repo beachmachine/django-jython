@@ -1,7 +1,7 @@
 from distutils.core import setup
 setup(
     name = "django-jython",
-    version = "1.3.0b1",
+    version = "1.5.0a1",
     packages = ['doj',
                 'doj.backends',
                 'doj.backends.zxjdbc',
@@ -11,8 +11,10 @@ setup(
                 'doj.backends.zxjdbc.mysql.constants',
                 'doj.backends.zxjdbc.sqlite3',
                 'doj.backends.zxjdbc.mssql2k',
+                'doj.backends.zxjdbc.sql_server',
                 'doj.management',
                 'doj.management.commands',
+                'doj.monkey',
                 'doj.test',
                 'doj.test.xmlrunner'],
     package_data = {

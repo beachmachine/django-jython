@@ -1,4 +1,4 @@
-VERSION = (1, 1, 2, 'alpha', 0)
-
 # loading monkey patches
 from doj.monkey import *
+
+VERSION = (1, 5, 0, 'alpha', 1)
