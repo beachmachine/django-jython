@@ -130,7 +130,7 @@ class DatabaseOperations(zxJDBCOperationsMixin, MysqlDatabaseOperations):
 class DatabaseWrapper(zxJDBCDatabaseWrapper):
     driver_class_name = 'com.mysql.jdbc.Driver'
     jdbc_url_pattern = \
-        "jdbc:mysql://%(HOST)s%(PORT)s/%(NAME)s"
+        "jdbc:mysql://%(HOST)s%(PORT)s/%(NAME)s?zeroDateTimeBehavior=convertToNull"
     operators = {
         'exact': '= %s',
         'iexact': 'LIKE %s',
@@ -153,7 +153,7 @@ class DatabaseWrapper(zxJDBCDatabaseWrapper):
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
 
         self.features = DatabaseFeatures(self)
-        self.ops = DatabaseOperations()
+        self.ops = DatabaseOperations(self)
         self.client = DatabaseClient(self)
         self.creation = DatabaseCreation(self)
         self.introspection = DatabaseIntrospection(self)
