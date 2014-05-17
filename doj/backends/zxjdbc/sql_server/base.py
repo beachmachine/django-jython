@@ -74,6 +74,8 @@ class DatabaseWrapper(zxJDBCDatabaseWrapper):
             'iexact': "= UPPER(%s)",
             'contains': "LIKE %s ESCAPE '\\' COLLATE " + self.collation,
             'icontains': "LIKE UPPER(%s) ESCAPE '\\' COLLATE "+ self.collation,
+            'like': "LIKE %s ESCAPE '\\' COLLATE " + self.collation,
+            'ilike': "LIKE UPPER(%s) ESCAPE '\\' COLLATE "+ self.collation,
             'gt': '> %s',
             'gte': '>= %s',
             'lt': '< %s',
