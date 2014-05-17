@@ -1,6 +1,8 @@
 from itertools import izip
 
 from django.db.models.sql import compiler
+from django.db import transaction
+from django.db.models.sql.constants import *
 from datetime import datetime
 
 REV_ODIR = {
@@ -113,11 +115,12 @@ class SQLCompiler(compiler.SQLCompiler):
         # _select_alias.
         out_cols = self.get_columns(True)
         ordering, ordering_group_by = self.get_ordering()
+
         if strategy == USE_ROW_NUMBER:
             if not ordering:
                 meta = self.query.get_meta()
                 qn = self.quote_name_unless_alias
-                # Special case: pk not in out_cols, use random ordering. 
+                # Special case: pk not in out_cols, use random ordering.
                 #
                 if '%s.%s' % (qn(meta.db_table), qn(meta.pk.db_column or meta.pk.column)) not in self.get_columns():
                     ordering = ['RAND()']
@@ -243,17 +246,7 @@ class SQLCompiler(compiler.SQLCompiler):
         # SQL Server 2005
         if self.connection.ops.sql_server_ver >= 2005:
             sql, params = self._as_sql(USE_ROW_NUMBER)
-            
-            # Construct the final SQL clause, using the initial select SQL
-            # obtained above.
-            result = ['SELECT * FROM (%s) AS X' % sql]
-
-            # Place WHERE condition on `rn` for the desired range.
-            if self.query.high_mark is None:
-                self.query.high_mark = 9223372036854775807
-            result.append('WHERE X.rn BETWEEN %d AND %d' % (self.query.low_mark+1, self.query.high_mark))
-
-            return ' '.join(result), params
+            return sql, params
 
         # SQL Server 2000, offset without limit case
         # get_columns needs to be called before get_ordering to populate
@@ -273,6 +266,59 @@ class SQLCompiler(compiler.SQLCompiler):
             'key': qn(meta.pk.db_column or meta.pk.column),
         }
         return sql, params
+
+    def results_iter(self):
+        """
+        Returns an iterator over the results from executing this query.
+        """
+        resolve_columns = hasattr(self, 'resolve_columns')
+        fields = None
+        has_aggregate_select = bool(self.query.aggregate_select)
+        # Set transaction dirty if we're using SELECT FOR UPDATE to ensure
+        # a subsequent commit/rollback is executed, so any database locks
+        # are released.
+        if self.query.select_for_update and transaction.is_managed(self.using):
+            transaction.set_dirty(self.using)
+
+        row_c = 0
+
+        for rows in self.execute_sql(MULTI):
+            for row in rows:
+                row_c += 1
+
+                if self.query.low_mark is not None and row_c < self.query.low_mark+1:
+                    continue
+                if self.query.high_mark is not None and row_c > self.query.high_mark:
+                    raise StopIteration
+
+                if resolve_columns:
+                    if fields is None:
+                        # We only set this up here because
+                        # related_select_fields isn't populated until
+                        # execute_sql() has been called.
+                        if self.query.select_fields:
+                            fields = self.query.select_fields + self.query.related_select_fields
+                        else:
+                            fields = self.query.model._meta.fields
+                        # If the field was deferred, exclude it from being passed
+                        # into `resolve_columns` because it wasn't selected.
+                        only_load = self.deferred_to_columns()
+                        if only_load:
+                            db_table = self.query.model._meta.db_table
+                            fields = [f for f in fields if db_table in only_load and
+                                      f.column in only_load[db_table]]
+                    row = self.resolve_columns(row, fields)
+
+                if has_aggregate_select:
+                    aggregate_start = len(self.query.extra_select.keys()) + len(self.query.select)
+                    aggregate_end = aggregate_start + len(self.query.aggregate_select)
+                    row = tuple(row[:aggregate_start]) + tuple([
+                        self.query.resolve_aggregate(value, aggregate, self.connection)
+                        for (alias, aggregate), value
+                        in zip(self.query.aggregate_select.items(), row[aggregate_start:aggregate_end])
+                    ]) + tuple(row[aggregate_end:])
+
+                yield row
 
 
 class SQLInsertCompiler(compiler.SQLInsertCompiler, SQLCompiler):

@@ -1,11 +1,13 @@
-from django.db.backends import BaseDatabaseOperations
 import query
 import datetime
 import time
 import decimal
 
-class DatabaseOperations(BaseDatabaseOperations):
+from django.db.backends import BaseDatabaseOperations
+from django.utils.dateparse import parse_date, parse_datetime, parse_time
+from django.utils.encoding import smart_str
 
+class DatabaseOperations(BaseDatabaseOperations):
     compiler_module = "doj.backends.zxjdbc.sql_server.compiler"
 
     def __init__(self, connection):
@@ -359,9 +361,14 @@ class DatabaseOperations(BaseDatabaseOperations):
         if value is None:
             return None
         if field and field.get_internal_type() == 'DateTimeField':
+            if isinstance(value, (str, unicode)):
+                value = convert_datetime_string_to_datetime(value)
             return value
         elif field and field.get_internal_type() == 'DateField':
-            value = value.date() # extract date
+            if isinstance(value, (str, unicode)):
+                value = convert_date_string_to_date(value)
+            elif isinstance(value, datetime.datetime):
+                value = value.date() # extract date
         elif field and field.get_internal_type() == 'TimeField' or (isinstance(value, datetime.datetime) and value.year == 1900 and value.month == value.day == 1):
             value = value.time() # extract time
         # Some cases (for example when select_related() is used) aren't
@@ -378,3 +385,47 @@ class DatabaseOperations(BaseDatabaseOperations):
         elif value is not None and field and field.get_internal_type() == 'FloatField':
             value = float(value)
         return value
+
+
+def convert_microsoft_date_to_isoformat(value):
+    if isinstance(value, basestring):
+        value = value.replace(' +', '+').replace(' -', '-')
+    return value
+
+def convert_date_string_to_date(value):
+    if value is None:
+        return value
+    if isinstance(value, datetime.datetime):
+        return value.date()
+    if isinstance(value, datetime.date):
+        return value
+
+    value = convert_microsoft_date_to_isoformat(smart_str(value))
+
+    try:
+        parsed = parse_date(value)
+        if parsed is not None:
+            return parsed
+    except ValueError:
+        pass
+
+    return datetime.date(year=0, month=0, day=0)
+
+def convert_datetime_string_to_datetime(value):
+    if value is None:
+        return value
+    if isinstance(value, datetime.datetime):
+        return value
+    if isinstance(value, datetime.date):
+        return datetime.datetime(year=value.year, month=value.month, day=value.day)
+
+    value = convert_microsoft_date_to_isoformat(smart_str(value))
+
+    try:
+        parsed = parse_datetime(value)
+        if parsed is not None:
+            return parsed
+    except ValueError:
+        pass
+
+    return datetime.datetime(year=0, month=0, day=0)
