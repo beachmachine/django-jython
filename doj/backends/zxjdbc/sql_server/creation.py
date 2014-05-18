@@ -24,7 +24,6 @@ class DatabaseCreation(BaseDatabaseCreation):
     # output (the "qn_" prefix is stripped before the lookup is performed.
 
     data_types = DataTypesWrapper({
-    #data_types = {
         'AutoField':         'int IDENTITY (1, 1)',
         'BooleanField':      'bit',
         'CharField':         'nvarchar(%(max_length)s)',
@@ -39,14 +38,11 @@ class DatabaseCreation(BaseDatabaseCreation):
         'IPAddressField':    'nvarchar(15)',
         'NullBooleanField':  'bit',
         'OneToOneField':     'int',
-        #'PositiveIntegerField': 'integer CONSTRAINT [CK_int_pos_%(column)s] CHECK ([%(column)s] >= 0)',
-        #'PositiveSmallIntegerField': 'smallint CONSTRAINT [CK_smallint_pos_%(column)s] CHECK ([%(column)s] >= 0)',
         'SlugField':         'nvarchar(%(max_length)s)',
         'SmallIntegerField': 'smallint',
         'BigIntegerField' :  'bigint',
         'TextField':         'nvarchar(max)',
         'TimeField':         'datetime',
-    #}
     })
 
     def _destroy_test_db(self, test_database_name, verbosity):
