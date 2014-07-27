@@ -177,7 +177,7 @@ class JDBCCursorWrapper(object):
         # smaller than the size parameter. We fallback to `fetchall`
         # in that case.
         try:
-            return self.cursor.fetchmany(size=size)
+            return self.cursor.fetchmany(size)
         except IndexError:
             return self.cursor.fetchall()
 
