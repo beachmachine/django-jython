@@ -26,7 +26,9 @@ __all__ = (
 
 
 class JDBCBaseDatabaseWrapper(BaseDatabaseWrapper):
-
+    """
+    Represents a database connection using zxJDBC.
+    """
     jdbc_default_host = None
     jdbc_default_port = None
     jdbc_driver_class_name = None
@@ -99,7 +101,6 @@ class JDBCBaseDatabaseOperations(BaseDatabaseOperations):
     zxJDBC supports dates, times, datetimes and decimal directly, so we
     override the convert methods of django here.
     """
-
     def value_to_db_date(self, value):
         return value
 
@@ -147,7 +148,6 @@ class JDBCCursorWrapper(object):
     A simple wrapper to do the "%s" -> "?" replacement before running zxJDBC's
     execute or executemany.
     """
-
     def __init__(self, cursor):
         self.cursor = cursor
 
@@ -215,9 +215,8 @@ def set_default_isolation_level(connection, innodb_binlog=False):
     Make transactions transparent to all cursors. Must be called by zxJDBC backends
     after instantiating a connection.
 
-    :param connection:zxJDBC connection
-    :param innodb_binlog:If special case for InnoDB
-    :return:
+    :param connection: zxJDBC connection
+    :param innodb_binlog: If special case for InnoDB
     """
     jdbc_connection = connection.__connection__
 
