@@ -3,12 +3,19 @@
 Creating a WAR Archive for Deployment
 =====================================
 
+.. note::
+
+  This functionality has been dropped from the reimplementation of
+  django-jython, but it will be re-added soon. The following documentation
+  shows you how this feature will work.
+
 django-jython includes a "war" management command so you can go to your project
 directory and type something like this::
 
-    lsoto@spirit:~/src/mysite$ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar
+    $ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-9.1-902.jdbc4.jar
 
-And get a single ``mysite.war`` file which you can deploy in your preferred application server. *This file doesn't require anything special installed on the target server*. No Django, no Jython, no nothing.
+And get a single ``mysite.war`` file which you can deploy in your preferred application server.
+*This file doesn't require anything special installed on the target server*. No Django, no Jython, no nothing.
 
 Usage
 -----
@@ -30,7 +37,7 @@ The first step is to add ``'doj'`` to the list of ``INSTALLED_APPS`` on your
 
 Then, the most typical usage is the one already exemplified::
 
-  $ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar
+  $ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-9.1-902.jdbc4.jar
 
 Here, you tell the war command that it should include an extra java library to
 the generated WAR file, because it can't know which java libraries are you using
@@ -45,7 +52,7 @@ You may also specify more files to include, separating the paths by the special
 For example, if you are the iText library inside your Django project you should
 specify something like the following when constructing the war file::
 
-  $ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar:/usr/share/java/iText-2.1.3.jar 
+  $ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-9.1-902.jdbc4.jar:/usr/share/java/iText-2.1.3.jar
 
 By the way, *the generated WAR file is created on the parent directory of your
 project directory*, in order to avoid cluttering your project space.
@@ -73,14 +80,14 @@ So, in case you have a dependency on a Python library (not included on the
 standard library of course), you have to specify it with the
 ``--include-py-packages`` option, as the following example::
 
-  $ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar --include-py-packages=$HOME/jython/Lib/site-packages/pyamf
+  $ jython manage.py war --include-py-packages=$HOME/jython/Lib/site-packages/pyamf
 
 
-Egg or zip files are also supported, as well as directories meant: to be "path
+Egg or zip files are also supported, as well as directories meant to be "path
 entries" (i.e, a directory _containing_ packages). For these cases, use the
 ``--include-py-path-entries`` option::
 
-  $ jython manage.py war --include-java-libs=$HOME/jdbcdrivers/postgresql-8.3-603.jdbc4.jar --include-py-path-entries=$HOME/eggs/PyAMF-0.3.1-py2.5.egg
+  $ jython manage.py war --include-py-path-entries=$HOME/eggs/PyAMF-0.3.1-py2.5.egg
 
 As with ``--include-java-libs``, multiple entries and/or packages can be
 specified, by separating them with the **path separator** character of your
@@ -129,7 +136,7 @@ to generate links inside your applications. This decouples your views from the
 actual url they get "attached" to on the web server.
 
 *But*, this isn't true for media files when the prefix is configured on
-``settings.py``, such as ``MEDIA_URL`` and ``ADMIN_MEDIA_PREFIX``. (Now, if you
+``settings.py``, such as ``MEDIA_URL`` or ``ADMIN_MEDIA_PREFIX``. (Now, if you
 never planned to serve media on the same server where your django applications
 live, skip this section. This is all about making it easy to serve static files
 inside the **same** servlet context as your Django project will live.)
@@ -138,17 +145,20 @@ So, the war command patches the ``settings.py`` copied on the generated WAR, by
 appending something like the following, at the end of the file::
 
   # Added by django-jython. Fixes URL prefixes to include the context root:
+  CONTEXT_ROOT='/mysite/'
   MEDIA_URL='/mysite/site_media/'
-  ADMIN_MEDIA_PREFIX='/mysite/media/'
+  STATIC_URL='/mysite/site_static/'
+  LOGIN_REDIRECT_URL='/mysite/index/'
+  LOGIN_URL='/mysite/login/'
+  LOGOUT_URL='/mysite/logout/'
+
+These values respect the original values of these variables. If any
+of these variables do point to an remote server (e.g. starting with ``http://...``)
+it will not get prefixed.
 
 (You can check this by yourself, looking at the file
 ``/WEB-INF/lib-python/<project_name>/settings.py`` inside the generated WAR
 file)
-
-This is done only if these variables are not blank (also, a warning is printed
-when you build the WAR if any of them is blank) and don't seem to be a really
-absolute URL (including the ``'http://'`` part), which mean that media files are
-not going to live in the same server as the application.
 
 By default, the war command assumes that you will use the name of the project as
 the name of the context root in the deployed application. You can change this
@@ -158,30 +168,3 @@ Please note that this small hack means that you can't simply rename your war
 file to deploy it on another context name. You must regenerate it specifying the
 other context name. Or just manually editing the settings.py file inside the
 WAR, whatever fits you better.  
-
-Sample Output
--------------
-
-Currently the command is a bit verbose. As a reference, here is what I get when
-running the command on the project you get after following the `official Django
-tutorial <http://www.djangoproject.com/documentation/tutorial01/>`_ (up to
-part three)::
-
-  $ jython  manage.py war
-  
-  Assembling WAR on /var/folders/mQ/mQkMNKiaE583pWpee85FFk+++TI/-Tmp-/tmp4fkuU2/pollsite
-  
-  Copying WAR skeleton...
-  Copying jython.jar...
-  Copying Lib...
-  Copying django...
-  Copying media...
-  Copying pollsite...
-  WARNING: Not copying project media, since MEDIA_ROOT is not defined
-  Copying doj...
-  Building WAR on /Users/lsoto/src/jython-book/src/chapter14/tour/pollsite.war...
-  Cleaning /var/folders/mQ/mQkMNKiaE583pWpee85FFk+++TI/-Tmp-/tmp4fkuU2...
-  
-  Finished.
-
-  Now you can copy /Users/lsoto/src/jython-book/src/chapter14/tour/pollsite.war to whatever location your application server wants it.

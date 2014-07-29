@@ -5,6 +5,7 @@ Josh Juneau (Oracle backend)
 Jacob Fenwick (MySQL backend)
 Victor Ng (Microsft SQL Server backend)
 John Sonnenschein (Shared WAR option)
+Andreas Stocker (1.7.X rewrite)
 
 Also, special thanks to Google Inc, for sponsoring the initial Leo's work under
 the Google Summer of Code program in 2008.

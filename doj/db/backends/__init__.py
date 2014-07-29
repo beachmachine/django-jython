@@ -65,13 +65,13 @@ class JDBCBaseDatabaseWrapper(BaseDatabaseWrapper):
         """
         settings_dict = dict(self.settings_dict)
 
-        if 'DATABASE_OPTIONS' not in settings_dict:
+        if 'OPTIONS' not in settings_dict:
             return None
-        if 'JNDI_NAME' not in settings_dict['DATABASE_OPTIONS']:
+        if 'JNDI_NAME' not in settings_dict['OPTIONS']:
             return None
 
-        name = settings_dict['DATABASE_OPTIONS']['JNDI_NAME']
-        props = settings_dict['DATABASE_OPTIONS'].get('JNDI_CONTEXT_OPTIONS', {})
+        name = settings_dict['OPTIONS']['JNDI_NAME']
+        props = settings_dict['OPTIONS'].get('JNDI_CONTEXT_OPTIONS', {})
 
         return zxJDBC.lookup(name, keywords=props)
 

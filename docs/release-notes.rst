@@ -1,6 +1,23 @@
 Release Notes
 =============
 
+1.7.0a1
+-------
+
+Released on July 29, 2014
+
+Changes
+~~~~~~~
+
+Rewrite of the codebase. This version is meant to be used with Django 1.7.x,
+and ships with following database backends:
+
+* PostgreSQL
+* MySQL
+* SQLite
+* MSSQL
+
+
 1.3.0b1
 -------
 
