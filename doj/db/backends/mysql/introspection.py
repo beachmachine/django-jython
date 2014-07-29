@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import re
+
 from django.utils.datastructures import OrderedSet
-from django.db.backends import BaseDatabaseIntrospection, FieldInfo
 from django.utils.encoding import force_text
 
+from doj.db.backends import JDBCBaseDatabaseIntrospection as BaseDatabaseIntrospection
+from doj.db.backends import JDBCFieldInfo as FieldInfo
 
 foreign_key_re = re.compile(r"\sCONSTRAINT `[^`]*` FOREIGN KEY \(`([^`]*)`\) REFERENCES `([^`]*)` \(`([^`]*)`\)")
 

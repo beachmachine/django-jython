@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """
 Microsoft SQL Server database backend for DOJ.
 
@@ -8,9 +7,6 @@ Requires JDBC driver: net.sourceforge.jtds.jdbc.Driver
 
 from __future__ import absolute_import, unicode_literals
 
-import warnings
-
-from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError as DjangoIntegrityError, InterfaceError as DjangoInterfaceError
 from django.utils.functional import cached_property
 
@@ -34,8 +30,6 @@ VERSION_SQL2000 = 8
 VERSION_SQL2005 = 9
 VERSION_SQL2008 = 10
 VERSION_SQL2012 = 11
-
-USE_LEGACY_DATE_FIELDS_DEFAULT = False
 
 IntegrityError = BaseDatabaseWrapper.IntegrityError
 
@@ -93,20 +87,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     }
 
 
-def is_ip_address(value):
-    """
-    Returns True if value is a valid IP address, otherwise False.
-    """
-    # IPv6 added with Django 1.4
-    from django.core.validators import validate_ipv46_address as ip_validator
-
-    try:
-        ip_validator(value)
-    except ValidationError:
-        return False
-    return True
-
-
 class DatabaseWrapper(BaseDatabaseWrapper):
     vendor = 'microsoft'
     jdbc_driver_class_name = 'net.sourceforge.jtds.jdbc.Driver'
@@ -143,19 +123,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             self.cast_avg_to_float = not bool(options.get('disable_avg_cast', False))
         except ValueError:
             self.cast_avg_to_float = False
-
-        try:
-            self.use_legacy_date_fields = bool(options.get('use_legacy_date_fields', USE_LEGACY_DATE_FIELDS_DEFAULT))
-        except ValueError:
-            self.use_legacy_date_fields = USE_LEGACY_DATE_FIELDS_DEFAULT
-
-        if self.use_legacy_date_fields:
-                warnings.warn(
-                    "The `use_legacy_date_fields` setting has been deprecated. "
-                    "The default option value has changed to 'False'. "
-                    "If you need to use the legacy SQL 'datetime' datatype, "
-                    "you must replace them with the provide model field.",
-                    DeprecationWarning)
 
         self.features = DatabaseFeatures(self)
         self.ops = DatabaseOperations(self)

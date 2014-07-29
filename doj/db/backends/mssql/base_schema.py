@@ -3,9 +3,6 @@
 This is a reimplementation of BaseDatabaseSchemaEditor that plays better with
 non-core database backends.
 """
-from django.utils.log import getLogger
-
-logger = getLogger('django.db.backends.schema')
 
 import operator
 
@@ -14,6 +11,10 @@ from django.db.models.fields.related import ManyToManyField
 from django.db.transaction import atomic
 from django.utils.six.moves import reduce
 from django.utils.six import callable
+from django.utils.log import getLogger
+
+logger = getLogger('django.db.backends.schema')
+
 
 class BaseDatabaseSchemaEditor(object):
     """

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+
 from django.utils import six
 
 from doj.db.backends.mssql.base_schema import BaseDatabaseSchemaEditor

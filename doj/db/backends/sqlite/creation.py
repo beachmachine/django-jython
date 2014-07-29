@@ -3,8 +3,9 @@
 import os
 import sys
 
-from doj.db.backends import JDBCBaseDatabaseCreation as BaseDatabaseCreation
 from django.utils.six.moves import input
+
+from doj.db.backends import JDBCBaseDatabaseCreation as BaseDatabaseCreation
 
 
 class DatabaseCreation(BaseDatabaseCreation):

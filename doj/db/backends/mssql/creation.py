@@ -38,12 +38,6 @@ class DatabaseCreation(BaseDatabaseCreation):
         'GenericIPAddressField':        'nvarchar(39)',
         'IntegerField':                 'int',
         'IPAddressField':               'nvarchar(15)',
-        'LegacyDateField':              'datetime',
-        'LegacyDateTimeField':          'datetime',
-        'LegacyTimeField':              'time',
-        'NewDateField':                 'date',
-        'NewDateTimeField':             'datetime2',
-        'NewTimeField':                 'time',
         'NullBooleanField':             'bit',
         'OneToOneField':                'int',
         'PositiveIntegerField':         'int',
@@ -63,13 +57,6 @@ class DatabaseCreation(BaseDatabaseCreation):
 
     def __init__(self, *args, **kwargs):
         super(DatabaseCreation, self).__init__(*args, **kwargs)
-
-        if self.connection.use_legacy_date_fields:
-            self.data_types.update({
-                'DateField': 'datetime',
-                'DateTimeField': 'datetime',
-                'TimeField': 'datetime',
-            })
 
     def mark_tests_as_expected_failure(self, failing_tests):
         """

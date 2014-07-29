@@ -2,14 +2,15 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import re
+import django
+
+from django.db.models.sql import compiler
+
 try:
     from itertools import zip_longest
 except ImportError:
     from itertools import izip_longest as zip_longest
-
-import django
-from django.db.models.sql import compiler
-import re
 
 # query_class returns the base class to use for Django queries.
 # The custom 'SqlServerQuery' class derives from django.db.models.sql.query.Query

@@ -33,13 +33,6 @@ class DatabaseOperations(BaseDatabaseOperations):
     def __init__(self, *args, **kwargs):
         super(DatabaseOperations, self).__init__(*args, **kwargs)
 
-        if self.connection.use_legacy_date_fields:
-            self.value_to_db_datetime = self._legacy_value_to_db_datetime
-            self.value_to_db_time = self._legacy_value_to_db_time
-        else:
-            self.value_to_db_datetime = self._new_value_to_db_datetime
-            self.value_to_db_time = self._new_value_to_db_time
-
         if self.connection.cast_avg_to_float:
             # Need to cast as float to avoid truncating to an int
             self._sql_function_overrides['AVG'] = ('AVG', '%(function)s(CAST(%(field)s AS FLOAT))')
@@ -275,23 +268,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             return val
         raise TypeError("'value' must be a date or datetime")
 
-    def _legacy_value_to_db_datetime(self, value):
-        if value is None or isinstance(value, six.string_types):
-            return value
-
-        if timezone.is_aware(value):# and not self.connection.features.supports_timezones:
-            if getattr(settings, 'USE_TZ', False):
-                value = value.astimezone(timezone.utc).replace(tzinfo=None)
-            else:
-                raise ValueError("SQL Server backend does not support timezone-aware datetimes.")
-
-        # SQL Server 2005 doesn't support microseconds
-        if self.connection.is_sql2005():
-            value = value.replace(microsecond=0)
-        val = self.__to_truncated_datetime_string(value)
-        return val
-
-    def _new_value_to_db_datetime(self, value):
+    def value_to_db_datetime(self, value):
         if value is None or isinstance(value, six.string_types):
             return value
 
@@ -302,28 +279,7 @@ class DatabaseOperations(BaseDatabaseOperations):
                 raise ValueError("SQL Server backend does not support timezone-aware datetimes.")
         return value.isoformat()
 
-    def _legacy_value_to_db_time(self, value):
-        if value is None or isinstance(value, six.string_types):
-            return value
-
-        if timezone.is_aware(value):
-            if not getattr(settings, 'USE_TZ', False) and hasattr(value, 'astimezone'):
-                value = timezone.make_naive(value, timezone.utc)
-            else:
-                raise ValueError("SQL Server backend does not support timezone-aware times.")
-
-        # MS SQL 2005 doesn't support microseconds
-        # ...but it also doesn't really suport bare times
-        if self.connection.is_sql2005():
-            value = value.replace(microsecond=0)
-        val = value.isoformat()
-        if value.microsecond:
-            # truncate to millisecond so SQL's 'datetime' can parse it
-            idx = val.rindex('.')
-            val = val[:idx + 4] + val[idx + 7:]
-        return val
-
-    def _new_value_to_db_time(self, value):
+    def value_to_db_time(self, value):
         if value is None or isinstance(value, six.string_types):
             return value
 
@@ -359,7 +315,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         `value` is an int, containing the looked-up year.
         """
         first = datetime.datetime(value, 1, 1)
-        ms = 997000 if self.connection.use_legacy_date_fields else 999999
+        ms = 999999
         second = datetime.datetime(value, 12, 31, 23, 59, 59, ms)
         if settings.USE_TZ:
             tz = timezone.get_current_timezone()
