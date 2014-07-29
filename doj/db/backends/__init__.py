@@ -21,7 +21,7 @@ __all__ = (
     'JDBCFieldInfo',
     'JDBCBaseDatabaseSchemaEditor',
     'JDBCCursorWrapper',
-    'set_default_isolation_level',
+    'JDBCConnection',
 )
 
 
@@ -86,14 +86,22 @@ class JDBCBaseDatabaseWrapper(BaseDatabaseWrapper):
                                         conn_params['PASSWORD'],
                                         self.jdbc_driver_class_name,
                                         **conn_params['OPTIONS'])
+            self._set_default_isolation_level(connection)
         return connection
 
     def _set_autocommit(self, autocommit):
         self.connection.autocommit = autocommit
 
+    @staticmethod
+    def _set_default_isolation_level(connection):
+        """
+        Make transactions transparent to all cursors. Must be called by zxJDBC backends
+        after instantiating a connection.
 
-class JDBCBaseDatabaseFeatures(BaseDatabaseFeatures):
-    needs_datetime_string_cast = False
+        :param connection: zxJDBC connection
+        """
+        jdbc_connection = connection.__connection__
+        jdbc_connection.setTransactionIsolation(JDBCConnection.TRANSACTION_READ_COMMITTED)
 
 
 class JDBCBaseDatabaseOperations(BaseDatabaseOperations):
@@ -117,30 +125,6 @@ class JDBCBaseDatabaseOperations(BaseDatabaseOperations):
         first = datetime(value, 1, 1)
         second = datetime(value, 12, 31, 23, 59, 59, 999999)
         return [first, second]
-
-
-class JDBCBaseDatabaseIntrospection(BaseDatabaseIntrospection):
-    pass
-
-
-class JDBCBaseDatabaseClient(BaseDatabaseClient):
-    pass
-
-
-class JDBCBaseDatabaseValidation(BaseDatabaseValidation):
-    pass
-
-
-class JDBCBaseDatabaseCreation(BaseDatabaseCreation):
-    pass
-
-
-class JDBCFieldInfo(FieldInfo):
-    pass
-
-
-class JDBCBaseDatabaseSchemaEditor(BaseDatabaseSchemaEditor):
-    pass
 
 
 class JDBCCursorWrapper(object):
@@ -210,17 +194,33 @@ class JDBCCursorWrapper(object):
     arraysize = property(fget=__get_arraysize, fset=__set_arraysize)
 
 
-def set_default_isolation_level(connection, innodb_binlog=False):
-    """
-    Make transactions transparent to all cursors. Must be called by zxJDBC backends
-    after instantiating a connection.
+class JDBCBaseDatabaseFeatures(BaseDatabaseFeatures):
+    needs_datetime_string_cast = False
 
-    :param connection: zxJDBC connection
-    :param innodb_binlog: If special case for InnoDB
-    """
-    jdbc_connection = connection.__connection__
 
-    if innodb_binlog:
-        jdbc_connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ)
-    else:
-        jdbc_connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED)
+class JDBCBaseDatabaseIntrospection(BaseDatabaseIntrospection):
+    pass
+
+
+class JDBCBaseDatabaseClient(BaseDatabaseClient):
+    pass
+
+
+class JDBCBaseDatabaseValidation(BaseDatabaseValidation):
+    pass
+
+
+class JDBCBaseDatabaseCreation(BaseDatabaseCreation):
+    pass
+
+
+class JDBCFieldInfo(FieldInfo):
+    pass
+
+
+class JDBCBaseDatabaseSchemaEditor(BaseDatabaseSchemaEditor):
+    pass
+
+
+class JDBCConnection(Connection):
+    pass

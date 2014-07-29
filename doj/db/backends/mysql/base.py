@@ -20,6 +20,7 @@ from doj.db.backends import JDBCBaseDatabaseWrapper as BaseDatabaseWrapper
 from doj.db.backends import JDBCBaseDatabaseFeatures as BaseDatabaseFeatures
 from doj.db.backends import JDBCBaseDatabaseOperations as BaseDatabaseOperations
 from doj.db.backends import JDBCCursorWrapper as CursorWrapper
+from doj.db.backends import JDBCConnection
 
 from doj.db.backends.mysql.client import DatabaseClient
 from doj.db.backends.mysql.creation import DatabaseCreation
@@ -438,3 +439,14 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         if not match:
             raise Exception('Unable to determine MySQL version from version string %r' % server_info)
         return tuple(int(x) for x in match.groups())
+
+    @staticmethod
+    def _set_default_isolation_level(connection):
+        """
+        Make transactions transparent to all cursors. Must be called by zxJDBC backends
+        after instantiating a connection.
+
+        :param connection: zxJDBC connection
+        """
+        jdbc_connection = connection.__connection__
+        jdbc_connection.setTransactionIsolation(JDBCConnection.TRANSACTION_REPEATABLE_READ)

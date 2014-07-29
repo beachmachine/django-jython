@@ -27,6 +27,7 @@ from doj.db.backends import JDBCBaseDatabaseFeatures as BaseDatabaseFeatures
 from doj.db.backends import JDBCBaseDatabaseValidation as BaseDatabaseValidation
 from doj.db.backends import JDBCBaseDatabaseOperations as BaseDatabaseOperations
 from doj.db.backends import JDBCCursorWrapper as CursorWrapper
+from doj.db.backends import JDBCConnection
 
 from doj.db.backends.sqlite.client import DatabaseClient
 from doj.db.backends.sqlite.creation import DatabaseCreation
@@ -453,6 +454,17 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         Returns a new instance of this backend's SchemaEditor
         """
         return DatabaseSchemaEditor(self, *args, **kwargs)
+
+    @staticmethod
+    def _set_default_isolation_level(connection):
+        """
+        Make transactions transparent to all cursors. Must be called by zxJDBC backends
+        after instantiating a connection.
+
+        :param connection: zxJDBC connection
+        """
+        jdbc_connection = connection.__connection__
+        jdbc_connection.setTransactionIsolation(JDBCConnection.TRANSACTION_SERIALIZABLE)
 
 
 def _sqlite_date_extract(lookup_type, dt):
