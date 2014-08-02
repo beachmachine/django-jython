@@ -142,6 +142,9 @@ class JDBCCursorWrapper(object):
         self.cursor.arraysize = size
 
     def __getattr__(self, attr):
+        if attr == 'rowcount':
+            if self.cursor.updatecount > self.cursor.rowcount:
+                return self.cursor.updatecount
         return getattr(self.cursor, attr)
 
     def __iter__(self):
