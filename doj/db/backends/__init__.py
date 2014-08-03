@@ -141,10 +141,12 @@ class JDBCCursorWrapper(object):
     def __set_arraysize(self, size):
         self.cursor.arraysize = size
 
+    def __get_rowcount(self):
+        if self.cursor.updatecount > self.cursor.rowcount:
+            return self.cursor.updatecount
+        return self.cursor.rowcount
+
     def __getattr__(self, attr):
-        if attr == 'rowcount':
-            if self.cursor.updatecount > self.cursor.rowcount:
-                return self.cursor.updatecount
         return getattr(self.cursor, attr)
 
     def __iter__(self):
@@ -195,6 +197,7 @@ class JDBCCursorWrapper(object):
         return self.cursor.setoutputsize(sizes, column)
 
     arraysize = property(fget=__get_arraysize, fset=__set_arraysize)
+    rowcount = property(fget=__get_rowcount)
 
 
 class JDBCBaseDatabaseFeatures(BaseDatabaseFeatures):
