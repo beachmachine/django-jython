@@ -4,10 +4,10 @@ from __future__ import absolute_import, unicode_literals
 
 import sys
 import time
+import django
 
 from unittest import expectedFailure
 
-import django
 from django.conf import settings
 from django.db import connections
 from django.utils import six
@@ -80,7 +80,7 @@ class DatabaseCreation(BaseDatabaseCreation):
             setattr(test_case, method_name, method)
 
     def create_test_db(self, *args, **kwargs):
-        self.mark_tests_as_expected_failure(self.connection.features.failing_tests)
+        #self.mark_tests_as_expected_failure(self.connection.features.failing_tests)
         super(DatabaseCreation, self).create_test_db(*args, **kwargs)
 
     def _create_test_db(self, verbosity=1, autoclobber=False):
@@ -89,7 +89,7 @@ class DatabaseCreation(BaseDatabaseCreation):
         """
         if self._test_database_create(settings):
             try:
-                with self.connection:
+                with self.connection.cursor():
                     test_database_name = super(DatabaseCreation, self)._create_test_db(verbosity, autoclobber)
             except Exception as e:
                 if 'Choose a different database name.' in str(e):

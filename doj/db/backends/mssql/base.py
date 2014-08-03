@@ -74,7 +74,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
 
     # Dict of test import path and list of versions on which it fails
     failing_tests = {
-        # Some tests are known to fail with django-mssql.
+        # Some tests are known to fail with DOJ/mssql.
         'aggregation.tests.BaseAggregateTestCase.test_dates_with_aggregation': [(1, 6), (1, 7)],
         'aggregation_regress.tests.AggregationTests.test_more_more_more': [(1, 6), (1, 7)],
 
@@ -93,7 +93,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     jdbc_connection_url_pattern = 'jdbc:jtds:sqlserver://%(HOST)s:%(PORT)s/%(NAME)s'
     jdbc_default_host = 'localhost'
     jdbc_default_port = 1433
-    jdbc_default_name = 'sys'
+    jdbc_default_name = 'master'
     operators = {
         "exact": "= %s",
         "iexact": "LIKE %s ESCAPE '\\'",

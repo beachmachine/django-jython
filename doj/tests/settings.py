@@ -63,12 +63,12 @@ WSGI_APPLICATION = 'doj.tests.wsgi.application'
 TEST_DATABASES = {
     'sqlite': {
         'ENGINE': 'doj.db.backends.sqlite',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        'TEST_NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, 'doj.sqlite3'),
+        'TEST_NAME': os.path.join(BASE_DIR, 'doj-tests.sqlite3'),
     },
     'postgresql': {
         'ENGINE': 'doj.db.backends.postgresql',
-        'NAME': 'doj-tests',
+        'NAME': 'doj',
         'TEST_NAME': 'doj-tests',
         'HOST': 'localhost',
         'USER': 'root',
@@ -76,7 +76,7 @@ TEST_DATABASES = {
     },
     'mysql': {
         'ENGINE': 'doj.db.backends.mysql',
-        'NAME': 'doj-tests',
+        'NAME': 'doj',
         'TEST_NAME': 'doj-tests',
         'HOST': 'localhost',
         'USER': 'root',
@@ -84,7 +84,7 @@ TEST_DATABASES = {
     },
     'mssql': {
         'ENGINE': 'doj.db.backends.mssql',
-        'NAME': 'doj-tests',
+        'NAME': 'doj',
         'TEST_NAME': 'doj-tests',
         'HOST': 'localhost',
         'USER': 'root',

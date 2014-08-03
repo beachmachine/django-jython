@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import codecs
+
+from decimal import Decimal
 
 from django.utils import six
 
@@ -135,7 +138,7 @@ END'''
         # new schema, copy the data, drop all inbound foreign keys to old table,
         # swap in the temp table, and finally rebuild all inbound foreign keys.
         raise NotImplementedError(
-            "django-mssql doesn't support adding an IDENTITY column to a table."
+            "DOJ/mssql doesn't support adding an IDENTITY column to a table."
         )
 
     def _alter_db_column_sql(self, model, column, alteration=None, values={}, fragment=False, params=None):
@@ -197,7 +200,17 @@ END''' % {'table': model._meta.db_table}
             return "'%s'" % six.text_type(value).replace("\'", "\'\'")
         elif isinstance(value, bool):
             return "1" if value else "0"
+        elif isinstance(value, (Decimal, float)):
+            return str(value)
+        elif isinstance(value, six.integer_types):
+            return str(value)
         elif value is None:
             return "NULL"
+        elif isinstance(value, (bytes, bytearray, six.memoryview)):
+            value = bytes(value)
+            hex_encoder = codecs.getencoder('hex_codec')
+            value_hex, _length = hex_encoder(value)
+            # Use 'ascii' encoding for b'01' => '01', no need to use force_text here.
+            return "0x%s" % value_hex.decode('ascii').upper()
         else:
-            return six.text_type(value)
+            raise ValueError("Cannot quote parameter value %r of type %s" % (value, type(value)))
