@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('field_4', models.CharField(max_length=256, help_text='', default=b'abc')),
                 ('field_5', models.DateField(help_text='', auto_now_add=True)),
                 ('field_6', models.DateTimeField(help_text='', auto_now_add=True)),
-                ('field_7', models.DecimalField(help_text='', max_digits=5, decimal_places=2, default=123.456)),
+                ('field_7', models.DecimalField(help_text='', max_digits=5, decimal_places=2, default=123.45)),
                 ('field_8', models.EmailField(max_length=75, help_text='', default=b'test@email.at')),
                 ('field_9', models.FloatField(help_text='', default=12.34)),
                 ('field_10', models.IntegerField(help_text='', default=1234)),
@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='testmodel',
             name='field_19',
-            field=models.ForeignKey(help_text='', to='db.TestModelRelation', null=True),
+            field=models.ForeignKey(help_text='', to='db.TestModelRelation', null=True, blank=True),
             preserve_default=True,
         ),
     ]

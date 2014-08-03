@@ -77,7 +77,6 @@ class SQLCompiler(compiler.SQLCompiler):
         values = []
         index_extra_select = len(self.query.extra_select)
         for value, field in zip_longest(row[index_extra_select:], fields):
-            # print '\tfield=%s\tvalue=%s' % (repr(field), repr(value))
             if field:
                 try:
                     value = self.connection.ops.convert_values(value, field)

@@ -318,6 +318,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     jdbc_connection_url_pattern = 'jdbc:sqlite://%(NAME)s'
     jdbc_default_host = ''
     jdbc_default_port = 0
+    jdbc_default_name = ':memory:'
     # SQLite requires LIKE statements to include an ESCAPE clause if the value
     # being escaped has a percent or underscore in it.
     # See http://www.sqlite.org/lang_expr.html for an explanation.
@@ -363,7 +364,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                 "settings.DATABASES is improperly configured. "
                 "Please supply the NAME value.")
 
-        settings_dict['NAME'] = settings_dict['NAME'] or ':memory:'
+        settings_dict['NAME'] = settings_dict['NAME'] or self.jdbc_default_name
         return settings_dict
 
     def get_new_connection(self, conn_params):

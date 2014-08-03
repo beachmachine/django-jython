@@ -306,6 +306,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     jdbc_connection_url_pattern = 'jdbc:mysql://%(HOST)s:%(PORT)s/%(NAME)s?zeroDateTimeBehavior=convertToNull'
     jdbc_default_host = 'localhost'
     jdbc_default_port = 3306
+    jdbc_default_name = 'mysql'
     operators = {
         'exact': '= %s',
         'iexact': 'LIKE %s',
@@ -343,7 +344,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                 "settings.DATABASES is improperly configured. "
                 "Please supply the NAME value.")
 
-        settings_dict['NAME'] = settings_dict['NAME'] or 'mysql'
+        settings_dict['NAME'] = settings_dict['NAME'] or self.jdbc_default_name
         return settings_dict
 
     def init_connection_state(self):

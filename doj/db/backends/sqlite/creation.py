@@ -14,7 +14,7 @@ class DatabaseCreation(BaseDatabaseCreation):
     # schema inspection is more useful.
     data_types = {
         'AutoField': 'integer',
-        'BinaryField': 'BLOB',
+        'BinaryField': 'blob',
         'BooleanField': 'bool',
         'CharField': 'varchar(%(max_length)s)',
         'CommaSeparatedIntegerField': 'varchar(%(max_length)s)',

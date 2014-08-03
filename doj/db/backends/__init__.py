@@ -31,6 +31,7 @@ class JDBCBaseDatabaseWrapper(BaseDatabaseWrapper):
     """
     jdbc_default_host = None
     jdbc_default_port = None
+    jdbc_default_name = None
     jdbc_driver_class_name = None
     jdbc_connection_url_pattern = None
 
@@ -52,6 +53,8 @@ class JDBCBaseDatabaseWrapper(BaseDatabaseWrapper):
             settings_dict['HOST'] = self.jdbc_default_host
         if not settings_dict.get('PORT', None):
             settings_dict['PORT'] = self.jdbc_default_port
+        if not settings_dict.get('NAME', None):
+            settings_dict['NAME'] = self.jdbc_default_name
 
         return settings_dict
 
@@ -154,7 +157,7 @@ class JDBCCursorWrapper(object):
 
     def execute(self, sql, params=None):
         if not params:
-            params = ()
+            params = tuple()
         sql = sql % (('?',) * len(params))
         self.cursor.execute(sql, params)
 

@@ -58,9 +58,10 @@ class DatabaseFeatures(BaseDatabaseFeatures):
 class DatabaseWrapper(BaseDatabaseWrapper):
     vendor = 'postgresql'
     jdbc_driver_class_name = 'org.postgresql.Driver'
-    jdbc_connection_url_pattern = 'jdbc:postgresql://%(HOST)s:%(PORT)s/%(NAME)s'
+    jdbc_connection_url_pattern = 'jdbc:postgresql://%(HOST)s:%(PORT)s/%(NAME)s?stringtype=unspecified'
     jdbc_default_host = 'localhost'
     jdbc_default_port = 5432
+    jdbc_default_name = 'postgres'
     operators = {
         'exact': '= %s',
         'iexact': '= UPPER(%s)',
@@ -103,7 +104,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                 "settings.DATABASES is improperly configured. "
                 "Please supply the NAME value.")
 
-        settings_dict['NAME'] = settings_dict['NAME'] or 'postgres'
+        settings_dict['NAME'] = settings_dict['NAME'] or self.jdbc_default_name
         return settings_dict
 
     def init_connection_state(self):

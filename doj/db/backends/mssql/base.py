@@ -93,6 +93,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     jdbc_connection_url_pattern = 'jdbc:jtds:sqlserver://%(HOST)s:%(PORT)s/%(NAME)s'
     jdbc_default_host = 'localhost'
     jdbc_default_port = 1433
+    jdbc_default_name = 'sys'
     operators = {
         "exact": "= %s",
         "iexact": "LIKE %s ESCAPE '\\'",
@@ -141,7 +142,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                 "settings.DATABASES is improperly configured. "
                 "Please supply the NAME value.")
 
-        settings_dict['NAME'] = settings_dict['NAME'] or 'sys'
+        settings_dict['NAME'] = settings_dict['NAME'] or self.jdbc_default_name
         return settings_dict
 
     def init_connection_state(self):
