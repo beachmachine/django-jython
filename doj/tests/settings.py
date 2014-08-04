@@ -86,15 +86,14 @@ TEST_DATABASES = {
         'ENGINE': 'doj.db.backends.mssql',
         'NAME': 'doj',
         'TEST_NAME': 'doj-tests',
-        #'HOST': 'localhost',
-        'HOST': '192.168.56.102',
+        'HOST': 'localhost',
         'USER': 'root',
         'PASSWORD': 'root',
     },
 }
 
 DATABASES = {
-    'default': TEST_DATABASES['mssql'],
+    'default': TEST_DATABASES['sqlite'],
 }
 
 # Internationalization
