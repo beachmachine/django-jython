@@ -76,10 +76,10 @@ def create_function(conn, name, num_args, py_func):
     from org.sqlite import Function
     class func(Function):
         def xFunc(self):
-            assert self.args() == num_args
-            args = [self.value_string(n) for n in xrange(0, num_args)]
+            assert self.super__args() == num_args
+            args = [self.super__value_text(n) for n in xrange(0, num_args)]
             ret = py_func(*args)
-            self.result(ret)
+            self.super__result(ret)
     Function.create(conn, name, func())
 
 
@@ -482,7 +482,10 @@ def _sqlite_date_extract(lookup_type, dt):
     if dt is None:
         return None
     try:
-        dt = backend_utils.typecast_timestamp(dt)
+        if str(dt).isdecimal():
+            dt = datetime.datetime.fromtimestamp(int(dt)/1000)
+        else:
+            dt = backend_utils.typecast_timestamp(dt)
     except (ValueError, TypeError):
         return None
     if lookup_type == 'week_day':
@@ -493,7 +496,10 @@ def _sqlite_date_extract(lookup_type, dt):
 
 def _sqlite_date_trunc(lookup_type, dt):
     try:
-        dt = backend_utils.typecast_timestamp(dt)
+        if str(dt).isdecimal():
+            dt = datetime.datetime.fromtimestamp(int(dt)/1000)
+        else:
+            dt = backend_utils.typecast_timestamp(dt)
     except (ValueError, TypeError):
         return None
     if lookup_type == 'year':
@@ -508,7 +514,10 @@ def _sqlite_datetime_extract(lookup_type, dt, tzname):
     if dt is None:
         return None
     try:
-        dt = backend_utils.typecast_timestamp(dt)
+        if str(dt).isdecimal():
+            dt = datetime.datetime.fromtimestamp(int(dt)/1000)
+        else:
+            dt = backend_utils.typecast_timestamp(dt)
     except (ValueError, TypeError):
         return None
     if tzname is not None:
@@ -521,7 +530,10 @@ def _sqlite_datetime_extract(lookup_type, dt, tzname):
 
 def _sqlite_datetime_trunc(lookup_type, dt, tzname):
     try:
-        dt = backend_utils.typecast_timestamp(dt)
+        if str(dt).isdecimal():
+            dt = datetime.datetime.fromtimestamp(int(dt)/1000)
+        else:
+            dt = backend_utils.typecast_timestamp(dt)
     except (ValueError, TypeError):
         return None
     if tzname is not None:
@@ -542,7 +554,10 @@ def _sqlite_datetime_trunc(lookup_type, dt, tzname):
 
 def _sqlite_format_dtdelta(dt, conn, days, secs, usecs):
     try:
-        dt = backend_utils.typecast_timestamp(dt)
+        if str(dt).isdecimal():
+            dt = datetime.datetime.fromtimestamp(int(dt)/1000)
+        else:
+            dt = backend_utils.typecast_timestamp(dt)
         delta = datetime.timedelta(int(days), int(secs), int(usecs))
         if conn.strip() == '+':
             dt = dt + delta
