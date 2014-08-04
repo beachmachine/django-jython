@@ -3,8 +3,10 @@ syntax:glob
 *.class
 *~
 *.war
+*.sqlite3
 build
 MANIFEST
 semantic.cache
 dist/*
 docs/_build/*
+doj/tests/settings.py
