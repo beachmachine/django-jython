@@ -35,7 +35,8 @@ class JDBCBaseDatabaseWrapper(BaseDatabaseWrapper):
     jdbc_driver_class_name = None
     jdbc_connection_url_pattern = None
 
-    Database = zxJDBC
+    class Database(zxJDBC):
+        pass
 
     class DatabaseError(Exception):
         pass

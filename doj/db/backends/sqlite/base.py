@@ -344,6 +344,16 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         'istartswith': "LIKE UPPER(%s) || '%%%%'",
     }
 
+    class Database(BaseDatabaseWrapper.Database):
+
+        @staticmethod
+        def Binary(value):
+            """
+            The SQLite JDBC driver does not support binary fields,
+            so we use them as text fields.
+            """
+            return bytes(value)
+
     def __init__(self, *args, **kwargs):
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
 
