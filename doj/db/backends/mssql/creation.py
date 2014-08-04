@@ -120,13 +120,11 @@ class DatabaseCreation(BaseDatabaseCreation):
                 # boot all other connections to the database, leaving only this connection
                 cursor.execute("ALTER DATABASE %s SET SINGLE_USER WITH ROLLBACK IMMEDIATE" % qn_db_name)
                 time.sleep(1)
-                # database is now clear to drop
+                # after we switch to master, database is clear to drop
+                cursor.execute("USE [master]")
                 cursor.execute("DROP DATABASE %s" % qn_db_name)
         except Exception:
-            # if 'it is currently in use' in str(e):
-            #     six.print_('Cannot drop database %s because it is in use' % test_database_name)
-            # else:
-                six.reraise(*sys.exc_info())
+            six.reraise(*sys.exc_info())
 
     def _test_database_create(self, settings):
         """
