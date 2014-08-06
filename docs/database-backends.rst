@@ -1,6 +1,6 @@
 .. _database-backends:
 
-Database Backends
+Database backends
 =================
 
 Backends are implemented using the great Jython's zxJDBC package, which makes
@@ -78,7 +78,7 @@ Developed and tested against MSSQL 2008 with the JDBC driver
 Download the JDBC Driver from http://jtds.sourceforge.net/ and
 remember to put the JAR file on the ``CLASSPATH``.
 
-JNDI Support
+JNDI support
 ------------
 
 All the backends documented on the previous sections support JNDI lookups to
@@ -101,7 +101,7 @@ the application server in which you will deploy your application.
 
   When using JNDI and with the exception of ``ENGINE``, all the other
   options will be ignored by django-jython. For ease of
-  development you may want to add the ``JNDI_NAME`` option *only* to the staging
+  development you may want to add the ``JNDI_NAME`` option **only** to the staging
   and production servers. After all, on most cases you won't really need
   database connection pooling when testing on your development machine.
 
@@ -130,7 +130,7 @@ specified as another dictionary. For example::
 Note that usually you don't need to pass additional options for JNDI to work if
 the application has been deployed on a JavaEE container (such as Tomcat,
 Glassfish, JBoss, Websphere, Weblogic, etc). We provide this setting for
-flexibility and completeness. But on most cases the configuration will looklike
+flexibility and completeness. But on most cases the configuration will look like
 the one-liner shown on the first JNDI settings example.
 
 [TODO] Recipe: JNDI and Tomcat
@@ -154,7 +154,7 @@ configuration line to your settings.py::
     }
   }
 
-Do *not* remove the other database settings, as they will be used by
+Do **not** remove the other database settings, as they will be used by
 django-jython to help you create your JNDI configuration.
 
 Deploy your application as normal. It won't work (raising a JNDI exception

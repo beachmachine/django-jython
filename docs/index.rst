@@ -1,6 +1,6 @@
 ..
 
-Welcome to Django-Jython's documentation!
+Welcome to django-jython's documentation!
 =========================================
 
 django-jython is a collection of tools and database backends to use the `Django

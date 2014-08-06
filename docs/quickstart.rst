@@ -28,7 +28,7 @@ To get started with using django-jython, first install it following these steps:
      Successfully installed django-jython
 
 
-Database Backends
+Database backends
 -----------------
 
 Then, if you want to use the JDBC backends change the ``settings.py`` file of
@@ -74,14 +74,25 @@ containing the JDBC driver for each database somewhere in your
 
   export CLASSPATH="$CLASSPATH:/path/to/postgresql-9.1-902.jdbc4.jar"
 
-Building a war file
--------------------
+Django and Jython
+-----------------
 
-.. note::
+The minimal required version of Jython to make Django work is 2.7b2. As this version
+is still in development there are some bugs and incompatibilities we need to work around.
+For this reason django-jython comes with some patches that are applied on runtime (this means
+you do **not** need to modify the sources of Django or Jython). django-jython tries to
+automatically apply these patches as early as possible, but sometimes this mechanism
+fails. To make sure the patching works, add these lines to the **very top** of
+the ``manage.py`` file of your application::
 
-  This functionality has been dropped from the reimplementation of
-  django-jython, but it will be re-added soon. The following documentation
-  shows you how this feature will work.
+  #!/usr/bin/env python
+  from doj.monkey import install_monkey_patches
+  install_monkey_patches()
+
+  # Usual content of manage.py...
+
+Building a .war file
+--------------------
 
 To build a war archive for deployment into Java application servers, change
 ``settings.py`` on your project to include ``'doj'``. For example::
@@ -98,8 +109,7 @@ To build a war archive for deployment into Java application servers, change
       'doj',
   )
 
-Then you can build a war file running ``jython manage.py war`` on your project
+Then you can build a war file running ``jython manage.py buildwar`` on your project
 directory.
 
 For a complete documentation on building war files see :ref:`war-deployment`.
-
