@@ -1,0 +1,2 @@
+This is the standard J2EE directory where servlet support jars, etc, should be placed.
+In the simple case, this is where the `jython.jar` file should go.

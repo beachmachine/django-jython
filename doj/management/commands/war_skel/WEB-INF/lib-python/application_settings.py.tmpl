@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+
+from {{ settings.SETTINGS_MODULE }} import *
+
+CONTEXT_ROOT = "{{ context_root }}"
+
+{% if settings.MEDIA_URL.0 == '/' %}
+MEDIA_URL = "/{{ context_root }}{{ settings.MEDIA_URL }}"
+{% endif %}
+
+{% if settings.STATIC_URL.0 == '/' %}
+STATIC_URL = "/{{ context_root }}{{ settings.STATIC_URL }}"
+{% endif %}
+
+{% if settings.LOGIN_REDIRECT_URL.0 == '/' %}
+LOGIN_REDIRECT_URL = "/{{ context_root }}{{ settings.LOGIN_REDIRECT_URL }}"
+{% endif %}
+
+{% if settings.LOGIN_URL.0 == '/' %}
+LOGIN_URL = "/{{ context_root }}{{ settings.LOGIN_URL }}"
+{% endif %}
+
+{% if settings.LOGOUT_URL.0 == '/' %}
+LOGOUT_URL = "/{{ context_root }}{{ settings.LOGOUT_URL }}"
+{% endif %}

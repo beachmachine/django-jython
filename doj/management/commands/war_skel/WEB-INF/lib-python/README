@@ -1,0 +1,9 @@
+This directory is treated specially by modjy. Firstly, lib-python is added
+to `sys.path`, which means that any python libraries you wish to use can be
+dropped in here, and they will automatically become available to your code.
+Secondly, the directory is searched for python `.pth` files. These files are
+simple text files, each line of which is added directly to sys.path. So if
+you want to use `.jar` files, `.zip` files or `.egg` files containing python
+code, you should create a text file, whose name ends with .pth, listing each
+of those files, one per line, and place the file in the lib-python directory.
+All files in the lib-python directory whose names end with .pth are scanned.

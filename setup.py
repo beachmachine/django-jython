@@ -13,13 +13,23 @@ setup(
         'doj.db.backends.mysql',
         'doj.db.backends.postgresql',
         'doj.db.backends.sqlite',
+        'doj.management',
+        'doj.management.commands',
         'doj.monkey',
         'doj.tests',
         'doj.tests.db',
         'doj.tests.db.migrations',
+        'doj.tests.monkey',
     ],
     package_data={
-        'doj.management.commands': []
+        'doj.management.commands': [
+            'war_skel/wsgi.py.tmpl',
+            'war_skel/WEB-INF/web.xml.tmpl',
+            'war_skel/WEB-INF/lib/README',
+            'war_skel/WEB-INF/lib/jruby-extras-fileservlet.jar',
+            'war_skel/WEB-INF/lib-python/application_settings.py.tmpl',
+            'war_skel/WEB-INF/lib-python/README',
+        ],
     },
     # metadata for upload to PyPI
     author=u"Andreas Stocker",
