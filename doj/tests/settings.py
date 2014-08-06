@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """
 Django settings for tests project.
 
@@ -86,7 +85,7 @@ TEST_DATABASES = {
         'ENGINE': 'doj.db.backends.mssql',
         'NAME': 'doj',
         'TEST_NAME': 'doj-tests',
-        'HOST': 'localhost',
+        'HOST': '192.168.56.102',
         'USER': 'root',
         'PASSWORD': 'root',
     },
