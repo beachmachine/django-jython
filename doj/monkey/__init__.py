@@ -6,6 +6,10 @@ import doj.monkey.inspect_getcallargs
 
 
 def install_monkey_patches():
-    doj.monkey.django_utils_functional_lazy.install()
-    doj.monkey.django_http_response_streaminghttpresponse.install()
-    doj.monkey.inspect_getcallargs.install()
+    # Make sure we install monkey patches only once
+    if not getattr(install_monkey_patches, 'installed', False):
+        setattr(install_monkey_patches, 'installed', True)
+
+        doj.monkey.django_utils_functional_lazy.install()
+        doj.monkey.django_http_response_streaminghttpresponse.install()
+        doj.monkey.inspect_getcallargs.install()
