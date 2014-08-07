@@ -87,3 +87,16 @@ class DBTestCase(TestCase):
         self.assertEqual(TestModel.objects.filter(field_5__lt=future_date).count(), DBTestCase.NUMBER_OF_RECORDS/2)
         self.assertEqual(TestModel.objects.filter(field_5__gt=past_date).count(), DBTestCase.NUMBER_OF_RECORDS/2)
         self.assertEqual(TestModel.objects.filter(field_5__range=(past_date, future_date)).count(), DBTestCase.NUMBER_OF_RECORDS)
+
+    def test_join_lookup(self):
+        for _ in range(0, DBTestCase.NUMBER_OF_RECORDS):
+            test_model = TestModel()
+            test_model.save()
+
+            test_relation = TestModelRelation()
+            test_relation.save()
+
+            test_relation.test_models.add(test_model)
+
+        self.assertEqual(TestModel.objects.filter(field_19__field_1=1234).count(), DBTestCase.NUMBER_OF_RECORDS)
+        self.assertEqual(TestModel.objects.filter(field_19__field_1=0).count(), 0)
