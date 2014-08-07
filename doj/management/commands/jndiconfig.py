@@ -47,11 +47,27 @@ class Command(NoArgsCommand, DOJConfigurationMixin):
         return os.path.join(os.path.dirname(__file__), 'jndi_skel')
 
     def _get_resource_name(self):
+        """
+        Gets the resource name for the JNDI configuration from the
+        ``JNDI_NAME`` entry in the database ``OPTIONS``
+
+        :return: Resource name
+        """
         settings_dict = self._get_database_configuration()
         jndi_name = settings_dict.get('OPTIONS', {}).get('JNDI_NAME', '')
         return jndi_name.replace('java:comp/env/', '')
 
     def _is_jndi_enabled(self):
+        """
+        Checks if a JNDI configuration can be created for the
+        current database configuration. The configuration can be created if
+        all of the following conditions are true:
+        - The connection has a ``get_jdbc_driver_class_name`` method
+        - The connection has a ``get_jdbc_connection_url`` method
+        - The ``JNDI_NAME`` entry is set on the database ``OPTIONS``
+
+        :return: JNDI configuration possible
+        """
         settings_dict = self._get_database_configuration()
 
         if not hasattr(connection, 'get_jdbc_driver_class_name'):

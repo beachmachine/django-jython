@@ -77,8 +77,8 @@ class Command(NoArgsCommand, DOJConfigurationMixin):
         """
         Determines if media files are included in the WAR. Media files are included
         when all of the following conditions are true:
-        * `MEDIA_ROOT` is set and an existing directory
-        * `MEDIA_URL` is set and an absolute, but not fully qualified, URL
+        - `MEDIA_ROOT` is set and an existing directory
+        - `MEDIA_URL` is set and an absolute, but not fully qualified, URL
 
         :return: Media included in WAR
         """
@@ -99,8 +99,8 @@ class Command(NoArgsCommand, DOJConfigurationMixin):
         """
         Determines if static files are included in the WAR. Static files are included
         when all of the following conditions are true:
-        * `STATIC_ROOT` is set and an existing directory
-        * `STATIC_URL` is set and an absolute, but not fully qualified, URL
+        - `STATIC_ROOT` is set and an existing directory
+        - `STATIC_URL` is set and an absolute, but not fully qualified, URL
 
         :return: Static included in WAR
         """
