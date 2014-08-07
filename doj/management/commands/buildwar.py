@@ -3,17 +3,18 @@
 import os
 import tempfile
 import zipfile
-import glob
 
 from optparse import make_option
 
 from django.conf import settings
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import NoArgsCommand
 from django.template import Context, Template
 
+from doj.management.commands import DOJConfigurationMixin
 
-class Command(BaseCommand):
-    option_list = BaseCommand.option_list + (
+
+class Command(NoArgsCommand, DOJConfigurationMixin):
+    option_list = NoArgsCommand.option_list + (
         make_option('--include-java-libs', dest='include_java_libs', default='',
                     help=u"List of java libraries (in the form of JAR files), "
                          u"which must be included, separated by the \"%s\" "
@@ -38,7 +39,7 @@ class Command(BaseCommand):
         make_option('--context-root', dest='context_root', default='',
                     help=u"Name of the context root for the application. If "
                          u"unspecified, the project name is used. The context "
-                         u"root name is used as the name of the WAR file, and "
+                         u"root name is used as the name of the .war file, and "
                          u"as a prefix for some url-related settings, such as "
                          u"MEDIA_URL"),
         make_option('--base-dir', dest='base_dir', default='',
@@ -58,17 +59,6 @@ class Command(BaseCommand):
         self.__tmp_dir = None
         self.__base_dir = None
 
-    def _setup(self, args, options):
-        """
-        Makes the given arguments an options available
-        to all methods.
-
-        :param args: Command arguments as tuple
-        :param options: Command arguments as dict
-        """
-        self._args = args
-        self._options = options
-
     def _get_skel_dir(self):
         return os.path.join(os.path.dirname(__file__), 'war_skel')
 
@@ -82,112 +72,6 @@ class Command(BaseCommand):
         if not self.__tmp_dir:
             self.__tmp_dir = tempfile.mkdtemp(suffix='-buildwar')
         return self.__tmp_dir
-
-    def _get_base_dir(self):
-        """
-        Gets the path to the project base.
-
-        :return: Directory path
-        """
-        if not self.__base_dir:
-            self.__base_dir = self._options.get('base_dir', None)
-            if not self.__base_dir:
-                self.__base_dir = getattr(settings, 'BASE_DIR', None)
-
-            if not self.__base_dir:
-                self.__base_dir = os.path.dirname(settings.__file__)
-
-        return self.__base_dir
-
-    def _get_project_name(self):
-        """
-        Gets a descriptive name of the project.
-
-        :return: Name
-        """
-        project_name = self._options['project_name']
-        if not project_name:
-            project_name = getattr(settings, 'DOJ_BUILDWAR_PROJECT_NAME', None)
-            if not project_name:
-                project_name = os.path.basename(self._get_base_dir())
-
-        return project_name
-
-    def _get_project_description(self):
-        """
-        Gets a description for the project.
-
-        :return: Name
-        """
-        project_description = self._options['project_description']
-        if not project_description:
-            project_description = getattr(settings, 'DOJ_BUILDWAR_PROJECT_DESCRIPTION', None)
-            if not project_description:
-                project_description = self._get_project_name()
-
-        return project_description
-
-    def _get_context_root(self):
-        """
-        Gets the context name of the project.
-
-        :return: Context name
-        """
-        context_root = self._options['context_root']
-        if not context_root:
-            context_root = getattr(settings, 'DOJ_BUILDWAR_CONTEXT_ROOT', None)
-            if not context_root:
-                context_root = self._get_project_name()
-
-        return context_root.strip().replace(' ', '_')
-
-    def _get_django_apps(self):
-        """
-        Gets a list of installed Django apps.
-
-        :return: List of app names
-        """
-        return list(getattr(settings, 'INSTALLED_APPS', list()))
-
-    def _get_python_packages(self):
-        """
-        Gets a list of python packages that should be included in the WAR. First the
-        method looks for the `--include-py-packages` option, then for
-        `DOJ_BUILDWAR_PY_PACKAGES` in the settings.
-
-        :return: List of package names
-        """
-        packages = [p for p in self._options['include_py_packages'].split(os.path.pathsep) if p]
-        if not packages:
-            packages = getattr(settings, 'DOJ_BUILDWAR_PY_PACKAGES', list())
-
-        return [package.strip() for package in packages]
-
-    def _get_java_libs(self):
-        """
-        Gets a list of java libraries that should be included in the WAR. First the
-        method looks for the `--include-java-libs` option, then for
-        `DOJ_BUILDWAR_JAVA_LIBS` in the settings.
-
-        :return: List of absolute paths to .jar files
-        """
-        libs = [l for l in self._options['include_java_libs'].split(os.path.pathsep) if l]
-        if not libs:
-            libs = getattr(settings, 'DOJ_BUILDWAR_JAVA_LIBS', list())
-        return [l.strip() for l in libs]
-
-    def _get_additional_dirs(self):
-        """
-        Gets a list of additional directories that should be included in the WAR.
-        First the method looks for the `--include-additional-dirs` option, then for
-        `DOJ_BUILDWAR_ADDITIONAL_DIRS` in the settings.
-
-        :return: List of absolute paths to additional directories
-        """
-        dirs = [d for d in self._options['include_add_dirs'].split(os.path.pathsep) if d]
-        if not dirs:
-            dirs = getattr(settings, 'DOJ_BUILDWAR_ADDITIONAL_DIRS', list())
-        return [d.strip() for d in dirs]
 
     def _is_media_included(self):
         """
@@ -233,8 +117,8 @@ class Command(BaseCommand):
 
         return True
 
-    def handle(self, *args, **options):
-        self._setup(args, options)
+    def handle_noargs(self, **options):
+        self._setup(None, options)
 
         self.stdout.write(self.style.MIGRATE_LABEL(u"Assembling WAR"))
         self.stdout.flush()

@@ -59,6 +59,9 @@ class JDBCBaseDatabaseWrapper(BaseDatabaseWrapper):
 
         return settings_dict
 
+    def get_jdbc_driver_class_name(self):
+        return self.jdbc_driver_class_name
+
     def get_jdbc_connection_url(self):
         return self.jdbc_connection_url_pattern % self.get_jdbc_settings()
 
