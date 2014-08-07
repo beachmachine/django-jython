@@ -18,15 +18,15 @@ The first step is to add ``'doj'`` to the list of ``INSTALLED_APPS`` on your
 ``settings.py`` file. So this section should look like::
 
   INSTALLED_APPS = (
-      'django.contrib.auth',
-      'django.contrib.contenttypes',
-      'django.contrib.sessions',
-      'django.contrib.sites',
-      'django.contrib.admin',
-      'mysite.polls',
-      'mysite.another_app',
-      # More apps...
-      'doj',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.admin',
+    'mysite.polls',
+    'mysite.another_app',
+    # More apps...
+    'doj',
   )
 
 Then, the most typical usage is the one already exemplified::
@@ -56,10 +56,10 @@ settings. This has the advantage that there is no need to add the library paths 
 a ``DOJ_BUILDWAR_JAVA_LIBS`` configuration to your settings::
 
   DOJ_BUILDWAR_JAVA_LIBS = [
-      '/path/to/jython-standalone-2.7-b2.jar',
-      '/path/to/postgresql-9.1-902.jdbc4.jar',
-      '/path/to/iText-2.1.3.jar',
-      # More .jars...
+    '/path/to/jython-standalone-2.7-b2.jar',
+    '/path/to/postgresql-9.1-902.jdbc4.jar',
+    '/path/to/iText-2.1.3.jar',
+    # More .jars...
   ]
 
 Including extra Python libraries
@@ -89,8 +89,8 @@ dependencies to your application's settings. This is done with the
 ``DOJ_BUILDWAR_PY_PACKAGES`` configuration::
 
   DOJ_BUILDWAR_PY_PACKAGES = [
-      'pyamf',
-      # More packages...
+    'pyamf',
+    # More packages...
   ]
 
 Media files and the context root name

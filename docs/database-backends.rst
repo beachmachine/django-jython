@@ -22,7 +22,7 @@ Developed and tested against PostgreSQL v9.3 with the JDBC driver
 
   DATABASES = {
     'default': {
-      ...
+      # ...
       'ENGINE': 'doj.db.backends.postgresql',
     }
   }
@@ -38,7 +38,7 @@ Developed and tested against SQLite3 v3.7.6 with the JDBC driver
 
   DATABASES = {
     'default': {
-      ...
+      # ...
       'ENGINE': 'doj.db.backends.sqlite',
     }
   }
@@ -54,7 +54,7 @@ Developed and tested against SQLite3 v3.7.6 with the JDBC driver
 
   DATABASES = {
     'default': {
-      ...
+      # ...
       'ENGINE': 'doj.db.backends.mysql',
     }
   }
@@ -70,7 +70,7 @@ Developed and tested against MSSQL 2008 with the JDBC driver
 
   DATABASES = {
     'default': {
-      ...
+      # ...
       'ENGINE': 'doj.db.backends.mssql',
     }
   }
@@ -87,9 +87,9 @@ simply add the following line to the project's ``settings.py``::
 
   DATABASES = {
     'default': {
-      ...
+      # ...
       'OPTIONS': {
-        'JNDI_NAME': 'java:comp/env/jdbc/myDataSource'
+        'JNDI_NAME': 'java:comp/env/jdbc/myDataSource',
       }
     }
   }
@@ -109,14 +109,14 @@ Specifying additional JNDI options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Additionally, you can use the ``'JNDI_CONTEXT_OPTIONS'`` entry of the
-``OPTIONS`` dictionary to pass ``additional options
-<http://java.sun.com/j2se/1.5.0/docs/api/javax/naming/Context.html#INITIAL_CONTEXT_FACTORY>``_
+``OPTIONS`` dictionary to pass `additional options
+<http://java.sun.com/j2se/1.5.0/docs/api/javax/naming/Context.html#INITIAL_CONTEXT_FACTORY>`_
 to set up the underlying JNDI ``InitialContext``. The options are themselves
 specified as another dictionary. For example::
 
   DATABASES = {
     'default': {
-      ...
+      # ...
       'OPTIONS': {
         'JNDI_NAME': 'java:comp/env/jdbc/myDataSource',
         'JNDI_CONTEXT_OPTIONS': {
@@ -133,21 +133,15 @@ Glassfish, JBoss, Websphere, Weblogic, etc). We provide this setting for
 flexibility and completeness. But on most cases the configuration will look like
 the one-liner shown on the first JNDI settings example.
 
-[TODO] Recipe: JNDI and Tomcat
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. note::
-
-  This functionality has been dropped from the reimplementation of
-  django-jython, but it will be re-added soon. The following documentation
-  shows you how this feature will work.
+JNDI and Tomcat
+~~~~~~~~~~~~~~~
 
 To use django-jython JNDI support on top of Apache Tomcat, add the JNDI
 configuration line to your settings.py::
   
   DATABASES = {
     'default': {
-      ...
+      # ...
       'OPTIONS': {
         'JNDI_NAME': 'java:comp/env/jdbc/myDataSource'
       }
@@ -159,30 +153,30 @@ django-jython to help you create your JNDI configuration.
 
 Deploy your application as normal. It won't work (raising a JNDI exception
 telling you that "the jdbc name is not bound in this Context"), but we will fix
-that now. Use the tomcat management command to get a sample context XML file to
-set up your data source::
+that now. Use the ``jndiconfig`` management command to get a sample context XML
+file to set up your data source::
 
-  $ jython manage.py tomcat jndiconfig
+  $ jython manage.py jndiconfig
 
 You will see an output similar to this::
 
-  For a basic configuration of JNDI on your Tomcat server, create a file named
-  pollsite.xml on /path/to/apache-tomcat-6.x.x/conf/Catalina/localhost/ with the
-  following contents:
-  
+  <!-- This is the JNDI datasource configuration for mysite -->
   <Context>
+    <!-- Some documentation... -->
     <Resource name="jdbc/myDataSource"
               auth="Container"
               type="javax.sql.DataSource"
-              username="lsoto"
-              password="secret"
-              driverClassName="org.postgresql.Driver"
-              url="jdbc:postgresql://localhost/pollsite"
+              username="root"
+              password="root"
+              driverClassName="com.mysql.jdbc.Driver"
+              url="jdbc:mysql://localhost:3306/mydatabase?zeroDateTimeBehavior=convertToNull"
               maxActive="8"
-              maxIdle="4"/>
+              maxIdle="4"
+              maxWait="10000"/>
   </Context>
-  
-  Do NOT forget to copy the JDBC Driver jar file to the lib/ directory of your 
-  Tomcat instalation
+
+  Usage hint:
+    For a basic configuration of JNDI on your Tomcat server, create a file named judocms.xml on
+    '/path/to/apache-tomcat-6.x.x/conf/Catalina/localhost/' with the content printed above.
 
 Follow the instructions, restart Tomcat and it will be working as expected.

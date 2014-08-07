@@ -6,11 +6,11 @@ Install
 
 To get started with using django-jython, first install it following these steps:
 
- - Grab the `latest django-jython distribution
-   <http://pypi.python.org/pypi/django-jython>`_
- - Uncompress it
- - Move into the resulting directory
- - Run ``jython setup.py``
+- Grab the `latest django-jython distribution
+  <http://pypi.python.org/pypi/django-jython>`_
+- Uncompress it
+- Move into the resulting directory
+- Run ``jython setup.py``
 
 .. note::
 
@@ -36,7 +36,7 @@ your project and set::
 
   DATABASES = {
     'default': {
-      ...
+      # ...
       'ENGINE': 'doj.db.backends.postgresql',
     }
   }
@@ -45,7 +45,7 @@ Or::
 
   DATABASES = {
     'default': {
-      ...
+      # ...
       'ENGINE': 'doj.db.backends.sqlite',
     }
   }
@@ -54,7 +54,7 @@ Or::
 
   DATABASES = {
     'default': {
-      ...
+      # ...
       'ENGINE': 'doj.db.backends.mysql',
     }
   }
@@ -63,7 +63,7 @@ Or::
 
   DATABASES = {
     'default': {
-      ...
+      # ...
       'ENGINE': 'doj.db.backends.mssql',
     }
   }
@@ -82,7 +82,7 @@ is still in development there are some bugs and incompatibilities we need to wor
 For this reason django-jython comes with some patches that are applied on runtime (this means
 you do **not** need to modify the sources of Django or Jython). django-jython tries to
 automatically apply these patches as early as possible, but sometimes this mechanism
-fails. To make sure the patching works, add these lines to the **very top** of
+fails. To make sure the patching works, add these lines at the **very top** of
 the ``manage.py`` file of your application::
 
   #!/usr/bin/env python
@@ -98,15 +98,15 @@ To build a war archive for deployment into Java application servers, change
 ``settings.py`` on your project to include ``'doj'``. For example::
 
   INSTALLED_APPS = (
-      'django.contrib.auth',
-      'django.contrib.contenttypes',
-      'django.contrib.sessions',
-      'django.contrib.sites',
-      'django.contrib.admin',
-      'mysite.polls',
-      'mysite.another_app',
-      # More apps...
-      'doj',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.admin',
+    'mysite.polls',
+    'mysite.another_app',
+    # More apps...
+    'doj',
   )
 
 Then you can build a war file running ``jython manage.py buildwar`` on your project
