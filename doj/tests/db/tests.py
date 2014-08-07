@@ -3,6 +3,8 @@
 from datetime import datetime
 
 from django.test import TestCase
+from django.db.models import Count, Min, Max, Avg, Sum
+from django.db.models.query import EmptyQuerySet
 
 from doj.tests.db.models import TestModel, TestModelRelation
 
@@ -100,3 +102,72 @@ class DBTestCase(TestCase):
 
         self.assertEqual(TestModel.objects.filter(field_19__field_1=1234).count(), DBTestCase.NUMBER_OF_RECORDS)
         self.assertEqual(TestModel.objects.filter(field_19__field_1=0).count(), 0)
+
+    def test_bulk_create(self):
+        TestModel.objects.bulk_create(
+            [TestModel() for _ in range(0, DBTestCase.NUMBER_OF_RECORDS)]
+        )
+
+        self.assertEqual(TestModel.objects.all().count(), DBTestCase.NUMBER_OF_RECORDS)
+
+    def test_bulk_update(self):
+        for _ in range(0, DBTestCase.NUMBER_OF_RECORDS):
+            test_model = TestModel()
+            test_model.save()
+
+        TestModel.objects.all().update(field_4='xyz')
+
+        self.assertEqual(TestModel.objects.filter(field_4='xyz').count(), DBTestCase.NUMBER_OF_RECORDS)
+        self.assertEqual(TestModel.objects.filter(field_4='abc').count(), 0)
+
+    def test_latest_earliest(self):
+        for _ in range(0, DBTestCase.NUMBER_OF_RECORDS):
+            test_model = TestModel()
+            test_model.save()
+
+        latest = TestModel.objects.latest('field_18')
+        earliest = TestModel.objects.earliest('field_18')
+
+        self.assertIsInstance(latest, TestModel)
+        self.assertIsInstance(earliest, TestModel)
+
+    def test_first_last(self):
+        for _ in range(0, DBTestCase.NUMBER_OF_RECORDS):
+            test_model = TestModel()
+            test_model.save()
+
+        first = TestModel.objects.order_by('id').first()
+        last = TestModel.objects.order_by('id').last()
+
+        self.assertIsInstance(first, TestModel)
+        self.assertIsInstance(last, TestModel)
+
+    def test_aggregate(self):
+        counter = 1
+        counters = []
+        for _ in range(0, DBTestCase.NUMBER_OF_RECORDS):
+            test_model = TestModel(field_10=counter)
+            test_model.save()
+
+            counters.append(counter)
+            counter += 1
+
+        count_result = TestModel.objects.aggregate(Count('field_10'))
+        avg_result = TestModel.objects.aggregate(Avg('field_10'))
+        min_result = TestModel.objects.aggregate(Min('field_10'))
+        max_result = TestModel.objects.aggregate(Max('field_10'))
+        sum_result = TestModel.objects.aggregate(Sum('field_10'))
+
+        self.assertEqual(count_result, {'field_10__count': DBTestCase.NUMBER_OF_RECORDS})
+        self.assertEqual(min_result, {'field_10__min': 1})
+        self.assertEqual(max_result, {'field_10__max': DBTestCase.NUMBER_OF_RECORDS})
+        self.assertEqual(avg_result, {'field_10__avg': float(sum(counters))/len(counters)})
+        self.assertEqual(sum_result, {'field_10__sum': sum(counters)})
+
+    def test_none(self):
+        for _ in range(0, DBTestCase.NUMBER_OF_RECORDS):
+            test_model = TestModel()
+            test_model.save()
+
+        self.assertEqual(TestModel.objects.none().count(), 0)
+        self.assertIsInstance(TestModel.objects.none(), EmptyQuerySet)

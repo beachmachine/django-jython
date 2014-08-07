@@ -362,7 +362,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     def _rollback(self):
         try:
             BaseDatabaseWrapper._rollback(self)
-        except:
+        except self.NotSupportedError:
             pass
 
     def disable_constraint_checking(self):
@@ -427,7 +427,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     def is_usable(self):
         try:
             self.connection.cursor().execute("SELECT 1")
-        except:
+        except self.Error:
             return False
         else:
             return True

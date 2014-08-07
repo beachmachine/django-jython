@@ -38,10 +38,19 @@ class JDBCBaseDatabaseWrapper(BaseDatabaseWrapper):
     class Database(zxJDBC):
         pass
 
-    class DatabaseError(Exception):
+    class Error(zxJDBC.Error):
         pass
 
-    class IntegrityError(Exception):
+    class NotSupportedError(zxJDBC.NotSupportedError):
+        pass
+
+    class DatabaseError(zxJDBC.DatabaseError):
+        pass
+
+    class IntegrityError(zxJDBC.IntegrityError):
+        pass
+
+    class ProgrammingError(zxJDBC.ProgrammingError):
         pass
 
     def __init__(self, *args, **kwargs):

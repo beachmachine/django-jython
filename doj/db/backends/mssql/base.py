@@ -192,6 +192,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     # Ignore them.
     def _savepoint_commit(self, sid):
         queries_log = self.queries
+
         if queries_log:
             queries_log.append({
                 'sql': '-- RELEASE SAVEPOINT %s -- (because assertNumQueries)' % self.ops.quote_name(sid),
@@ -201,7 +202,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     def is_usable(self):
         try:
             self.connection.cursor().execute("SELECT 1")
-        except:
+        except self.Error:
             return False
         else:
             return True

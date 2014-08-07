@@ -145,7 +145,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     def is_usable(self):
         try:
             self.connection.cursor().execute("SELECT 1")
-        except:
+        except self.Error:
             return False
         else:
             return True
