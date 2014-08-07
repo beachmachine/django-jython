@@ -93,6 +93,19 @@ class JDBCBaseDatabaseWrapper(BaseDatabaseWrapper):
 
         return zxJDBC.lookup(name, keywords=props)
 
+    def get_connection_params(self):
+        settings_dict = dict(self.settings_dict)
+
+        # None may be used to connect to the default 'postgres' db
+        if settings_dict['NAME'] == '':
+            from django.core.exceptions import ImproperlyConfigured
+            raise ImproperlyConfigured(
+                "settings.DATABASES is improperly configured. "
+                "Please supply the NAME value.")
+
+        settings_dict['NAME'] = settings_dict['NAME'] or self.jdbc_default_name
+        return settings_dict
+
     def get_new_connection(self, conn_params):
         connection = self.get_new_jndi_connection()
 
@@ -104,6 +117,9 @@ class JDBCBaseDatabaseWrapper(BaseDatabaseWrapper):
                                         **conn_params['OPTIONS'])
             self._set_default_isolation_level(connection)
         return connection
+
+    def create_cursor(self):
+        return JDBCCursorWrapper(self.connection.cursor())
 
     def _set_autocommit(self, autocommit):
         self.connection.autocommit = autocommit

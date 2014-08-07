@@ -85,7 +85,7 @@ TEST_DATABASES = {
         'ENGINE': 'doj.db.backends.mssql',
         'NAME': 'doj',
         'TEST_NAME': 'doj-tests',
-        'HOST': '192.168.56.102',
+        'HOST': 'localhost',
         'USER': 'root',
         'PASSWORD': 'root',
     },
@@ -98,7 +98,7 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-gb'
 
 TIME_ZONE = 'UTC'
 

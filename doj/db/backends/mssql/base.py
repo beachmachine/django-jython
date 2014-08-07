@@ -132,26 +132,8 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.introspection = DatabaseIntrospection(self)
         self.validation = BaseDatabaseValidation(self)
 
-    def get_connection_params(self):
-        settings_dict = dict(self.settings_dict)
-
-        # None may be used to connect to the default 'postgres' db
-        if settings_dict['NAME'] == '':
-            from django.core.exceptions import ImproperlyConfigured
-            raise ImproperlyConfigured(
-                "settings.DATABASES is improperly configured. "
-                "Please supply the NAME value.")
-
-        settings_dict['NAME'] = settings_dict['NAME'] or self.jdbc_default_name
-        return settings_dict
-
     def init_connection_state(self):
         pass
-
-    def create_cursor(self):
-        """Creates a cursor. Assumes that a connection is established."""
-        cursor = self.connection.cursor()
-        return CursorWrapper(cursor)
 
     def disable_constraint_checking(self):
         """

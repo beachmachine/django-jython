@@ -266,7 +266,8 @@ class DatabaseOperations(BaseDatabaseOperations):
         return six.text_type(value)
 
     def convert_values(self, value, field):
-        """SQLite returns floats when it should be returning decimals,
+        """
+        SQLite returns floats when it should be returning decimals,
         and gets dates and datetimes wrong.
         For consistency with other backends, coerce when required.
         """
@@ -363,19 +364,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.creation = DatabaseCreation(self)
         self.introspection = DatabaseIntrospection(self)
         self.validation = BaseDatabaseValidation(self)
-
-    def get_connection_params(self):
-        settings_dict = dict(self.settings_dict)
-
-        # None may be used to connect to the default 'postgres' db
-        if settings_dict['NAME'] == '':
-            from django.core.exceptions import ImproperlyConfigured
-            raise ImproperlyConfigured(
-                "settings.DATABASES is improperly configured. "
-                "Please supply the NAME value.")
-
-        settings_dict['NAME'] = settings_dict['NAME'] or self.jdbc_default_name
-        return settings_dict
 
     def get_new_connection(self, conn_params):
         conn = super(DatabaseWrapper, self).get_new_connection(conn_params)

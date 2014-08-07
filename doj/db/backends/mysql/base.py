@@ -334,19 +334,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.introspection = DatabaseIntrospection(self)
         self.validation = DatabaseValidation(self)
 
-    def get_connection_params(self):
-        settings_dict = dict(self.settings_dict)
-
-        # None may be used to connect to the default 'postgres' db
-        if settings_dict['NAME'] == '':
-            from django.core.exceptions import ImproperlyConfigured
-            raise ImproperlyConfigured(
-                "settings.DATABASES is improperly configured. "
-                "Please supply the NAME value.")
-
-        settings_dict['NAME'] = settings_dict['NAME'] or self.jdbc_default_name
-        return settings_dict
-
     def init_connection_state(self):
         with self.cursor() as cursor:
             # SQL_AUTO_IS_NULL in MySQL controls whether an AUTO_INCREMENT column
@@ -354,10 +341,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             # NULL.  Disabling this value brings this aspect of MySQL in line with
             # SQL standards.
             cursor.execute('SET SQL_AUTO_IS_NULL = 0')
-
-    def create_cursor(self):
-        cursor = self.connection.cursor()
-        return CursorWrapper(cursor)
 
     def _rollback(self):
         try:

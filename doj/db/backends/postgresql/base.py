@@ -94,19 +94,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.introspection = DatabaseIntrospection(self)
         self.validation = BaseDatabaseValidation(self)
 
-    def get_connection_params(self):
-        settings_dict = dict(self.settings_dict)
-
-        # None may be used to connect to the default 'postgres' db
-        if settings_dict['NAME'] == '':
-            from django.core.exceptions import ImproperlyConfigured
-            raise ImproperlyConfigured(
-                "settings.DATABASES is improperly configured. "
-                "Please supply the NAME value.")
-
-        settings_dict['NAME'] = settings_dict['NAME'] or self.jdbc_default_name
-        return settings_dict
-
     def init_connection_state(self):
         settings_dict = dict(self.settings_dict)
         tz = 'UTC' if settings.USE_TZ else settings_dict.get('TIME_ZONE')
@@ -129,10 +116,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                 # Commit after setting the time zone (see #17062)
                 if not self.get_autocommit():
                     self.connection.commit()
-
-    def create_cursor(self):
-        cursor = self.connection.cursor()
-        return CursorWrapper(cursor)
 
     def check_constraints(self, table_names=None):
         """
