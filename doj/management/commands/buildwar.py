@@ -73,6 +73,10 @@ class Command(NoArgsCommand, DOJConfigurationMixin):
             self.__tmp_dir = tempfile.mkdtemp(suffix='-buildwar')
         return self.__tmp_dir
 
+    def _get_egg_list(self):
+        egg_folder = os.path.join(self._get_temp_dir(), 'WEB-INF', 'lib-python')
+        return [f for f in os.listdir(egg_folder) if os.path.isfile(os.path.join(egg_folder, f)) and f.endswith(('.egg', '.zip'))]
+
     def _is_media_included(self):
         """
         Determines if media files are included in the WAR. Media files are included
@@ -269,11 +273,18 @@ class Command(NoArgsCommand, DOJConfigurationMixin):
         for pkg in pkgs:
             module = __import__(pkg)
 
-            if os.path.basename(module.__file__).startswith(('__init__.', '__init__$')):  # package is a folder
+            if os.path.basename(module.__file__).startswith(('__init__.', '__init__$')):  # multi file package
                 pkg_path = os.path.dirname(module.__file__)
-                pkg_target = os.path.join(self._get_temp_dir(), 'WEB-INF', 'lib-python', pkg)
-                copytree(pkg_path, pkg_target, False, ignore_in_sources)
-            else:  # single file package
+
+                if os.path.isdir(pkg_path):  # package is a folder
+                    pkg_target = os.path.join(self._get_temp_dir(), 'WEB-INF', 'lib-python', pkg)
+                    copytree(pkg_path, pkg_target, False, ignore_in_sources)
+                else:  # package is a zipped egg
+                    pkg_path = os.path.dirname(pkg_path)
+                    egg_name = os.path.basename(pkg_path)
+                    pkg_target = os.path.join(self._get_temp_dir(), 'WEB-INF', 'lib-python', egg_name)
+                    copy(pkg_path, pkg_target)
+            else:  # single file module
                 pkg_path = module.__file__
                 pkg_target = os.path.join(self._get_temp_dir(), 'WEB-INF', 'lib-python', os.path.basename(module.__file__))
                 copy(pkg_path, pkg_target)
@@ -290,6 +301,7 @@ class Command(NoArgsCommand, DOJConfigurationMixin):
             'wsgi.py.tmpl',
             'WEB-INF/web.xml.tmpl',
             'WEB-INF/lib-python/application_settings.py.tmpl',
+            'WEB-INF/lib-python/eggs.pth.tmpl',
         ]
         context = Context({
             'project_name': self._get_project_name(),
@@ -297,6 +309,7 @@ class Command(NoArgsCommand, DOJConfigurationMixin):
             'context_root': self._get_context_root(),
             'is_media_included': self._is_media_included(),
             'is_static_included': self._is_static_included(),
+            'egg_list': self._get_egg_list(),
             'settings': settings,
         })
 

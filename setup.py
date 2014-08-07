@@ -28,6 +28,7 @@ setup(
             'war_skel/WEB-INF/lib/README',
             'war_skel/WEB-INF/lib/jruby-extras-fileservlet.jar',
             'war_skel/WEB-INF/lib-python/application_settings.py.tmpl',
+            'war_skel/WEB-INF/lib-python/eggs.pth.tmpl',
             'war_skel/WEB-INF/lib-python/README',
         ],
     },
