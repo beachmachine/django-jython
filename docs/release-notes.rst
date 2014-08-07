@@ -1,10 +1,10 @@
 Release Notes
 =============
 
-1.7.0a1
+1.7.0b1
 -------
 
-Released on July 29, 2014
+Released on August 07, 2014
 
 Changes
 ~~~~~~~

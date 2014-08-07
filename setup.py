@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name='django-jython',
-    version='1.7.0a1',
+    version='1.7.0b1',
     packages=[
         'doj',
         'doj.db',
@@ -40,11 +40,12 @@ setup(
     keywords=u"django jython doj database java",
     url=u"http://code.google.com/p/django-jython/",
     classifiers=[
-        u"Development Status :: 3 - Alpha",
+        u"Development Status :: 4 - Beta",
         u"Framework :: Django",
         u"Intended Audience :: Developers",
         u"License :: OSI Approved :: BSD License",
         u"Programming Language :: Python",
-        u"Programming Language :: Java"
+        u"Programming Language :: Java",
+        u"Programming Language :: Python :: Implementation :: Jython",
     ]
 )
