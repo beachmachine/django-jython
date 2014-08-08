@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 setup(
     name='django-jython',
@@ -32,6 +35,7 @@ setup(
             'war_skel/WEB-INF/lib-python/README',
         ],
     },
+    zip_safe=False,
     # metadata for upload to PyPI
     author=u"Andreas Stocker",
     author_email=u"andreas@st0cker.at",
