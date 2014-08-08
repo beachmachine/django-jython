@@ -37,7 +37,7 @@ Here, you tell the ``buildwar`` command that it should include an extra Java lib
 the generated ``.war`` file, because it can't know which Java libraries are you using
 inside your project. In the typical cases, you must **at least** specify the
 JDBC driver you are using to connect to the database, which will depend on the
-configured :ref:`database-backends`, as well as the standalone version of Jython itself.
+configured :ref:`database-backends`, as well as the **standalone version** of Jython itself.
 
 The generated ``.war`` file is created on the current working directory.
 
@@ -45,14 +45,14 @@ You may also specify more files to include, separating the paths by the special
 **path separator** character, which is ``:`` in Unix based platforms and
 ``;`` on Windows platforms.
 
-For example, if you are the iText library inside your Django project you should
-specify something like the following when constructing the war file::
+For example, if you are using the iText library inside your Django project you should
+specify something like the following when constructing the ``.war`` file::
 
   $ jython manage.py buildwar --include-java-libs=/path/to/jython-standalone-2.7-b2.jar:/path/to/postgresql-9.1-902.jdbc4.jar:/path/to/iText-2.1.3.jar
 
 It is also possible to tell django-jython the needed Java library via the application's
 settings. This has the advantage that there is no need to add the library paths to the
-``buildwar`` command each time you build a new ``.war``. All you need to do is to add
+``buildwar`` command every time you build a new ``.war``. All you need to do is to add
 a ``DOJ_BUILDWAR_JAVA_LIBS`` configuration to your settings::
 
   DOJ_BUILDWAR_JAVA_LIBS = [

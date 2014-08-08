@@ -152,7 +152,7 @@ Do **not** remove the other database settings, as they will be used by
 django-jython to help you create your JNDI configuration.
 
 Deploy your application as normal. It won't work (raising a JNDI exception
-telling you that "the jdbc name is not bound in this Context"), but we will fix
+telling you that *the jdbc name is not bound in this Context*), but we will fix
 that now. Use the ``jndiconfig`` management command to get a sample context XML
 file to set up your data source::
 
@@ -176,7 +176,7 @@ You will see an output similar to this::
   </Context>
 
   Usage hint:
-    For a basic configuration of JNDI on your Tomcat server, create a file named judocms.xml on
+    For a basic configuration of JNDI on your Tomcat server, create a file named mysite.xml on
     '/path/to/apache-tomcat-6.x.x/conf/Catalina/localhost/' with the content printed above.
 
 Follow the instructions, restart Tomcat and it will be working as expected.

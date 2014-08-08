@@ -74,6 +74,8 @@ containing the JDBC driver for each database somewhere in your
 
   export CLASSPATH="$CLASSPATH:/path/to/postgresql-9.1-902.jdbc4.jar"
 
+For a complete documentation on building war files see :ref:`database-backends`.
+
 Django and Jython
 -----------------
 

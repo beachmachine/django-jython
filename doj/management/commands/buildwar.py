@@ -279,7 +279,7 @@ class Command(NoArgsCommand, DOJConfigurationMixin):
                 if os.path.isdir(pkg_path):  # package is a folder
                     pkg_target = os.path.join(self._get_temp_dir(), 'WEB-INF', 'lib-python', pkg)
                     copytree(pkg_path, pkg_target, False, ignore_in_sources)
-                else:  # package is a zipped egg
+                elif os.path.isfile(os.path.dirname(pkg_path)):  # package is a zipped egg
                     pkg_path = os.path.dirname(pkg_path)
                     egg_name = os.path.basename(pkg_path)
                     pkg_target = os.path.join(self._get_temp_dir(), 'WEB-INF', 'lib-python', egg_name)
