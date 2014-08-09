@@ -1,4 +1,16 @@
-# loading monkey patches
-from doj.monkey import *
+# -*- coding: utf-8 -*-
 
-VERSION = (1, 5, 0, 'alpha', 1)
+from doj.monkey import install_monkey_patches
+
+__VERSION = (1, 7, 0, 'a', 1)
+
+
+def get_version():
+    """
+    Gets the version of the library
+    :return: Version
+    """
+    return tuple(__VERSION)
+
+
+install_monkey_patches()

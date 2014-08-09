@@ -1,3 +1,4 @@
+#!/bin/sh
 cd _build
 rm html.zip
 cd html

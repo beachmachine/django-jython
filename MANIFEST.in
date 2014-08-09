@@ -1,4 +1,5 @@
 recursive-include doj/management/commands/war_skel *
+recursive-include doj/management/commands/jndi_skel *
 recursive-include docs *
 include LICENSE.txt
 include AUTHORS

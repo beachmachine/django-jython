@@ -1,6 +1,34 @@
 Release Notes
 =============
 
+1.7.0b1
+-------
+
+Released on August 08, 2014
+
+Changes
+~~~~~~~
+
+Rewrite of the codebase. This version is meant to be used with Django 1.7.x,
+and ships with following database backends:
+
+* PostgreSQL
+* MySQL
+* SQLite
+* MSSQL
+
+Django compatibility
+~~~~~~~~~~~~~~~~~~~~
+
+This version has been tested against Django 1.7.0 and will work with any future
+micro release of the 1.7.x branch.
+
+Jython compatibility
+~~~~~~~~~~~~~~~~~~~~
+
+The release has been tested on Jython 2.7b2.
+
+
 1.3.0b1
 -------
 
@@ -53,8 +81,8 @@ Changes from the 1.1.1 release:
  - MySQL backend now compatible with Django 1.2.x
  - PostgreSQL backend now compatible with Django 1.2.x
  
-Django Compatbility
-~~~~~~~~~~~~~~~~~~~
+Django compatibility
+~~~~~~~~~~~~~~~~~~~~
 
 This version has been tested against Django 1.2.3 and will work with any future
 micro release of the 1.2.x branch.
@@ -92,8 +120,8 @@ Changes from the 1.1.0 release:
 
 
 
-Django Compatbility
-~~~~~~~~~~~~~~~~~~~
+Django compatibility
+~~~~~~~~~~~~~~~~~~~~
 
 This version has been tested against Django 1.1.1 and will work with any future
 micro release of the 1.1.x branch.
@@ -155,7 +183,7 @@ Changes from the 1.0.0b1 release:
  - Stand-alone documentation included on the distribution
 
 
-Django Compatibility
+Django compatibility
 ~~~~~~~~~~~~~~~~~~~~
 
 This version has been tested against Django 1.0.4. It may or may not work with
@@ -167,7 +195,7 @@ bug #11621 <http://code.djangoproject.com/ticket/11621>`_.
 Django 1.0.3 or earlier should not be used, since such releases have known
 security vulnerabilities.
 
-Jython Compatibility
+Jython compatibility
 ~~~~~~~~~~~~~~~~~~~~
 
 The release has been tested on Jython 2.5.1. However, it should work on any
@@ -195,7 +223,7 @@ the GSoC 2008):
   ``--include-py-packages`` option.
 * Bugfixes for all reported issues.
 
-Django Compatibility
+Django compatibility
 ~~~~~~~~~~~~~~~~~~~~
 
 This release is meant to be used with the current 1.0.X branch of Django. If for
@@ -207,7 +235,7 @@ Once Django 1.0.3 is released, the subversion checkout won't be needed.
 Please note that database backends included on this release of django-jython
 will *not* work with Django 1.1.X.
 
-Jython Compatibility
+Jython compatibility
 ~~~~~~~~~~~~~~~~~~~~
 
 This release is compatible with Jython 2.5b2 and later releases. 
