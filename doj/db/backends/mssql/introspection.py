@@ -11,30 +11,10 @@ AUTO_FIELD_MARKER = -777555
 
 
 class DatabaseIntrospection(BaseDatabaseIntrospection):
-    data_types_reverse = {
+    data_types_reverse = BaseDatabaseIntrospection.data_types_reverse
+    data_types_reverse.update({
         AUTO_FIELD_MARKER: 'AutoField',
-        -16: 'TextField',
-        -15: 'CharField',
-        -9: 'TextField',
-        -7: 'BooleanField',
-        -6: 'SmallIntegerField',
-        -5: 'IntegerField',
-        -1: 'TextField',
-        1: 'CharField',
-        2: 'DecimalField',
-        3: 'DecimalField',
-        4: 'IntegerField',
-        5: 'SmallIntegerField',
-        6: 'FloatField',
-        7: 'FloatField',
-        8: 'FloatField',
-        12: 'TextField',
-        17: 'BinaryField',
-        20: 'BigIntegerField',
-        91: 'DateField',
-        92: 'TimeField',
-        93: 'DateTimeField',
-    }
+    })
 
     def get_field_type(self, data_type, description):
         field_type = self.data_types_reverse[data_type]

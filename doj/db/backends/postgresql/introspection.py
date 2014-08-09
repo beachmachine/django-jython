@@ -9,31 +9,12 @@ from doj.db.backends import JDBCFieldInfo as FieldInfo
 
 
 class DatabaseIntrospection(BaseDatabaseIntrospection):
-    # Maps type codes to Django Field types.
-    data_types_reverse = {
-        16: 'BooleanField',
-        17: 'BinaryField',
-        20: 'BigIntegerField',
-        21: 'SmallIntegerField',
-        23: 'IntegerField',
-        25: 'TextField',
-        700: 'FloatField',
-        701: 'FloatField',
-        869: 'GenericIPAddressField',
-        1042: 'CharField',  # blank-padded
-        1043: 'CharField',
-        1082: 'DateField',
-        1083: 'TimeField',
-        1114: 'DateTimeField',
-        1184: 'DateTimeField',
-        1266: 'TimeField',
-        1700: 'DecimalField',
-    }
-
     ignored_tables = []
 
     def get_table_list(self, cursor):
-        "Returns a list of table names in the current database."
+        """
+        Returns a list of table names in the current database.
+        """
         cursor.execute("""
             SELECT c.relname
             FROM pg_catalog.pg_class c
@@ -44,7 +25,9 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         return [row[0] for row in cursor.fetchall() if row[0] not in self.ignored_tables]
 
     def get_table_description(self, cursor, table_name):
-        "Returns a description of the table, with the DB-API cursor.description interface."
+        """
+        Returns a description of the table, with the DB-API cursor.description interface.
+        """
         # As cursor.description does not return reliably the nullable property,
         # we have to query the information_schema (#7783)
         cursor.execute("""
@@ -109,7 +92,11 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             # a string of space-separated integers. This designates the field
             # indexes (1-based) of the fields that have indexes on the table.
             # Here, we skip any indexes across multiple fields.
-            if ' ' in row[1]:
+            indkey = row[1]
+            if hasattr(indkey, 'getValue'):
+                indkey = indkey.getValue()
+
+            if ' ' in indkey:
                 continue
             if row[0] not in indexes:
                 indexes[row[0]] = {'primary_key': False, 'unique': False}

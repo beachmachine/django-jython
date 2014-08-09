@@ -12,28 +12,6 @@ foreign_key_re = re.compile(r"\sCONSTRAINT `[^`]*` FOREIGN KEY \(`([^`]*)`\) REF
 
 
 class DatabaseIntrospection(BaseDatabaseIntrospection):
-    data_types_reverse = {
-        252: 'TextField',
-        1: 'IntegerField',
-        0: 'DecimalField',
-        246: 'DecimalField',
-        10: 'DateField',
-        12: 'DateTimeField',
-        5: 'FloatField',
-        4: 'FloatField',
-        9: 'IntegerField',
-        3: 'IntegerField',
-        8: 'BigIntegerField',
-        2: 'IntegerField',
-        254: 'CharField',
-        11: 'TimeField',
-        7: 'DateTimeField',
-        249: 'TextField',
-        250: 'TextField',
-        251: 'TextField',
-        253: 'CharField',
-    }
-
     def get_table_list(self, cursor):
         """
         Returns a list of table names in the current database.

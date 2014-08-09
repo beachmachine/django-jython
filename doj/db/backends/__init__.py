@@ -35,23 +35,12 @@ class JDBCBaseDatabaseWrapper(BaseDatabaseWrapper):
     jdbc_driver_class_name = None
     jdbc_connection_url_pattern = None
 
-    class Database(zxJDBC):
-        pass
-
-    class Error(zxJDBC.Error):
-        pass
-
-    class NotSupportedError(zxJDBC.NotSupportedError):
-        pass
-
-    class DatabaseError(zxJDBC.DatabaseError):
-        pass
-
-    class IntegrityError(zxJDBC.IntegrityError):
-        pass
-
-    class ProgrammingError(zxJDBC.ProgrammingError):
-        pass
+    Database = zxJDBC
+    Error = Database.Error
+    NotSupportedError = Database.NotSupportedError
+    DatabaseError = Database.DatabaseError
+    IntegrityError = Database.IntegrityError
+    ProgrammingError = Database.ProgrammingError
 
     def __init__(self, *args, **kwargs):
         super(JDBCBaseDatabaseWrapper, self).__init__(*args, **kwargs)
@@ -202,7 +191,10 @@ class JDBCCursorWrapper(object):
         return self.cursor.close()
 
     def fetchone(self):
-        return self.cursor.fetchone()
+        try:
+            return self.cursor.fetchone()
+        except JDBCBaseDatabaseWrapper.DatabaseError:
+            return None
 
     def fetchmany(self, size=None):
         if not size:
@@ -213,11 +205,14 @@ class JDBCCursorWrapper(object):
         # in that case.
         try:
             return self.cursor.fetchmany(size)
-        except IndexError:
+        except (IndexError, JDBCBaseDatabaseWrapper.DatabaseError):
             return self.cursor.fetchall()
 
     def fetchall(self):
-        return self.cursor.fetchall()
+        try:
+            return self.cursor.fetchall()
+        except (IndexError, JDBCBaseDatabaseWrapper.DatabaseError):
+            return []
 
     def nextset(self):
         return self.cursor.nextset()
@@ -237,7 +232,36 @@ class JDBCBaseDatabaseFeatures(BaseDatabaseFeatures):
 
 
 class JDBCBaseDatabaseIntrospection(BaseDatabaseIntrospection):
-    pass
+    data_types_reverse = {
+        zxJDBC.BIGINT: 'BigIntegerField',
+        zxJDBC.BINARY: 'BinaryField',
+        zxJDBC.BIT: 'BooleanField',
+        zxJDBC.BLOB: 'BinaryField',
+        zxJDBC.BOOLEAN: 'BooleanField',
+        zxJDBC.CHAR: 'CharField',
+        zxJDBC.CLOB: 'TextField',
+        zxJDBC.DATE: 'DateField',
+        zxJDBC.DATETIME: 'DateTimeField',
+        zxJDBC.DECIMAL: 'DecimalField',
+        zxJDBC.DOUBLE: 'FloatField',
+        zxJDBC.FLOAT: 'FloatField',
+        zxJDBC.INTEGER: 'IntegerField',
+        zxJDBC.LONGNVARCHAR: 'TextField',
+        zxJDBC.LONGVARBINARY: 'BinaryField',
+        zxJDBC.LONGVARCHAR: 'TextField',
+        zxJDBC.NCHAR: 'CharField',
+        zxJDBC.NCLOB: 'TextField',
+        zxJDBC.NUMBER: 'IntegerField',
+        zxJDBC.NVARCHAR: 'CharField',
+        zxJDBC.REAL: 'FloatField',
+        zxJDBC.SMALLINT: 'SmallIntegerField',
+        zxJDBC.STRING: 'TextField',
+        zxJDBC.TIME: 'TimeField',
+        zxJDBC.TIMESTAMP: 'DateTimeField',
+        zxJDBC.TINYINT: 'SmallIntegerField',
+        zxJDBC.VARBINARY: 'BinaryField',
+        zxJDBC.VARCHAR: 'CharField',
+    }
 
 
 class JDBCBaseDatabaseClient(BaseDatabaseClient):
