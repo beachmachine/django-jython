@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name='django-jython',
-    version='1.7.0b1',
+    version='1.7.0b2',
     packages=[
         'doj',
         'doj.db',
