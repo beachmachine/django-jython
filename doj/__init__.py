@@ -2,7 +2,7 @@
 
 from doj.monkey import install_monkey_patches
 
-__VERSION = (1, 7, 0, 'a', 1)
+__VERSION = (1, 7, 0, 'b', 2)
 
 
 def get_version():

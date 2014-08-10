@@ -1,6 +1,27 @@
 Release Notes
 =============
 
+1.7.0b2
+-------
+
+Released on August 10, 2014
+
+Changes
+~~~~~~~
+
+Database inspection via the ``inspectdb`` management command working.
+
+Django compatibility
+~~~~~~~~~~~~~~~~~~~~
+
+This version has been tested against Django 1.7.0 and will work with any future
+micro release of the 1.7.x branch.
+
+Jython compatibility
+~~~~~~~~~~~~~~~~~~~~
+
+The release has been tested on Jython 2.7b2.
+
 1.7.0b1
 -------
 
