@@ -41,7 +41,13 @@ setup(
     author_email=u"andreas@st0cker.at",
     description=u"Database backends and management commands, for development under Django/Jython",
     license=u"BSD",
-    keywords=u"django jython doj database java",
+    keywords=[
+        u"django",
+        u"jython",
+        u"doj",
+        u"database",
+        u"java",
+    ],
     url=u"http://code.google.com/p/django-jython/",
     classifiers=[
         u"Development Status :: 4 - Beta",
