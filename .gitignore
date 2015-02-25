@@ -3,9 +3,11 @@
 *~
 *.war
 *.sqlite3
+doj.iml
 build
 MANIFEST
 semantic.cache
-dist/*
-docs/_build/*
+dist/**
+django_jython.egg-info/**
+docs/_build/**
 doj/tests/settings.py

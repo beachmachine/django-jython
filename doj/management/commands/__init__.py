@@ -6,8 +6,6 @@ from django.conf import settings
 
 
 class DOJConfigurationMixin(object):
-    __base_dir = None
-
     def _setup(self, args, options):
         """
         Makes the given arguments an options available
