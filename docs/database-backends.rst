@@ -49,9 +49,6 @@ remember to put the JAR file on the ``CLASSPATH``.
 MySQL
 -----
 
-Developed and tested against SQLite3 v3.7.6 with the JDBC driver
-3.7.2. To use it set the following in your Django project settings::
-
   DATABASES = {
     'default': {
       # ...
@@ -59,7 +56,7 @@ Developed and tested against SQLite3 v3.7.6 with the JDBC driver
     }
   }
 
-Download the JDBC Driver from https://bitbucket.org/xerial/sqlite-jdbc/downloads and
+Download the JDBC Driver from http://dev.mysql.com/downloads/connector/j and
 remember to put the JAR file on the ``CLASSPATH``.
 
 MSSQL
