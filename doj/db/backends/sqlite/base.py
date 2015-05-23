@@ -13,6 +13,7 @@ import re
 
 from django.conf import settings
 from django.db import utils
+from django.db.utils import Error
 from django.db.backends import utils as backend_utils
 from django.db.models import fields
 from django.db.models.sql import aggregates
@@ -74,13 +75,15 @@ def decoder(conv_func):
 
 def create_function(conn, name, num_args, py_func):
     from org.sqlite import Function
-    class func(Function):
+
+    class Impl(Function):
         def xFunc(self):
             assert self.super__args() == num_args
             args = [self.super__value_text(n) for n in xrange(0, num_args)]
             ret = py_func(*args)
             self.super__result(ret)
-    Function.create(conn, name, func())
+
+    Function.create(conn, name, Impl())
 
 
 class SQLiteCursorWrapper(CursorWrapper):
@@ -122,6 +125,17 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             cursor.execute('SELECT SQLITE_VERSION()')
             version = (int(i) for i in cursor.fetchone()[0].split('.'))
             return version >= (3, 6, 8, 0)
+
+    @cached_property
+    def can_release_savepoints(self):
+        return self.uses_savepoints
+
+    @cached_property
+    def can_share_in_memory_db(self):
+        with self.connection.cursor() as cursor:
+            cursor.execute('SELECT SQLITE_VERSION()')
+            version = (int(i) for i in cursor.fetchone()[0].split('.'))
+            return version >= (3, 7, 13, 0)
 
     @cached_property
     def supports_stddev(self):
@@ -320,6 +334,37 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     jdbc_default_host = ''
     jdbc_default_port = 0
     jdbc_default_name = ':memory:'
+    # SQLite doesn't actually support most of these types, but it "does the right
+    # thing" given more verbose field definitions, so leave them as is so that
+    # schema inspection is more useful.
+    data_types = {
+        'AutoField': 'integer',
+        'BinaryField': 'text',  # SQLite JDBC driver causes problems with blob
+        'BooleanField': 'bool',
+        'CharField': 'varchar(%(max_length)s)',
+        'CommaSeparatedIntegerField': 'varchar(%(max_length)s)',
+        'DateField': 'date',
+        'DateTimeField': 'datetime',
+        'DecimalField': 'decimal',
+        'FileField': 'varchar(%(max_length)s)',
+        'FilePathField': 'varchar(%(max_length)s)',
+        'FloatField': 'real',
+        'IntegerField': 'integer',
+        'BigIntegerField': 'bigint',
+        'IPAddressField': 'char(15)',
+        'GenericIPAddressField': 'char(39)',
+        'NullBooleanField': 'bool',
+        'OneToOneField': 'integer',
+        'PositiveIntegerField': 'integer unsigned',
+        'PositiveSmallIntegerField': 'smallint unsigned',
+        'SlugField': 'varchar(%(max_length)s)',
+        'SmallIntegerField': 'smallint',
+        'TextField': 'text',
+        'TimeField': 'time',
+    }
+    data_types_suffix = {
+        'AutoField': 'AUTOINCREMENT',
+    }
     # SQLite requires LIKE statements to include an ESCAPE clause if the value
     # being escaped has a percent or underscore in it.
     # See http://www.sqlite.org/lang_expr.html for an explanation.
@@ -339,11 +384,11 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         'istartswith': "LIKE %s ESCAPE '\\'",
         'iendswith': "LIKE %s ESCAPE '\\'",
     }
-
     pattern_ops = {
         'startswith': "LIKE %s || '%%%%'",
         'istartswith': "LIKE UPPER(%s) || '%%%%'",
     }
+    needs_rollback = property(fget=lambda self: False, fset=lambda self, val: None)
 
     class Database(BaseDatabaseWrapper.Database):
 
@@ -402,7 +447,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         # transaction explicitly rather than simply disable autocommit.
         return self.features.uses_savepoints and self.in_atomic_block
 
-
     def _commit(self):
         if self.connection is not None and not self.connection.autocommit:
             with self.wrap_database_errors:
@@ -446,7 +490,16 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         return True
 
     def _start_transaction_under_autocommit(self):
-        pass
+        """
+        Start a transaction explicitly in autocommit mode.
+
+        Staying in autocommit mode works around a bug of sqlite3 that breaks
+        savepoints when autocommit is disabled.
+        """
+        try:
+            self.cursor().execute("BEGIN")
+        except Error:
+            pass
 
     def schema_editor(self, *args, **kwargs):
         """
@@ -464,6 +517,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         """
         jdbc_connection = connection.__connection__
         jdbc_connection.setTransactionIsolation(JDBCConnection.TRANSACTION_SERIALIZABLE)
+
+    def is_in_memory_db(self, name):
+        return name == ":memory:" or "mode=memory" in force_text(name)
 
 
 def _sqlite_date_extract(lookup_type, dt):

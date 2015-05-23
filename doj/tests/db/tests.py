@@ -3,6 +3,7 @@
 from datetime import datetime
 
 from django.test import TestCase
+from django.db import transaction
 from django.db.models import Count, Min, Max, Avg, Sum
 from django.db.models.query import EmptyQuerySet
 

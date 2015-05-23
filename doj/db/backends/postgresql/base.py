@@ -13,7 +13,7 @@ from django.utils.timezone import utc
 from doj.db.backends import JDBCBaseDatabaseWrapper as BaseDatabaseWrapper
 from doj.db.backends import JDBCBaseDatabaseFeatures as BaseDatabaseFeatures
 from doj.db.backends import JDBCBaseDatabaseValidation as BaseDatabaseValidation
-from doj.db.backends import JDBCCursorWrapper as CursorWrapper
+from doj.db.backends import JDBCCursorWrapper as BaseCursorWrapper
 
 from doj.db.backends.postgresql.operations import DatabaseOperations
 from doj.db.backends.postgresql.client import DatabaseClient
@@ -55,6 +55,18 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     requires_sqlparse_for_splitting = False
 
 
+class CursorWrapper(BaseCursorWrapper):
+
+    def _fix_sql(self, sql):
+        return sql.replace('COUNT(%s)', 'COUNT(%s::varchar)')
+
+    def execute(self, sql, params=None):
+        super(CursorWrapper, self).execute(self._fix_sql(sql), params=params)
+
+    def executemany(self, sql, param_list):
+        super(CursorWrapper, self).executemany(self._fix_sql(sql), param_list)
+
+
 class DatabaseWrapper(BaseDatabaseWrapper):
     vendor = 'postgresql'
     jdbc_driver_class_name = 'org.postgresql.Driver'
@@ -62,6 +74,39 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     jdbc_default_host = 'localhost'
     jdbc_default_port = 5432
     jdbc_default_name = 'postgres'
+    # This dictionary maps Field objects to their associated PostgreSQL column
+    # types, as strings. Column-type strings can contain format strings; they'll
+    # be interpolated against the values of Field.__dict__ before being output.
+    # If a column type is set to None, it won't be included in the output.
+    data_types = {
+        'AutoField': 'serial',
+        'BinaryField': 'bytea',
+        'BooleanField': 'boolean',
+        'CharField': 'varchar(%(max_length)s)',
+        'CommaSeparatedIntegerField': 'varchar(%(max_length)s)',
+        'DateField': 'date',
+        'DateTimeField': 'timestamp with time zone',
+        'DecimalField': 'numeric(%(max_digits)s, %(decimal_places)s)',
+        'FileField': 'varchar(%(max_length)s)',
+        'FilePathField': 'varchar(%(max_length)s)',
+        'FloatField': 'double precision',
+        'IntegerField': 'integer',
+        'BigIntegerField': 'bigint',
+        'IPAddressField': 'inet',
+        'GenericIPAddressField': 'inet',
+        'NullBooleanField': 'boolean',
+        'OneToOneField': 'integer',
+        'PositiveIntegerField': 'integer',
+        'PositiveSmallIntegerField': 'smallint',
+        'SlugField': 'varchar(%(max_length)s)',
+        'SmallIntegerField': 'smallint',
+        'TextField': 'text',
+        'TimeField': 'time',
+    }
+    data_type_check_constraints = {
+        'PositiveIntegerField': '"%(column)s" >= 0',
+        'PositiveSmallIntegerField': '"%(column)s" >= 0',
+    }
     operators = {
         'exact': '= %s',
         'iexact': '= UPPER(%s)',
@@ -78,7 +123,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         'istartswith': 'LIKE UPPER(%s)',
         'iendswith': 'LIKE UPPER(%s)',
     }
-
     pattern_ops = {
         'startswith': "LIKE %s || '%%%%'",
         'istartswith': "LIKE UPPER(%s) || '%%%%'",
@@ -116,6 +160,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                 # Commit after setting the time zone (see #17062)
                 if not self.get_autocommit():
                     self.connection.commit()
+
+    def create_cursor(self):
+        return CursorWrapper(self.connection.cursor())
 
     def check_constraints(self, table_names=None):
         """

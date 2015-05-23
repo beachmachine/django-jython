@@ -4,6 +4,7 @@ import re
 
 from doj.db.backends import JDBCBaseDatabaseIntrospection as BaseDatabaseIntrospection
 from doj.db.backends import JDBCFieldInfo as FieldInfo
+from doj.db.backends import JDBCTableInfo as TableInfo
 
 
 field_size_re = re.compile(r'^\s*(?:var)?char\s*\(\s*(\d+)\s*\)\s*$')
@@ -63,10 +64,10 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         # Skip the sqlite_sequence system table used for autoincrement key
         # generation.
         cursor.execute("""
-            SELECT name FROM sqlite_master
+            SELECT name, type FROM sqlite_master
             WHERE type in ('table', 'view') AND NOT name='sqlite_sequence'
             ORDER BY name""")
-        return [row[0] for row in cursor.fetchall()]
+        return [TableInfo(row[0], row[1][0]) for row in cursor.fetchall()]
 
     def get_table_description(self, cursor, table_name):
         """

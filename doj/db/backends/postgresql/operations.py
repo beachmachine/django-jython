@@ -19,23 +19,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         else:
             return "EXTRACT('%s' FROM %s)" % (lookup_type, field_name)
 
-    def date_interval_sql(self, sql, connector, timedelta):
-        """
-        implements the interval functionality for expressions
-        format for Postgres:
-            (datefield + interval '3 days 200 seconds 5 microseconds')
-        """
-        modifiers = []
-        if timedelta.days:
-            modifiers.append('%s days' % timedelta.days)
-        if timedelta.seconds:
-            modifiers.append('%s seconds' % timedelta.seconds)
-        if timedelta.microseconds:
-            modifiers.append('%s microseconds' % timedelta.microseconds)
-        mods = ' '.join(modifiers)
-        conn = ' %s ' % connector
-        return '(%s)' % conn.join([sql, 'interval \'%s\'' % mods])
-
     def date_trunc_sql(self, lookup_type, field_name):
         # http://www.postgresql.org/docs/current/static/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC
         return "DATE_TRUNC('%s', %s)" % (lookup_type, field_name)
@@ -67,13 +50,16 @@ class DatabaseOperations(BaseDatabaseOperations):
     def deferrable_sql(self):
         return " DEFERRABLE INITIALLY DEFERRED"
 
-    def lookup_cast(self, lookup_type):
+    def lookup_cast(self, lookup_type, internal_type=None):
         lookup = '%s'
 
         # Cast text lookups to text to allow things like filter(x__contains=4)
         if lookup_type in ('iexact', 'contains', 'icontains', 'startswith',
                            'istartswith', 'endswith', 'iendswith', 'regex', 'iregex'):
-            lookup = "%s::text"
+            if internal_type in ('IPAddressField', 'GenericIPAddressField'):
+                lookup = "HOST(%s)"
+            else:
+                lookup = "%s::text"
 
         # Use UPPER(x) for case-insensitive lookups; it's faster.
         if lookup_type in ('iexact', 'icontains', 'istartswith', 'iendswith'):
