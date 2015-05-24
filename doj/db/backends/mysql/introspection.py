@@ -2,24 +2,37 @@
 
 import re
 
+from collections import namedtuple
+
 from django.utils.datastructures import OrderedSet
 from django.utils.encoding import force_text
 
 from doj.db.backends import JDBCBaseDatabaseIntrospection as BaseDatabaseIntrospection
 from doj.db.backends import JDBCFieldInfo as FieldInfo
+from doj.db.backends import JDBCTableInfo as TableInfo
 
 foreign_key_re = re.compile(r"\sCONSTRAINT `[^`]*` FOREIGN KEY \(`([^`]*)`\) REFERENCES `([^`]*)` \(`([^`]*)`\)")
 
+FieldInfo = namedtuple('FieldInfo', FieldInfo._fields + ('extra',))
+
 
 class DatabaseIntrospection(BaseDatabaseIntrospection):
+
+    def get_field_type(self, data_type, description):
+        field_type = super(DatabaseIntrospection, self).get_field_type(data_type, description)
+        if field_type == 'IntegerField' and 'auto_increment' in description.extra:
+            return 'AutoField'
+        return field_type
+
     def get_table_list(self, cursor):
         """
         Returns a list of table names in the current database.
         :param cursor: Database cursor
         :return: List of table names
         """
-        cursor.execute("SHOW TABLES")
-        return [row[0] for row in cursor.fetchall()]
+        cursor.execute("SHOW FULL TABLES")
+        return [TableInfo(row[0], {'BASE TABLE': 't', 'VIEW': 'v'}.get(row[1]))
+                for row in cursor.fetchall()]
 
     def get_table_description(self, cursor, table_name):
         """

@@ -18,7 +18,7 @@ PostgreSQL
 ----------
 
 Developed and tested against PostgreSQL v9.3 with the JDBC driver
-9.1-902.jdbc4. To use it set the following in your Django project settings::
+9.4-1201.jdbc41. To use it set the following in your Django project settings::
 
   DATABASES = {
     'default': {
@@ -34,7 +34,7 @@ SQLite3
 -------
 
 Developed and tested against SQLite3 v3.7.6 with the JDBC driver
-3.7.2. To use it set the following in your Django project settings::
+3.8.10. To use it set the following in your Django project settings::
 
   DATABASES = {
     'default': {
@@ -46,8 +46,11 @@ Developed and tested against SQLite3 v3.7.6 with the JDBC driver
 Download the JDBC Driver from https://bitbucket.org/xerial/sqlite-jdbc/downloads and
 remember to put the JAR file on the ``CLASSPATH``.
 
-MySQL
------
+MySQL/MariaDB
+-------------
+
+Developed and tested against MariaDB 10.0.17 with the JDBC driver
+5.1.35. To use it set the following in your Django project settings::
 
   DATABASES = {
     'default': {

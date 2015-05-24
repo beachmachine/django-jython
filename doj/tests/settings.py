@@ -92,7 +92,7 @@ TEST_DATABASES = {
 }
 
 DATABASES = {
-    'default': TEST_DATABASES['postgresql'],
+    'default': TEST_DATABASES['mysql'],
 }
 
 # Internationalization
