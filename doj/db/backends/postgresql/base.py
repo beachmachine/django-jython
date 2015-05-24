@@ -13,7 +13,7 @@ from django.utils.timezone import utc
 from doj.db.backends import JDBCBaseDatabaseWrapper as BaseDatabaseWrapper
 from doj.db.backends import JDBCBaseDatabaseFeatures as BaseDatabaseFeatures
 from doj.db.backends import JDBCBaseDatabaseValidation as BaseDatabaseValidation
-from doj.db.backends import JDBCCursorWrapper as BaseCursorWrapper
+from doj.db.backends import JDBCCursorWrapper as CursorWrapper
 
 from doj.db.backends.postgresql.operations import DatabaseOperations
 from doj.db.backends.postgresql.client import DatabaseClient
@@ -53,18 +53,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     closed_cursor_error_class = InterfaceError
     has_case_insensitive_like = False
     requires_sqlparse_for_splitting = False
-
-
-class CursorWrapper(BaseCursorWrapper):
-
-    def _fix_sql(self, sql):
-        return sql.replace('COUNT(%s)', 'COUNT(%s::varchar)')
-
-    def execute(self, sql, params=None):
-        super(CursorWrapper, self).execute(self._fix_sql(sql), params=params)
-
-    def executemany(self, sql, param_list):
-        super(CursorWrapper, self).executemany(self._fix_sql(sql), param_list)
 
 
 class DatabaseWrapper(BaseDatabaseWrapper):

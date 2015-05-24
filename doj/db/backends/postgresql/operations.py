@@ -8,6 +8,8 @@ from doj.db.backends import JDBCBaseDatabaseOperations as BaseDatabaseOperations
 
 
 class DatabaseOperations(BaseDatabaseOperations):
+    compiler_module = "doj.db.backends.postgresql.compiler"
+
     def __init__(self, connection):
         super(DatabaseOperations, self).__init__(connection)
 
