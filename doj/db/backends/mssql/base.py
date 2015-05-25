@@ -144,7 +144,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         "istartswith": "LIKE %s ESCAPE '\\'",
         "iendswith": "LIKE %s ESCAPE '\\'",
     }
-    needs_rollback = property(fget=lambda self: False, fset=lambda self, val: None)
 
     def __init__(self, *args, **kwargs):
         self.use_transactions = kwargs.pop('use_transactions', None)
