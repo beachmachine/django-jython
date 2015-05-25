@@ -124,7 +124,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         with self.connection.cursor() as cursor:
             cursor.execute('SELECT SQLITE_VERSION()')
             version = (int(i) for i in cursor.fetchone()[0].split('.'))
-            return version >= (3, 6, 8, 0)
+            return tuple(version) >= (3, 6, 8, 0)
 
     @cached_property
     def can_release_savepoints(self):
@@ -135,7 +135,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
         with self.connection.cursor() as cursor:
             cursor.execute('SELECT SQLITE_VERSION()')
             version = (int(i) for i in cursor.fetchone()[0].split('.'))
-            return version >= (3, 7, 13, 0)
+            return tuple(version) >= (3, 7, 13, 0)
 
     @cached_property
     def supports_stddev(self):
@@ -388,7 +388,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         'startswith': "LIKE %s || '%%%%'",
         'istartswith': "LIKE UPPER(%s) || '%%%%'",
     }
-    needs_rollback = property(fget=lambda self: False, fset=lambda self, val: None)
 
     class Database(BaseDatabaseWrapper.Database):
 
