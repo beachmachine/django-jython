@@ -109,7 +109,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     can_combine_inserts_with_and_without_auto_increment_pk = False
     supports_foreign_keys = False
     supports_column_check_constraints = False
-    autocommits_when_autocommit_is_off = True
     can_introspect_decimal_field = False
     can_introspect_positive_integer_field = True
     can_introspect_small_integer_field = True
@@ -487,18 +486,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     def is_usable(self):
         return True
-
-    def _start_transaction_under_autocommit(self):
-        """
-        Start a transaction explicitly in autocommit mode.
-
-        Staying in autocommit mode works around a bug of sqlite3 that breaks
-        savepoints when autocommit is disabled.
-        """
-        try:
-            self.cursor().execute("BEGIN")
-        except Error:
-            pass
 
     def schema_editor(self, *args, **kwargs):
         """
