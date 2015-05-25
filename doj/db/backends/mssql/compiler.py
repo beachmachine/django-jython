@@ -2,15 +2,16 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import re
-import django
-
-from django.db.models.sql import compiler
-
 try:
     from itertools import zip_longest
 except ImportError:
     from itertools import izip_longest as zip_longest
+
+import django
+from django.db.models.sql import compiler
+import re
+
+NEEDS_AGGREGATES_FIX = django.VERSION[:2] < (1, 7)
 
 # query_class returns the base class to use for Django queries.
 # The custom 'SqlServerQuery' class derives from django.db.models.sql.query.Query
@@ -19,24 +20,6 @@ except ImportError:
 # SqlServerQuery overrides:
 # ...insert queries to add "SET IDENTITY_INSERT" if needed.
 # ...select queries to emulate LIMIT/OFFSET for sliced queries.
-
-_re_order_limit_offset = re.compile(
-    r'(?:ORDER BY\s+(.+?))?\s*(?:LIMIT\s+(\d+))?\s*(?:OFFSET\s+(\d+))?$')
-
-_re_find_order_direction = re.compile(r'\s+(asc|desc)\s*$', re.IGNORECASE)
-
-# Pattern to find the quoted column name at the end of a field specification
-_re_pat_col = re.compile(r"\[([^\[]+)\]$")
-
-# Pattern to find each of the parts of a column name (extra_select, table, field)
-_re_pat_col_parts = re.compile(
-    r'(?:' +
-    r'(\([^\)]+\))\s+as\s+' +
-    r'|(\[[^\[]+\])\.' +
-    r')?' +
-    r'\[([^\[]+)\]$',
-    re.IGNORECASE
-)
 
 # Pattern to scan a column data type string and split the data type from any
 # constraints or other included parts of a column definition. Based upon
@@ -52,12 +35,13 @@ _re_data_type_terminator = re.compile(
 # Pattern used in column aliasing to find sub-select placeholders
 _re_col_placeholder = re.compile(r'\{_placeholder_(\d+)\}')
 
+# Pattern to find the quoted column name at the end of a field specification
+_re_pat_col = re.compile(r"\[([^\[]+)\]$")
 
-def _break(s, find):
-    """Break a string s into the part before the substring to find,
-    and the part including and after the substring."""
-    i = s.find(find)
-    return s[:i], s[i:]
+_re_order_limit_offset = re.compile(
+    r'(?:ORDER BY\s+(.+?))?\s*(?:LIMIT\s+(\d+))?\s*(?:OFFSET\s+(\d+))?$')
+
+_re_find_order_direction = re.compile(r'\s+(asc|desc)\s*$', re.IGNORECASE)
 
 
 def _get_order_limit_offset(sql):
@@ -68,15 +52,19 @@ def _remove_order_limit_offset(sql):
     return _re_order_limit_offset.sub('', sql).split(None, 1)[1]
 
 
+def _break(s, find):
+    """Break a string s into the part before the substring to find,
+    and the part including and after the substring."""
+    i = s.find(find)
+    return s[:i], s[i:]
+
+
 class SQLCompiler(compiler.SQLCompiler):
     def resolve_columns(self, row, fields=()):
-        # If the results are sliced, the resultset will have an initial
-        # "row number" column. Remove this column before the ORM sees it.
-        if getattr(self, '_using_row_number', False):
-            row = row[1:]
         values = []
         index_extra_select = len(self.query.extra_select)
         for value, field in zip_longest(row[index_extra_select:], fields):
+            # print '\tfield=%s\tvalue=%s' % (repr(field), repr(value))
             if field:
                 try:
                     value = self.connection.ops.convert_values(value, field)
@@ -85,17 +73,17 @@ class SQLCompiler(compiler.SQLCompiler):
             values.append(value)
         return row[:index_extra_select] + tuple(values)
 
-    def compile(self, node):
+    def compile(self, node, select_format=False):
         """
         Added with Django 1.7 as a mechanism to evalute expressions
         """
-        sql_function = getattr(node, 'sql_function', None)
+        sql_function = getattr(node, 'function', None)
         if sql_function and sql_function in self.connection.ops._sql_function_overrides:
             sql_function, sql_template = self.connection.ops._sql_function_overrides[sql_function]
             if sql_function:
-                node.sql_function = sql_function
+                node.function = sql_function
             if sql_template:
-                node.sql_template = sql_template
+                node.template = sql_template
         return super(SQLCompiler, self).compile(node)
 
     def _fix_aggregates(self):
@@ -108,24 +96,21 @@ class SQLCompiler(compiler.SQLCompiler):
         match behavior of other django backends, it needs to not drop remainders.
         E.g. AVG([1, 2]) needs to yield 1.5, not 1
         """
-        for alias, aggregate in self.query.aggregate_select.items():
+        for alias, aggregate in self.query.annotation_select.items():
             sql_function = getattr(aggregate, 'sql_function', None)
             if not sql_function or sql_function not in self.connection.ops._sql_function_overrides:
                 continue
+
             sql_function, sql_template = self.connection.ops._sql_function_overrides[sql_function]
             if sql_function:
-                self.query.aggregate_select[alias].sql_function = sql_function
+                self.query.annotation_select[alias].sql_function = sql_function
             if sql_template:
-                self.query.aggregate_select[alias].sql_template = sql_template
+                self.query.annotation_select[alias].sql_template = sql_template
 
-    def as_sql(self, with_limits=True, with_col_aliases=False):
+    def as_sql(self, with_limits=True, with_col_aliases=False, subquery=False):
         # Django #12192 - Don't execute any DB query when QS slicing results in limit 0
         if with_limits and self.query.low_mark == self.query.high_mark:
             return '', ()
-
-        if django.VERSION[:2] < (1, 7):
-            # Django 1.7+ provides SQLCompiler.compile as a hook
-            self._fix_aggregates()
 
         self._using_row_number = False
 
@@ -402,7 +387,7 @@ class SQLDeleteCompiler(compiler.SQLDeleteCompiler, SQLCompiler):
 
 
 class SQLUpdateCompiler(compiler.SQLUpdateCompiler, SQLCompiler):
-    def as_sql(self):
+    def as_sql(self, with_limits=True, with_col_aliases=False, subquery=False):
         sql, params = super(SQLUpdateCompiler, self).as_sql()
         if sql:
             # Need the NOCOUNT OFF so UPDATE returns a count, instead of -1
@@ -411,16 +396,6 @@ class SQLUpdateCompiler(compiler.SQLUpdateCompiler, SQLCompiler):
 
 
 class SQLAggregateCompiler(compiler.SQLAggregateCompiler, SQLCompiler):
-    def as_sql(self, qn=None):
+    def as_sql(self, with_limits=True, with_col_aliases=False, subquery=False):
         self._fix_aggregates()
-        return super(SQLAggregateCompiler, self).as_sql(qn=qn)
-
-
-class SQLDateCompiler(compiler.SQLDateCompiler, SQLCompiler):
-    pass
-
-try:
-    class SQLDateTimeCompiler(compiler.SQLDateTimeCompiler, SQLCompiler):
-        pass
-except AttributeError:
-    pass
+        return super(SQLAggregateCompiler, self).as_sql()

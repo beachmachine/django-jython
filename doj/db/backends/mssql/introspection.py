@@ -6,6 +6,7 @@ from doj.db.backends import JDBCBaseDatabaseIntrospection as BaseDatabaseIntrosp
 from doj.db.backends import JDBCBaseDatabaseWrapper as BaseDatabaseWrapper
 
 from doj.db.backends import JDBCFieldInfo as FieldInfo
+from doj.db.backends import JDBCTableInfo as TableInfo
 
 AUTO_FIELD_MARKER = -777555
 
@@ -25,18 +26,16 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         return field_type
 
     def get_table_list(self, cursor):
-        """
-        Return a list of table and view names in the current database.
-        """
+        "Return a list of table and view names in the current database."
         cursor.execute("""\
-SELECT TABLE_NAME
+SELECT TABLE_NAME, 't'
 FROM INFORMATION_SCHEMA.TABLES
 WHERE TABLE_TYPE = 'BASE TABLE'
 UNION
-SELECT TABLE_NAME
+SELECT TABLE_NAME, 'v'
 FROM INFORMATION_SCHEMA.VIEWS
 """)
-        return [row[0] for row in cursor.fetchall()]
+        return [TableInfo(row[0], row[1]) for row in cursor.fetchall()]
 
     def _is_auto_field(self, cursor, table_name, column_name):
         """

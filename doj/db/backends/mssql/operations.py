@@ -387,7 +387,13 @@ class DatabaseOperations(BaseDatabaseOperations):
         return False
 
     def savepoint_create_sql(self, sid):
-        return "SAVE TRANSACTION {0}".format(self.quote_name(sid))
+        return """\
+DECLARE @trans INT = @@TRANCOUNT;
+IF @trans = 0
+    BEGIN TRANSACTION {0};
+ELSE
+    SAVE TRANSACTION {0};
+        """.format(self.quote_name(sid))
 
     def savepoint_rollback_sql(self, sid):
         return "ROLLBACK TRANSACTION {0}".format(self.quote_name(sid))

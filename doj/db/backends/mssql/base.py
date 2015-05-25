@@ -94,6 +94,42 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     jdbc_default_host = 'localhost'
     jdbc_default_port = 1433
     jdbc_default_name = 'master'
+    # This dictionary maps Field objects to their associated Server Server column
+    # types, as strings. Column-type strings can contain format strings; they'll
+    # be interpolated against the values of Field.__dict__.
+    data_types = {
+        'AutoField':                    'int IDENTITY (1, 1)',
+        'BigAutoField':                 'bigint IDENTITY (1, 1)',
+        'BigIntegerField':              'bigint',
+        'BinaryField':                  'varbinary(max)',
+        'BooleanField':                 'bit',
+        'CharField':                    'nvarchar(%(max_length)s)',
+        'CommaSeparatedIntegerField':   'nvarchar(%(max_length)s)',
+        'DateField':                    'date',
+        'DateTimeField':                'datetime2',
+        'DateTimeOffsetField':          'datetimeoffset',
+        'DecimalField':                 'decimal(%(max_digits)s, %(decimal_places)s)',
+        'FileField':                    'nvarchar(%(max_length)s)',
+        'FilePathField':                'nvarchar(%(max_length)s)',
+        'FloatField':                   'double precision',
+        'GenericIPAddressField':        'nvarchar(39)',
+        'IntegerField':                 'int',
+        'IPAddressField':               'nvarchar(15)',
+        'NullBooleanField':             'bit',
+        'OneToOneField':                'int',
+        'PositiveIntegerField':         'int',
+        'PositiveSmallIntegerField':    'smallint',
+        'SlugField':                    'nvarchar(%(max_length)s)',
+        'SmallIntegerField':            'smallint',
+        'TextField':                    'nvarchar(max)',
+        'TimeField':                    'time',
+    }
+    # Starting with Django 1.7, check constraints are no longer included in with
+    # the data_types value.
+    data_type_check_constraints = {
+        'PositiveIntegerField': '%(qn_column)s >= 0',
+        'PositiveSmallIntegerField': '%(qn_column)s >= 0',
+    }
     operators = {
         "exact": "= %s",
         "iexact": "LIKE %s ESCAPE '\\'",
@@ -108,6 +144,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         "istartswith": "LIKE %s ESCAPE '\\'",
         "iendswith": "LIKE %s ESCAPE '\\'",
     }
+    needs_rollback = property(fget=lambda self: False, fset=lambda self, val: None)
 
     def __init__(self, *args, **kwargs):
         self.use_transactions = kwargs.pop('use_transactions', None)

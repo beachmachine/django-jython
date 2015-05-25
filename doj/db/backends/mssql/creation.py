@@ -17,43 +17,6 @@ from doj.db.backends import JDBCBaseDatabaseCreation as BaseDatabaseCreation
 
 
 class DatabaseCreation(BaseDatabaseCreation):
-    # This dictionary maps Field objects to their associated Server Server column
-    # types, as strings. Column-type strings can contain format strings; they'll
-    # be interpolated against the values of Field.__dict__.
-    data_types = {
-        'AutoField':                    'int IDENTITY (1, 1)',
-        'BigAutoField':                 'bigint IDENTITY (1, 1)',
-        'BigIntegerField':              'bigint',
-        'BinaryField':                  'varbinary(max)',
-        'BooleanField':                 'bit',
-        'CharField':                    'nvarchar(%(max_length)s)',
-        'CommaSeparatedIntegerField':   'nvarchar(%(max_length)s)',
-        'DateField':                    'date',
-        'DateTimeField':                'datetime2',
-        'DateTimeOffsetField':          'datetimeoffset',
-        'DecimalField':                 'decimal(%(max_digits)s, %(decimal_places)s)',
-        'FileField':                    'nvarchar(%(max_length)s)',
-        'FilePathField':                'nvarchar(%(max_length)s)',
-        'FloatField':                   'double precision',
-        'GenericIPAddressField':        'nvarchar(39)',
-        'IntegerField':                 'int',
-        'IPAddressField':               'nvarchar(15)',
-        'NullBooleanField':             'bit',
-        'OneToOneField':                'int',
-        'PositiveIntegerField':         'int',
-        'PositiveSmallIntegerField':    'smallint',
-        'SlugField':                    'nvarchar(%(max_length)s)',
-        'SmallIntegerField':            'smallint',
-        'TextField':                    'nvarchar(max)',
-        'TimeField':                    'time',
-    }
-
-    # Starting with Django 1.7, check constraints are no longer included in with
-    # the data_types value.
-    data_type_check_constraints = {
-        'PositiveIntegerField': '%(qn_column)s >= 0',
-        'PositiveSmallIntegerField': '%(qn_column)s >= 0',
-    }
 
     def __init__(self, *args, **kwargs):
         super(DatabaseCreation, self).__init__(*args, **kwargs)
@@ -80,14 +43,15 @@ class DatabaseCreation(BaseDatabaseCreation):
             setattr(test_case, method_name, method)
 
     def create_test_db(self, *args, **kwargs):
-        #self.mark_tests_as_expected_failure(self.connection.features.failing_tests)
+        self.mark_tests_as_expected_failure(self.connection.features.failing_tests)
         super(DatabaseCreation, self).create_test_db(*args, **kwargs)
 
-    def _create_test_db(self, verbosity=1, autoclobber=False):
+    def _create_test_db(self, verbosity=1, autoclobber=False, keepdb=False):
         """
         Create the test databases using a connection to database 'master'.
         """
         if self._test_database_create(settings):
+            test_database_name = ''
             try:
                 with self.connection.cursor():
                     test_database_name = super(DatabaseCreation, self)._create_test_db(verbosity, autoclobber)

@@ -66,7 +66,7 @@ MSSQL
 -----
 
 Developed and tested against MSSQL 2008 with the JDBC driver
-1.3.0. To use it set the following in your Django project settings::
+1.3.1. To use it set the following in your Django project settings::
 
   DATABASES = {
     'default': {
