@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from doj.monkey import install_monkey_patches
-
-__VERSION = (1, 7, 0, 'b', 2)
+__VERSION = (1, 8, 0, 'b', 1)
 
 
 def get_version():
@@ -11,6 +9,3 @@ def get_version():
     :return: Version
     """
     return tuple(__VERSION)
-
-
-install_monkey_patches()

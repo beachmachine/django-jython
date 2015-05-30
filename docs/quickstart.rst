@@ -79,19 +79,8 @@ For a complete documentation on building war files see :ref:`database-backends`.
 Django and Jython
 -----------------
 
-The minimal required version of Jython to make Django work is 2.7b2. As this version
-is still in development there are some bugs and incompatibilities we need to work around.
-For this reason django-jython comes with some patches that are applied on runtime (this means
-you do **not** need to modify the sources of Django or Jython). django-jython tries to
-automatically apply these patches as early as possible, but sometimes this mechanism
-fails. To make sure the patching works, add these lines at the **very top** of
-the ``manage.py`` file of your application::
-
-  #!/usr/bin/env python
-  from doj.monkey import install_monkey_patches
-  install_monkey_patches()
-
-  # Usual content of manage.py...
+The minimal required version of Jython to make Django work is 2.7.0. The required Django version
+is 1.8.x.
 
 Building a .war file
 --------------------

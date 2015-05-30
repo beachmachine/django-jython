@@ -1,21 +1,16 @@
 # -*- coding: utf-8 -*-
 
-def install_monkey_patches():
+import warnings
+
+from django.conf import settings
+
+
+class DojDeprecationWarning(DeprecationWarning):
     pass
 
-# def install_monkey_patches():
-#     # Make sure we install monkey patches only once
-#     if not getattr(install_monkey_patches, 'installed', False):
-#         setattr(install_monkey_patches, 'installed', True)
-#
-#         import doj.monkey.datetime_tojava
-#         doj.monkey.datetime_tojava.install()
-#
-#         import doj.monkey.django_utils_functional_lazy
-#         doj.monkey.django_utils_functional_lazy.install()
-#
-#         import doj.monkey.django_http_response_streaminghttpresponse
-#         doj.monkey.django_http_response_streaminghttpresponse.install()
-#
-#         import doj.monkey.inspect_getcallargs
-#         doj.monkey.inspect_getcallargs.install()
+
+def install_monkey_patches():
+    if settings.DEBUG:
+        warnings.simplefilter('always', DojDeprecationWarning)
+        warnings.warn(u"The call of `install_monkey_patches` is deprecated "
+                      u"and should be removed.", DojDeprecationWarning, 2)

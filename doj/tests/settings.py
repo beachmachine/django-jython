@@ -63,31 +63,39 @@ TEST_DATABASES = {
     'sqlite': {
         'ENGINE': 'doj.db.backends.sqlite',
         'NAME': os.path.join(BASE_DIR, 'doj.sqlite3'),
-        'TEST_NAME': os.path.join(BASE_DIR, 'doj-tests.sqlite3'),
+        'TEST': {
+            'NAME': os.path.join(BASE_DIR, 'doj-tests.sqlite3'),
+        }
     },
     'postgresql': {
         'ENGINE': 'doj.db.backends.postgresql',
         'NAME': 'doj',
-        'TEST_NAME': 'doj-tests',
         'HOST': 'localhost',
         'USER': 'root',
         'PASSWORD': 'root',
+        'TEST': {
+            'NAME': 'doj-tests',
+        }
     },
     'mysql': {
         'ENGINE': 'doj.db.backends.mysql',
         'NAME': 'doj',
-        'TEST_NAME': 'doj-tests',
         'HOST': 'localhost',
         'USER': 'root',
         'PASSWORD': 'root',
+        'TEST': {
+            'NAME': 'doj-tests',
+        }
     },
     'mssql': {
         'ENGINE': 'doj.db.backends.mssql',
         'NAME': 'doj',
-        'TEST_NAME': 'doj-tests',
         'HOST': 'localhost',
         'USER': 'root',
         'PASSWORD': 'root',
+        'TEST': {
+            'NAME': 'doj-tests',
+        }
     },
 }
 
