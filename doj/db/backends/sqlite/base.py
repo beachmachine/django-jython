@@ -13,7 +13,6 @@ import re
 
 from django.conf import settings
 from django.db import utils
-from django.db.utils import Error
 from django.db.backends import utils as backend_utils
 from django.db.models import fields
 from django.db.models.sql import aggregates
@@ -90,8 +89,16 @@ class SQLiteCursorWrapper(CursorWrapper):
     def close(self):
         try:
             return self.cursor.close()
-        except BaseDatabaseWrapper.Database.ProgrammingError:
+        except BaseDatabaseWrapper.ProgrammingError:
             pass
+
+    def execute(self, *args, **kwargs):
+        try:
+            return super(SQLiteCursorWrapper, self).execute(*args, **kwargs)
+        except BaseDatabaseWrapper.Error, e:  # Aggregates may raise an error in conjunction with joins, when there is no data to select
+            if e.message == "column -1 out of bounds [1,1] [SQLCode: 0]":
+                return None
+            raise e
 
 
 class DatabaseFeatures(BaseDatabaseFeatures):

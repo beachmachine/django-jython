@@ -165,6 +165,41 @@ class DBTestCase(TestCase):
         self.assertEqual(avg_result, {'field_10__avg': float(sum(counters))/len(counters)})
         self.assertEqual(sum_result, {'field_10__sum': sum(counters)})
 
+    def test_aggregate_join(self):
+        counter = 1
+        counters = []
+        for _ in range(0, DBTestCase.NUMBER_OF_RECORDS):
+            test_related_model = TestModelRelation(field_1=99)
+            test_related_model.save()
+
+            test_model = TestModel(field_10=counter, field_19=test_related_model)
+            test_model.save()
+
+            counters.append(counter)
+            counter += 1
+
+        count_result_1 = TestModel.objects.filter(field_19__field_1=99).aggregate(Count('field_10'))
+        count_result_2 = TestModel.objects.filter(field_19__field_1=0).aggregate(Count('field_10'))
+        avg_result_1 = TestModel.objects.filter(field_19__field_1=99).aggregate(Avg('field_10'))
+        avg_result_2 = TestModel.objects.filter(field_19__field_1=0).aggregate(Avg('field_10'))
+        min_result_1 = TestModel.objects.filter(field_19__field_1=99).aggregate(Min('field_10'))
+        min_result_2 = TestModel.objects.filter(field_19__field_1=0).aggregate(Min('field_10'))
+        max_result_1 = TestModel.objects.filter(field_19__field_1=99).aggregate(Max('field_10'))
+        max_result_2 = TestModel.objects.filter(field_19__field_1=0).aggregate(Max('field_10'))
+        sum_result_1 = TestModel.objects.filter(field_19__field_1=99).aggregate(Sum('field_10'))
+        sum_result_2 = TestModel.objects.filter(field_19__field_1=0).aggregate(Sum('field_10'))
+
+        self.assertEqual(count_result_1, {'field_10__count': DBTestCase.NUMBER_OF_RECORDS})
+        self.assertEqual(count_result_2, {'field_10__count': 0})
+        self.assertEqual(avg_result_1, {'field_10__avg': float(sum(counters))/len(counters)})
+        self.assertEqual(avg_result_2, {'field_10__avg': None})
+        self.assertEqual(min_result_1, {'field_10__min': 1})
+        self.assertEqual(min_result_2, {'field_10__min': None})
+        self.assertEqual(max_result_1, {'field_10__max': DBTestCase.NUMBER_OF_RECORDS})
+        self.assertEqual(max_result_2, {'field_10__max': None})
+        self.assertEqual(sum_result_1, {'field_10__sum': sum(counters)})
+        self.assertEqual(sum_result_2, {'field_10__sum': None})
+
     def test_none(self):
         for _ in range(0, DBTestCase.NUMBER_OF_RECORDS):
             test_model = TestModel()
