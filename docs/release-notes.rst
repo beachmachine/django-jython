@@ -1,6 +1,27 @@
 Release Notes
 =============
 
+1.8.0b2
+-------
+
+Released on August 09, 2015
+
+Changes
+~~~~~~~
+
+Bug fixes.
+
+Django compatibility
+~~~~~~~~~~~~~~~~~~~~
+
+This version has been tested against Django 1.8.3 and will work with any future
+micro release of the 1.8.x branch.
+
+Jython compatibility
+~~~~~~~~~~~~~~~~~~~~
+
+The release has been tested on Jython 2.7.0.
+
 1.8.0b1
 -------
 
