@@ -189,7 +189,7 @@ class Command(NoArgsCommand, DOJConfigurationMixin):
 
         media_path = settings.MEDIA_ROOT
         media_url = settings.MEDIA_URL
-        copytree(media_path, os.path.join(self._get_temp_dir(), media_url))
+        copytree(media_path, os.path.join(self._get_temp_dir(), media_url.lstrip('\\/')))
 
         self.stdout.write(self.style.MIGRATE_SUCCESS(u" OK"))
         self.stdout.flush()
@@ -205,7 +205,7 @@ class Command(NoArgsCommand, DOJConfigurationMixin):
 
         static_path = settings.STATIC_ROOT
         static_url = settings.STATIC_URL
-        copytree(static_path, os.path.join(self._get_temp_dir(), static_url))
+        copytree(static_path, os.path.join(self._get_temp_dir(), static_url.lstrip('\\/')))
 
         self.stdout.write(self.style.MIGRATE_SUCCESS(u" OK"))
         self.stdout.flush()

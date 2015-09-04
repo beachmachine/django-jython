@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name='django-jython',
-    version='1.8.0b2',
+    version='1.8.0b3',
     install_requires=[
         'Django>=1.8.0,<1.9.0',
     ],
