@@ -43,7 +43,7 @@ class Command(NoArgsCommand, DOJConfigurationMixin):
                          u"as a prefix for some url-related settings, such as "
                          u"MEDIA_URL"),
         make_option('--base-dir', dest='base_dir', default='',
-                    help=u"These base directory of your project. If unspecified, "
+                    help=u"The base directory of your project. If unspecified, "
                          u"the BASE_DIR configuration in your settings will be "
                          u"used."),
         make_option('--war-dir', dest='war_dir', default='',
