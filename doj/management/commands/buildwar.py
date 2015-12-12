@@ -47,10 +47,6 @@ class Command(NoArgsCommand, DOJConfigurationMixin):
                          u"the BASE_DIR configuration in your settings will be "
                          u"used."),
         make_option('--war-dir', dest='war_dir', default='',
-                    help=u"The directory where your WAR file will be written to. "
-                         u"If not set, the BASE_DIR configuration in your settings"
-                         u" will be used instead."),
-        make_option('--war-dir', dest='war_dir', default='',
                     help=u"The directory where the resulting WAR file will be "
                          u"written to.  If not set, use DOJ_BUILDWAR_DIRECTORY "
                          u"in the configuration if it's available.  As a last "
