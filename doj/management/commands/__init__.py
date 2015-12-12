@@ -7,6 +7,8 @@ from django.conf import settings
 
 class DOJConfigurationMixin(object):
     __base_dir = None
+    __war_dir = None
+
 
     def _setup(self, args, options):
         """
@@ -34,6 +36,23 @@ class DOJConfigurationMixin(object):
                 self.__base_dir = os.path.dirname(settings.__file__)
 
         return self.__base_dir
+
+    def _get_war_dir(self):
+        """
+        Gets the path where the WAR file will be written to.
+
+        :return: Directory path
+        """
+        if not self.__war_dir:
+            self.__war_dir = self._options.get('war_dir', None)
+            if not self.__war_dir:
+                self.__war_dir = getattr(settings, 'DOJ_BUILDWAR_DIRECTORY', None)
+            if not self.__war_dir:
+                self.__war_dir = self._get_base_dir()
+            else:
+                if not os.path.isabs(self.__war_dir):
+                    self.__war_dir = os.path.join(self._get_base_dir(), self.__war_dir)
+        return self.__war_dir
 
     def _get_project_name(self):
         """

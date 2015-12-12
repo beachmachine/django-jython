@@ -39,7 +39,15 @@ inside your project. In the typical cases, you must **at least** specify the
 JDBC driver you are using to connect to the database, which will depend on the
 configured :ref:`database-backends`, as well as the **standalone version** of Jython itself.
 
-The generated ``.war`` file is created on the current working directory.
+The generated ``.war`` file is created on the current working directory, though, you can
+override this value by using ``--war-dir``:
+
+  $ jython manage.py buildwar --war-dir=/tmp/output --include-java-libs=/path/to/jython-standalone-2.7-b2.jar:/path/to/postgresql-9.1-902.jdbc4.jar
+
+The ``war-dir`` option tries to be smart in determining relative versus absolute paths.
+If it finds a relative path, it will be relative to ``BASE_DIR``.  Additionally, you can
+also specify the ``DOJ_BUILDWAR_DIRECTORY`` configuration in your settings in leiu of the
+command line variant.  The same relative path deterimant logic will apply to here as well.
 
 You may also specify more files to include, separating the paths by the special
 **path separator** character, which is ``:`` in Unix based platforms and
