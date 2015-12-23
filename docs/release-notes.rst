@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+1.8.0b4
+-------
+
+Released on December 11, 2015
+
+Changes
+~~~~~~~
+
+Enhancement for buildwar command: war-dir
+
+- war-dir: Specify the directory to write the WAR file to.
+
 1.8.0b3
 -------
 

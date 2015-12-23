@@ -46,6 +46,12 @@ class Command(NoArgsCommand, DOJConfigurationMixin):
                     help=u"The base directory of your project. If unspecified, "
                          u"the BASE_DIR configuration in your settings will be "
                          u"used."),
+        make_option('--war-dir', dest='war_dir', default='',
+                    help=u"The directory where the resulting WAR file will be "
+                         u"written to.  If not set, use DOJ_BUILDWAR_DIRECTORY "
+                         u"in the configuration if it's available.  As a last "
+                         u"resort, it will fallback to BASE_DIR if the "
+                         u"previous two entries are not set."),
     )
     help = u"Builds a WAR file for stand-alone deployment on a Java Servlet container"
     requires_system_checks = True
@@ -58,6 +64,7 @@ class Command(NoArgsCommand, DOJConfigurationMixin):
 
         self.__tmp_dir = None
         self.__base_dir = None
+        self.__war_dir = None
 
     def _get_skel_dir(self):
         return os.path.join(os.path.dirname(__file__), 'war_skel')
@@ -144,9 +151,14 @@ class Command(NoArgsCommand, DOJConfigurationMixin):
         self.stdout.write(u"  Build %s.war..." % self._get_context_root(), ending='')
         self.stdout.flush()
 
-        temp_path = self._get_temp_dir()
-        war_path = os.path.abspath("%s.war" % self._get_context_root())
+        try:
+            os.makedirs(self._get_war_dir())
+        except OSError:
+            if not os.path.isdir(self._get_war_dir()):
+                raise
 
+        temp_path = self._get_temp_dir()
+        war_path = os.path.abspath(os.path.join(self._get_war_dir(), "%s.war" % self._get_context_root()))
         war_file = zipfile.ZipFile(war_path, 'w', compression=zipfile.ZIP_DEFLATED)
 
         def war_walker(arg, directory, files):
